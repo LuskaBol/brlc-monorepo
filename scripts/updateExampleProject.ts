@@ -21,7 +21,7 @@ function scanDirectory(dirPath: string): FileStructure {
   const structure: FileStructure = {
     name,
     isDirectory: true,
-    children: []
+    children: [],
   };
 
   const items = fs.readdirSync(dirPath);
@@ -31,12 +31,12 @@ function scanDirectory(dirPath: string): FileStructure {
     const stats = fs.statSync(fullPath);
 
     if (stats.isDirectory()) {
-      structure.children!.push(scanDirectory(fullPath));
+      structure.children?.push(scanDirectory(fullPath));
     } else {
-      structure.children!.push({
+      structure.children?.push({
         name: item,
         isDirectory: false,
-        content: fs.readFileSync(fullPath, "utf8")
+        content: fs.readFileSync(fullPath, "utf8"),
       });
     }
   }
@@ -44,7 +44,7 @@ function scanDirectory(dirPath: string): FileStructure {
   return structure;
 }
 
-function generateFileStructureDoc(structure: FileStructure, level: number = 0): string {
+function generateFileStructureDoc(structure: FileStructure, level = 0): string {
   let doc = "";
   const indent = INDENT_STRING.repeat(level);
 
@@ -55,7 +55,7 @@ function generateFileStructureDoc(structure: FileStructure, level: number = 0): 
   if (structure.isDirectory) {
     doc += `${indent}* \`${structure.name}/\`\n`;
     if (structure.children) {
-      structure.children.forEach(child => {
+      structure.children.forEach((child) => {
         doc += generateFileStructureDoc(child, level + 1);
       });
     }
@@ -69,7 +69,7 @@ function generateFileStructureDoc(structure: FileStructure, level: number = 0): 
 function generateFileContentDoc(structure: FileStructure): string {
   let doc = "## " + SECTION_INITIAL_NUMBER + ".2 Project Files\n\n";
 
-  function processFiles(node: FileStructure, currentPath: string = "") {
+  function processFiles(node: FileStructure, currentPath = "") {
     if (node.isDirectory) {
       const newPath = currentPath ? `${currentPath}/${node.name}` : node.name;
 
@@ -96,7 +96,7 @@ function main(): void {
   if (startSymbol < 0) {
     throw Error(
       `The example project section has not been found in the file to update. ` +
-      `File: "${FILE_TO_UPDATE}". Section start string: "${SECTION_START_STRING}"`
+      `File: "${FILE_TO_UPDATE}". Section start string: "${SECTION_START_STRING}"`,
     );
   }
 

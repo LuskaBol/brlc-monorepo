@@ -20,7 +20,7 @@ const OP_ID_ARRAY: string[] = [
   ethers.encodeBytes32String("MOCK OP_ID 2"),
   ethers.encodeBytes32String("MOCK OP_ID 3"),
   ethers.encodeBytes32String("MOCK OP_ID 4"),
-  ethers.encodeBytes32String("MOCK OP_ID 5")
+  ethers.encodeBytes32String("MOCK OP_ID 5"),
 ];
 const OP_ID_ZERO = ethers.ZeroHash;
 const TOKEN_AMOUNT = 12345678;
@@ -29,7 +29,7 @@ const TOKEN_AMOUNTS: number[] = [
   TOKEN_AMOUNT * 2,
   TOKEN_AMOUNT * 3,
   TOKEN_AMOUNT * 4,
-  TOKEN_AMOUNT * 5
+  TOKEN_AMOUNT * 5,
 ];
 
 // Events of the contracts under test
@@ -56,13 +56,13 @@ const ERROR_NAME_TREASURY_ALLOWANCE_ZERO = "Blueprint_TreasuryAllowanceZero";
 const EXPECTED_VERSION: Version = {
   major: 1,
   minor: 1,
-  patch: 0
+  patch: 0,
 };
 
 enum OperationStatus {
   Nonexistent = 0,
   Deposit = 1,
-  Withdrawal = 2
+  Withdrawal = 2,
 }
 
 interface Version {
@@ -98,13 +98,13 @@ interface TestOperation extends Operation {
 const defaultOperation: Operation = {
   status: OperationStatus.Nonexistent,
   account: ADDRESS_ZERO,
-  amount: 0n
+  amount: 0n,
 };
 
 const defaultAccountState: AccountState = {
   lastOpId: ethers.ZeroHash,
   balance: 0n,
-  operationCount: 0n
+  operationCount: 0n,
 };
 
 interface Fixture {
@@ -116,7 +116,7 @@ function convertToOperation(testOp: TestOperation): Operation {
   return {
     account: testOp.account,
     amount: testOp.amount,
-    status: testOp.status
+    status: testOp.status,
   };
 }
 
@@ -164,7 +164,7 @@ describe("Contracts 'Blueprint'", async () => {
 
     return {
       blueprint,
-      tokenMock
+      tokenMock,
     };
   }
 
@@ -192,7 +192,7 @@ describe("Contracts 'Blueprint'", async () => {
     return fixture;
   }
 
-  function createTestOperations(num: number = 1): TestOperation[] {
+  function createTestOperations(num = 1): TestOperation[] {
     const operations: TestOperation[] = [];
     const maxNum = Math.min(OP_ID_ARRAY.length, TOKEN_AMOUNTS.length, users.length);
     if (num > maxNum) {
@@ -203,7 +203,7 @@ describe("Contracts 'Blueprint'", async () => {
         opId: OP_ID_ARRAY[i],
         account: users[i].address,
         amount: BigInt(TOKEN_AMOUNTS[i]),
-        status: OperationStatus.Nonexistent
+        status: OperationStatus.Nonexistent,
       });
     }
     return operations;
@@ -262,7 +262,7 @@ describe("Contracts 'Blueprint'", async () => {
     await expect(tx).to.changeTokenBalances(
       tokenMock,
       [getAddress(blueprint), testOp.account, operationalTreasury.address],
-      [0, oldBalance - newBalance, -(oldBalance - newBalance)]
+      [0, oldBalance - newBalance, -(oldBalance - newBalance)],
     );
   }
 
@@ -313,7 +313,7 @@ describe("Contracts 'Blueprint'", async () => {
       const anotherBlueprintContract = await upgrades.deployProxy(
         blueprintFactory,
         [],
-        { initializer: false }
+        { initializer: false },
       ) as Contract;
 
       await expect(anotherBlueprintContract.initialize(ADDRESS_ZERO))
