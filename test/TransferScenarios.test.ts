@@ -67,7 +67,7 @@ function createDepositCase(
   expectedFinalBalances: bigint[],
   expectedWalletBalance: bigint,
   shouldRevert = false,
-  expectedError?: string
+  expectedError?: string,
 ): DepositTestCase {
   return {
     type: "deposit",
@@ -79,7 +79,7 @@ function createDepositCase(
     expectedFinalBalances,
     expectedWalletBalance,
     shouldRevert,
-    expectedError
+    expectedError,
   };
 }
 
@@ -92,7 +92,7 @@ function createWithdrawalCase(
   expectedFinalBalances: bigint[],
   expectedWalletBalance: bigint,
   shouldRevert = false,
-  expectedError?: string
+  expectedError?: string,
 ): WithdrawalTestCase {
   return {
     type: "withdrawal",
@@ -104,7 +104,7 @@ function createWithdrawalCase(
     expectedFinalBalances,
     expectedWalletBalance,
     shouldRevert,
-    expectedError
+    expectedError,
   };
 }
 
@@ -117,7 +117,7 @@ function createSharedIncomingCase(
   expectedFinalBalances: bigint[],
   expectedWalletBalance: bigint,
   shouldRevert = false,
-  expectedError?: string
+  expectedError?: string,
 ): SharedIncomingTestCase {
   return {
     type: "shared_incoming",
@@ -129,7 +129,7 @@ function createSharedIncomingCase(
     expectedFinalBalances,
     expectedWalletBalance,
     shouldRevert,
-    expectedError
+    expectedError,
   };
 }
 
@@ -142,7 +142,7 @@ function createSharedOutgoingCase(
   expectedFinalBalances: bigint[],
   expectedWalletBalance: bigint,
   shouldRevert = false,
-  expectedError?: string
+  expectedError?: string,
 ): SharedOutgoingTestCase {
   return {
     type: "shared_outgoing",
@@ -154,7 +154,7 @@ function createSharedOutgoingCase(
     expectedFinalBalances,
     expectedWalletBalance,
     shouldRevert,
-    expectedError
+    expectedError,
   };
 }
 
@@ -180,7 +180,7 @@ async function deploySharedWalletController(tokenMock: Contract): Promise<Contra
   const [deployer] = await ethers.getSigners();
 
   let sharedWalletController = (await upgrades.deployProxy(sharedWalletControllerFactory, [
-    getAddress(tokenMock)
+    getAddress(tokenMock),
   ])) as Contract;
 
   await sharedWalletController.waitForDeployment();
@@ -198,7 +198,7 @@ async function deployAndConfigureContracts(): Promise<Fixture> {
 
   return {
     sharedWalletController,
-    tokenMock
+    tokenMock,
   };
 }
 
@@ -207,7 +207,7 @@ async function createWalletWithParticipants(
   sharedWalletController: Contract,
   admin: SignerWithAddress,
   walletAddress: string,
-  participantAddresses: string[]
+  participantAddresses: string[],
 ): Promise<void> {
   await proveTx(connect(sharedWalletController, admin).createWallet(walletAddress, participantAddresses));
 }
@@ -228,7 +228,7 @@ class TransferTestEngine {
     walletAddress: string,
     participants: SignerWithAddress[],
     admin: SignerWithAddress,
-    stranger: SignerWithAddress
+    stranger: SignerWithAddress,
   ) {
     this.sharedWalletController = sharedWalletController;
     this.tokenMock = tokenMock;
@@ -280,14 +280,14 @@ class TransferTestEngine {
       this.sharedWalletController,
       this.admin,
       this.walletAddress,
-      participantAddresses
+      participantAddresses,
     );
 
     // Set initial balances by transferring tokens to the wallet
     for (let i = 0; i < testCase.initialBalances.length; i++) {
       if (testCase.initialBalances[i] > 0n) {
         await proveTx(
-          connect(this.tokenMock, this.participants[i]).transfer(this.walletAddress, testCase.initialBalances[i])
+          connect(this.tokenMock, this.participants[i]).transfer(this.walletAddress, testCase.initialBalances[i]),
         );
       }
     }
@@ -356,18 +356,18 @@ class TransferTestEngine {
     const actualWalletBalance = await this.tokenMock.balanceOf(this.walletAddress);
     expect(actualWalletBalance).to.equal(
       testCase.expectedWalletBalance,
-      `Wallet balance mismatch. Expected: ${testCase.expectedWalletBalance}, Actual: ${actualWalletBalance}`
+      `Wallet balance mismatch. Expected: ${testCase.expectedWalletBalance}, Actual: ${actualWalletBalance}`,
     );
 
     // Validate participant balances
     for (let i = 0; i < testCase.participantCount; i++) {
       const actualBalance = await this.sharedWalletController.getParticipantBalance(
         this.walletAddress,
-        this.participants[i].address
+        this.participants[i].address,
       );
       expect(actualBalance).to.equal(
         testCase.expectedFinalBalances[i],
-        `Participant ${i} balance mismatch. Expected: ${testCase.expectedFinalBalances[i]}, Actual: ${actualBalance}`
+        `Participant ${i} balance mismatch. Expected: ${testCase.expectedFinalBalances[i]}, Actual: ${actualBalance}`,
       );
     }
   }
@@ -377,7 +377,7 @@ class TransferTestEngine {
     for (let i = 0; i < participantCount; i++) {
       const balance = await this.sharedWalletController.getParticipantBalance(
         this.walletAddress,
-        this.participants[i].address
+        this.participants[i].address,
       );
       balances.push(balance);
     }
@@ -399,7 +399,7 @@ const oneParticipantMinimal: TransferTestCase[] = [
     [0n],
     10000n,
     [10000n],
-    10000n
+    10000n,
   ),
 
   createWithdrawalCase(
@@ -410,7 +410,7 @@ const oneParticipantMinimal: TransferTestCase[] = [
     [20000n],
     10000n,
     [10000n],
-    10000n
+    10000n,
   ),
 
   createSharedIncomingCase(
@@ -420,7 +420,7 @@ const oneParticipantMinimal: TransferTestCase[] = [
     [10000n],
     20000n,
     [30000n],
-    30000n
+    30000n,
   ),
 
   createSharedOutgoingCase(
@@ -430,7 +430,7 @@ const oneParticipantMinimal: TransferTestCase[] = [
     [20000n],
     10000n,
     [10000n],
-    10000n
+    10000n,
   ),
 
   // Error scenario
@@ -442,8 +442,8 @@ const oneParticipantMinimal: TransferTestCase[] = [
     20000n,
     [10000n],
     10000n,
-    true
-  )
+    true,
+  ),
 ];
 
 const twoParticipantMinimal: TransferTestCase[] = [
@@ -456,7 +456,7 @@ const twoParticipantMinimal: TransferTestCase[] = [
     [0n, 0n],
     10000n,
     [10000n, 0n],
-    10000n
+    10000n,
   ),
 
   createWithdrawalCase(
@@ -466,7 +466,7 @@ const twoParticipantMinimal: TransferTestCase[] = [
     [10000n, 20000n],
     10000n,
     [10000n, 10000n],
-    20000n
+    20000n,
   ),
 
   createSharedIncomingCase(
@@ -476,7 +476,7 @@ const twoParticipantMinimal: TransferTestCase[] = [
     [10000n, 10000n],
     20000n,
     [20000n, 20000n],
-    40000n
+    40000n,
   ),
 
   createSharedOutgoingCase(
@@ -486,7 +486,7 @@ const twoParticipantMinimal: TransferTestCase[] = [
     [20000n, 20000n],
     20000n,
     [10000n, 10000n],
-    20000n
+    20000n,
   ),
 
   // Remainder assignment test
@@ -506,7 +506,7 @@ const twoParticipantMinimal: TransferTestCase[] = [
      * - Final balances: [10000 + 20000, 20000 + 30000] = [30000, 50000]
      */
     [30000n, 50000n],
-    80000n
+    80000n,
   ),
 
   // Error scenario
@@ -518,8 +518,8 @@ const twoParticipantMinimal: TransferTestCase[] = [
     30000n,
     [10000n, 10000n],
     20000n,
-    true
-  )
+    true,
+  ),
 ];
 
 const threeParticipantMinimal: TransferTestCase[] = [
@@ -531,7 +531,7 @@ const threeParticipantMinimal: TransferTestCase[] = [
     [0n, 0n, 0n],
     10000n,
     [10000n, 0n, 0n],
-    10000n
+    10000n,
   ),
 
   createWithdrawalCase(
@@ -541,7 +541,7 @@ const threeParticipantMinimal: TransferTestCase[] = [
     [10000n, 10000n, 10000n],
     10000n,
     [10000n, 10000n, 0n],
-    20000n
+    20000n,
   ),
 
   createSharedIncomingCase(
@@ -551,7 +551,7 @@ const threeParticipantMinimal: TransferTestCase[] = [
     [10000n, 10000n, 10000n],
     30000n,
     [20000n, 20000n, 20000n],
-    60000n
+    60000n,
   ),
 
   createSharedOutgoingCase(
@@ -561,7 +561,7 @@ const threeParticipantMinimal: TransferTestCase[] = [
     [20000n, 20000n, 20000n],
     30000n,
     [10000n, 10000n, 10000n],
-    30000n
+    30000n,
   ),
 
   // Remainder assignment test
@@ -569,7 +569,8 @@ const threeParticipantMinimal: TransferTestCase[] = [
     "An external transfer with the remainder assigned to the first participant",
     3,
     "stranger",
-    [10000n, 20000n, 30000n], // Initial balances: participant 1: 10000, participant 2: 20000, participant 3: 30000, total: 60000
+    // Initial balances: participant 1: 10000, participant 2: 20000, participant 3: 30000, total: 60000
+    [10000n, 20000n, 30000n],
     50000n, // Transfer amount: 50000 (divisible by ACCURACY_FACTOR)
     /*
      * Share calculation with ACCURACY_FACTOR = 10000:
@@ -582,7 +583,7 @@ const threeParticipantMinimal: TransferTestCase[] = [
      * - Final balances: [10000 + 20000, 20000 + 10000, 30000 + 20000] = [30000, 30000, 50000]
      */
     [30000n, 30000n, 50000n],
-    110000n
+    110000n,
   ),
 
   // Error scenario
@@ -595,8 +596,8 @@ const threeParticipantMinimal: TransferTestCase[] = [
     [10000n, 10000n, 10000n],
     30000n,
     true,
-    ERROR_NAME_TRANSFER_AMOUNT_NOT_ROUNDED
-  )
+    ERROR_NAME_TRANSFER_AMOUNT_NOT_ROUNDED,
+  ),
 ];
 
 // Main test suites
@@ -609,7 +610,7 @@ describe("SharedWalletController Transfer Scenarios", () => {
   });
 
   describe("One Participant Scenarios", () => {
-    oneParticipantMinimal.forEach(testCase => {
+    oneParticipantMinimal.forEach((testCase) => {
       it(testCase.description, async () => {
         await engine.executeTestCase(testCase);
       });
@@ -617,7 +618,7 @@ describe("SharedWalletController Transfer Scenarios", () => {
   });
 
   describe("Two Participants Scenarios", () => {
-    twoParticipantMinimal.forEach(testCase => {
+    twoParticipantMinimal.forEach((testCase) => {
       it(testCase.description, async () => {
         await engine.executeTestCase(testCase);
       });
@@ -625,7 +626,7 @@ describe("SharedWalletController Transfer Scenarios", () => {
   });
 
   describe("Three Participants Scenarios", () => {
-    threeParticipantMinimal.forEach(testCase => {
+    threeParticipantMinimal.forEach((testCase) => {
       it(testCase.description, async () => {
         await engine.executeTestCase(testCase);
       });

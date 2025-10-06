@@ -3,9 +3,7 @@ import { network } from "hardhat";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 // Define base types for our objects
-interface BaseObject {
-  [key: string]: unknown;
-}
+type BaseObject = Record<string, unknown>;
 
 function arrayToObject(arr: unknown[], format: BaseObject): BaseObject {
   const keys = Object.keys(format);
@@ -25,7 +23,7 @@ export function checkEquality<T extends BaseObject>(
   actualObject: T | unknown[],
   expectedObject: T,
   index?: number,
-  props: { ignoreObjects: boolean } = { ignoreObjects: false }
+  props: { ignoreObjects: boolean } = { ignoreObjects: false },
 ): void {
   const indexString = index == null ? "" : ` with index: ${index}`;
 
@@ -40,7 +38,7 @@ export function checkEquality<T extends BaseObject>(
     if (Array.isArray(actualValue) && Array.isArray(expectedValue) && expectedValue.length > 0) {
       if (typeof expectedValue[0] === "object" && !Array.isArray(expectedValue[0])) {
         processedObj[property] = actualValue.map(arr =>
-          Array.isArray(arr) ? arrayToObject(arr, expectedValue[0] as BaseObject) : arr
+          Array.isArray(arr) ? arrayToObject(arr, expectedValue[0] as BaseObject) : arr,
         );
       }
     }
@@ -60,7 +58,7 @@ export function checkEquality<T extends BaseObject>(
 
     expect(value).to.deep.equal(
       expectedObject[property],
-      `Mismatch in the "${property}" property between the actual object and expected one${indexString}`
+      `Mismatch in the "${property}" property between the actual object and expected one${indexString}`,
     );
   }
 }

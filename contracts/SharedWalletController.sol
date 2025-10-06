@@ -16,7 +16,6 @@ import { ISharedWalletController, ISharedWalletControllerPrimary } from "./inter
 
 import { SharedWalletControllerStorageLayout } from "./SharedWalletControllerStorageLayout.sol";
 
-
 /**
  * @title SharedWalletController contract
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
@@ -404,14 +403,18 @@ contract SharedWalletController is
             address wallet = normalizedPairs[i].wallet;
             address participant = normalizedPairs[i].participant;
             WalletState storage walletState = $.walletStates[wallet];
-            (bool participantRegistered, uint256 participantBalance) = walletState.participantBalances.tryGet(participant);
+            (bool participantRegistered, uint256 participantBalance) = walletState.participantBalances.tryGet(
+                participant
+            );
 
             overviews[i] = RelationshipOverview({
                 wallet: wallet,
                 walletStatus: walletState.status,
                 walletBalance: walletState.balance,
                 participant: participant,
-                participantStatus: participantRegistered ? ParticipantStatus.Registered : ParticipantStatus.NotRegistered,
+                participantStatus: participantRegistered
+                    ? ParticipantStatus.Registered
+                    : ParticipantStatus.NotRegistered,
                 participantBalance: participantBalance
             });
         }

@@ -49,7 +49,7 @@ interface ISharedWalletControllerTypes {
         Active,
         Suspended
     }
-/**
+    /**
      * @dev Possible statuses of a participant in a shared wallet.
      *
      * The values:
@@ -61,7 +61,7 @@ interface ISharedWalletControllerTypes {
         NotRegistered,
         Registered
     }
-    
+
     /**
      * @dev A struct containing overview information about a shared wallet.
      *

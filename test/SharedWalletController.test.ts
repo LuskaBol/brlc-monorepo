@@ -1,3 +1,5 @@
+/* eslint @typescript-eslint/no-unused-expressions: "off", @typescript-eslint/no-non-null-assertion: "off" */
+
 import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
 import { Contract, ContractFactory } from "ethers";
@@ -10,7 +12,7 @@ import { checkEquality, setUpFixture } from "../test-utils/common";
 const EXPECTED_VERSION: Version = {
   major: 1,
   minor: 0,
-  patch: 0
+  patch: 0,
 };
 
 // Test constants
@@ -74,12 +76,12 @@ const ERROR_NAME_WALLET_AND_PARTICIPANT_ADDRESSES_BOTH_ZERO =
 enum WalletStatus {
   Nonexistent = 0,
   Active = 1,
-  Suspended = 2
+  Suspended = 2,
 }
 
 enum ParticipantStatus {
   NotRegistered = 0,
-  Registered = 1
+  Registered = 1,
 }
 
 interface WalletOverview {
@@ -151,58 +153,58 @@ interface Fixture {
 function createTestWalletOverview(
   wallet: string,
   status: WalletStatus = WalletStatus.Active,
-  balance: bigint = 0n
+  balance = 0n,
 ): WalletOverview {
   return {
     wallet,
     walletStatus: status,
     walletBalance: balance,
-    participantSummaries: []
+    participantSummaries: [],
   };
 }
 
 function createTestWalletSummary(
   wallet: string,
   walletStatus: WalletStatus = WalletStatus.Active,
-  walletBalance: bigint = 0n,
-  participantBalance: bigint = 0n
+  walletBalance = 0n,
+  participantBalance = 0n,
 ): WalletSummary {
   return {
     wallet,
     walletStatus,
     walletBalance,
-    participantBalance
+    participantBalance,
   };
 }
 
 function createTestParticipantSummary(
   participant: string,
-  balance: bigint = 0n,
+  balance = 0n,
 ): ParticipantSummary {
   return {
     participant,
-    participantBalance: balance
+    participantBalance: balance,
   };
 }
 
 function createTestParticipantOverview(
   participant: string,
-  totalBalance: bigint = 0n,
-  walletSummaries: WalletSummary[] = []
+  totalBalance = 0n,
+  walletSummaries: WalletSummary[] = [],
 ): ParticipantOverview {
   return {
     participant,
     totalBalance,
-    walletSummaries
+    walletSummaries,
   };
 }
 
 function createTestRelationshipOverview(
   wallet: string,
   participant: string,
-  participantBalance: bigint = 0n,
+  participantBalance = 0n,
   walletStatus: WalletStatus = WalletStatus.Active,
-  walletBalance: bigint = 0n,
+  walletBalance = 0n,
   participantStatus: ParticipantStatus = ParticipantStatus.Registered,
 ): RelationshipOverview {
   return {
@@ -211,7 +213,7 @@ function createTestRelationshipOverview(
     walletBalance,
     participant,
     participantStatus,
-    participantBalance
+    participantBalance,
   };
 }
 
@@ -248,7 +250,7 @@ describe("Contract 'SharedWalletController'", () => {
     options?: {
       validateOverviews?: boolean;
       validateEvents?: boolean;
-    }
+    },
   ): () => Promise<void> {
     return async () => {
       const { sharedWalletController } = await setUpFixture(deployAndConfigureContracts);
@@ -454,7 +456,7 @@ describe("Contract 'SharedWalletController'", () => {
 
   async function deploySharedWalletController(tokenMock: Contract): Promise<Contract> {
     let sharedWalletController = (await upgrades.deployProxy(sharedWalletControllerFactory, [
-      getAddress(tokenMock)
+      getAddress(tokenMock),
     ])) as Contract;
 
     await sharedWalletController.waitForDeployment();
@@ -469,7 +471,7 @@ describe("Contract 'SharedWalletController'", () => {
 
     return {
       sharedWalletController,
-      tokenMock
+      tokenMock,
     };
   }
 
@@ -496,7 +498,7 @@ describe("Contract 'SharedWalletController'", () => {
   async function createWalletWithParticipants(
     sharedWalletController: Contract,
     walletAddress: string,
-    participantAddresses: string[]
+    participantAddresses: string[],
   ): Promise<void> {
     await proveTx(connect(sharedWalletController, admin).createWallet(walletAddress, participantAddresses));
   }
@@ -505,7 +507,7 @@ describe("Contract 'SharedWalletController'", () => {
     promise: Promise<unknown>,
     contract: Contract,
     account: string,
-    role: string
+    role: string,
   ): Promise<void> {
     await expect(promise)
       .to.be.revertedWithCustomError(contract, ERROR_NAME_ACCESS_CONTROL_UNAUTHORIZED_ACCOUNT)
@@ -525,7 +527,7 @@ describe("Contract 'SharedWalletController'", () => {
     tokenMock: Contract,
     from: SignerWithAddress,
     to: string,
-    amount: bigint
+    amount: bigint,
   ): Promise<void> {
     await proveTx(connect(tokenMock, from).transfer(to, amount));
   }
@@ -567,12 +569,12 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Verify default values of view functions
         expect(
-          await sharedWalletController.getParticipantBalance(sharedWallets[0].address, participants[0].address)
+          await sharedWalletController.getParticipantBalance(sharedWallets[0].address, participants[0].address),
         ).to.equal(0n);
         expect(await sharedWalletController.getParticipantWallets(participants[0].address)).to.deep.equal([]);
         expect(await sharedWalletController.getWalletParticipants(sharedWallets[0].address)).to.deep.equal([]);
         expect(await sharedWalletController.isParticipant(sharedWallets[0].address, participants[0].address)).to.equal(
-          false
+          false,
         );
         expect(await sharedWalletController.getWalletCount()).to.equal(0);
         expect(await sharedWalletController.getAggregatedBalance()).to.equal(0);
@@ -582,12 +584,12 @@ describe("Contract 'SharedWalletController'", () => {
     describe("Is reverted if", () => {
       it("The token address is zero", async () => {
         const anotherContract = (await upgrades.deployProxy(sharedWalletControllerFactory, [], {
-          initializer: false
+          initializer: false,
         })) as Contract;
 
         await expect(anotherContract.initialize(ADDRESS_ZERO)).to.be.revertedWithCustomError(
           anotherContract,
-          ERROR_NAME_TOKEN_ADDRESS_ZERO
+          ERROR_NAME_TOKEN_ADDRESS_ZERO,
         );
       });
 
@@ -595,7 +597,7 @@ describe("Contract 'SharedWalletController'", () => {
         const { sharedWalletController, tokenMock } = await setUpFixture(deployContracts);
         await expect(sharedWalletController.initialize(getAddress(tokenMock))).to.be.revertedWithCustomError(
           sharedWalletController,
-          ERROR_NAME_INVALID_INITIALIZATION
+          ERROR_NAME_INVALID_INITIALIZATION,
         );
       });
 
@@ -606,7 +608,7 @@ describe("Contract 'SharedWalletController'", () => {
 
         await expect(implementation.initialize(tokenAddress)).to.be.revertedWithCustomError(
           implementation,
-          ERROR_NAME_INVALID_INITIALIZATION
+          ERROR_NAME_INVALID_INITIALIZATION,
         );
       });
     });
@@ -625,7 +627,7 @@ describe("Contract 'SharedWalletController'", () => {
         const { sharedWalletController } = await setUpFixture(deployContracts);
 
         await expect(
-          connect(sharedWalletController, stranger).upgradeToAndCall(getAddress(sharedWalletController), "0x")
+          connect(sharedWalletController, stranger).upgradeToAndCall(getAddress(sharedWalletController), "0x"),
         )
           .to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_ACCESS_CONTROL_UNAUTHORIZED_ACCOUNT)
           .withArgs(stranger.address, OWNER_ROLE);
@@ -635,7 +637,7 @@ describe("Contract 'SharedWalletController'", () => {
         const { sharedWalletController, tokenMock } = await setUpFixture(deployContracts);
 
         await expect(
-          sharedWalletController.upgradeToAndCall(getAddress(tokenMock), "0x")
+          sharedWalletController.upgradeToAndCall(getAddress(tokenMock), "0x"),
         ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_IMPLEMENTATION_ADDRESS_INVALID);
       });
     });
@@ -661,7 +663,7 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Verify all participants are registered
         const actualParticipants: string[] = await sharedWalletController.getWalletParticipants(
-          sharedWallets[0].address
+          sharedWallets[0].address,
         );
         expect(actualParticipants.length).to.equal(MAX_PARTICIPANTS_PER_WALLET);
         expect(actualParticipants).to.deep.equal(maxParticipants);
@@ -672,29 +674,29 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Create first wallet with participant
         await proveTx(
-          connect(sharedWalletController, admin).createWallet(sharedWallets[0].address, [participants[0].address])
+          connect(sharedWalletController, admin).createWallet(sharedWallets[0].address, [participants[0].address]),
         );
 
         // Create second wallet with same participant
         await proveTx(
-          connect(sharedWalletController, admin).createWallet(sharedWallets[1].address, [participants[0].address])
+          connect(sharedWalletController, admin).createWallet(sharedWallets[1].address, [participants[0].address]),
         );
 
         // Verify participant is in both wallets
         const isInWallet1: boolean = await sharedWalletController.isParticipant(
           sharedWallets[0].address,
-          participants[0].address
+          participants[0].address,
         );
         expect(isInWallet1).to.equal(true);
         const isInWallet2: boolean = await sharedWalletController.isParticipant(
           sharedWallets[1].address,
-          participants[0].address
+          participants[0].address,
         );
         expect(isInWallet2).to.equal(true);
 
         // Verify participant wallet list contains both wallets
         const participantWallets: string[] = await sharedWalletController.getParticipantWallets(
-          participants[0].address
+          participants[0].address,
         );
         expect(participantWallets).to.include(sharedWallets[0].address);
         expect(participantWallets).to.include(sharedWallets[1].address);
@@ -710,7 +712,7 @@ describe("Contract 'SharedWalletController'", () => {
           connect(sharedWalletController, stranger).createWallet(sharedWallets[0].address, [participants[0].address]),
           sharedWalletController,
           stranger.address,
-          ADMIN_ROLE
+          ADMIN_ROLE,
         );
       });
 
@@ -724,7 +726,7 @@ describe("Contract 'SharedWalletController'", () => {
 
         await expectPauseError(
           connect(sharedWalletController, admin).createWallet(walletAddress, participantAddresses),
-          sharedWalletController
+          sharedWalletController,
         );
       });
 
@@ -732,7 +734,7 @@ describe("Contract 'SharedWalletController'", () => {
         const { sharedWalletController } = await setUpFixture(deployAndConfigureContracts);
 
         await expect(
-          connect(sharedWalletController, admin).createWallet(ADDRESS_ZERO, [participants[0].address])
+          connect(sharedWalletController, admin).createWallet(ADDRESS_ZERO, [participants[0].address]),
         ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_WALLET_ADDRESS_ZERO);
       });
 
@@ -740,7 +742,7 @@ describe("Contract 'SharedWalletController'", () => {
         const { sharedWalletController } = await setUpFixture(deployAndConfigureContracts);
 
         await expect(
-          connect(sharedWalletController, admin).createWallet(sharedWallets[0].address, [])
+          connect(sharedWalletController, admin).createWallet(sharedWallets[0].address, []),
         ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_PARTICIPANT_ARRAY_EMPTY);
       });
 
@@ -757,8 +759,8 @@ describe("Contract 'SharedWalletController'", () => {
         await expect(
           connect(sharedWalletController, admin).createWallet(sharedWallets[0].address, [
             participants[0].address,
-            ADDRESS_ZERO
-          ])
+            ADDRESS_ZERO,
+          ]),
         ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_PARTICIPANT_ADDRESS_ZERO);
       });
 
@@ -770,16 +772,16 @@ describe("Contract 'SharedWalletController'", () => {
           participants[0].address,
           participants[1].address,
           participants[2].address,
-          participants[0].address // Duplicate
+          participants[0].address, // Duplicate
         ];
 
         // Try to create a wallet with the duplicate participant
         await expect(
-          connect(sharedWalletController, admin).createWallet(sharedWallets[1].address, largeDuplicateArray)
+          connect(sharedWalletController, admin).createWallet(sharedWallets[1].address, largeDuplicateArray),
         ).to.be.revertedWithCustomError(
           sharedWalletController,
-          ERROR_NAME_PARTICIPANT_REGISTERED_ALREADY
-        ).withArgs(participants[0].address)
+          ERROR_NAME_PARTICIPANT_REGISTERED_ALREADY,
+        ).withArgs(participants[0].address);
       });
 
       it("The participant is a shared wallet", async () => {
@@ -787,15 +789,15 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Create first wallet
         await proveTx(
-          connect(sharedWalletController, admin).createWallet(sharedWallets[0].address, [participants[0].address])
+          connect(sharedWalletController, admin).createWallet(sharedWallets[0].address, [participants[0].address]),
         );
 
         // Try to create wallet where participant is first wallet address
         await expect(
-          connect(sharedWalletController, admin).createWallet(sharedWallets[1].address, [sharedWallets[0].address])
+          connect(sharedWalletController, admin).createWallet(sharedWallets[1].address, [sharedWallets[0].address]),
         ).to.be.revertedWithCustomError(
           sharedWalletController,
-          ERROR_NAME_PARTICIPANT_IS_SHARED_WALLET
+          ERROR_NAME_PARTICIPANT_IS_SHARED_WALLET,
         ).withArgs(sharedWallets[0].address);
       });
 
@@ -808,7 +810,7 @@ describe("Contract 'SharedWalletController'", () => {
         }
 
         await expect(
-          connect(sharedWalletController, admin).createWallet(sharedWallets[0].address, tooManyParticipants)
+          connect(sharedWalletController, admin).createWallet(sharedWallets[0].address, tooManyParticipants),
         ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_PARTICIPANT_COUNT_EXCESS);
       });
 
@@ -817,12 +819,12 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Create first wallet
         await proveTx(
-          connect(sharedWalletController, admin).createWallet(sharedWallets[0].address, [participants[0].address])
+          connect(sharedWalletController, admin).createWallet(sharedWallets[0].address, [participants[0].address]),
         );
 
         // Try to create same wallet again
         await expect(
-          connect(sharedWalletController, admin).createWallet(sharedWallets[0].address, [participants[1].address])
+          connect(sharedWalletController, admin).createWallet(sharedWallets[0].address, [participants[1].address]),
         ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_WALLET_ALREADY_EXISTS);
       });
 
@@ -854,7 +856,7 @@ describe("Contract 'SharedWalletController'", () => {
           connect(sharedWalletController, stranger).suspendWallet(walletAddress),
           sharedWalletController,
           stranger.address,
-          ADMIN_ROLE
+          ADMIN_ROLE,
         );
       });
 
@@ -869,7 +871,7 @@ describe("Contract 'SharedWalletController'", () => {
 
         await expectPauseError(
           connect(sharedWalletController, admin).suspendWallet(walletAddress),
-          sharedWalletController
+          sharedWalletController,
         );
       });
 
@@ -878,7 +880,7 @@ describe("Contract 'SharedWalletController'", () => {
 
         await expect(connect(sharedWalletController, admin).suspendWallet(ADDRESS_ZERO)).to.be.revertedWithCustomError(
           sharedWalletController,
-          ERROR_NAME_WALLET_NONEXISTENT
+          ERROR_NAME_WALLET_NONEXISTENT,
         );
       });
 
@@ -886,7 +888,7 @@ describe("Contract 'SharedWalletController'", () => {
         const { sharedWalletController } = await setUpFixture(deployAndConfigureContracts);
 
         await expect(
-          connect(sharedWalletController, admin).suspendWallet(sharedWallets[0].address)
+          connect(sharedWalletController, admin).suspendWallet(sharedWallets[0].address),
         ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_WALLET_NONEXISTENT);
       });
 
@@ -897,7 +899,7 @@ describe("Contract 'SharedWalletController'", () => {
         // Try to suspend nonexistent wallet
         await expect(connect(sharedWalletController, admin).suspendWallet(walletAddress)).to.be.revertedWithCustomError(
           sharedWalletController,
-          ERROR_NAME_WALLET_NONEXISTENT
+          ERROR_NAME_WALLET_NONEXISTENT,
         );
       });
 
@@ -934,7 +936,7 @@ describe("Contract 'SharedWalletController'", () => {
         // Try to suspend wallet with non-zero balance
         await expect(connect(sharedWalletController, admin).suspendWallet(walletAddress)).to.be.revertedWithCustomError(
           sharedWalletController,
-          ERROR_NAME_WALLET_BALANCE_NOT_ZERO
+          ERROR_NAME_WALLET_BALANCE_NOT_ZERO,
         );
       });
     });
@@ -961,7 +963,7 @@ describe("Contract 'SharedWalletController'", () => {
           connect(sharedWalletController, stranger).resumeWallet(walletAddress),
           sharedWalletController,
           stranger.address,
-          ADMIN_ROLE
+          ADMIN_ROLE,
         );
       });
 
@@ -977,7 +979,7 @@ describe("Contract 'SharedWalletController'", () => {
 
         await expectPauseError(
           connect(sharedWalletController, admin).resumeWallet(walletAddress),
-          sharedWalletController
+          sharedWalletController,
         );
       });
 
@@ -986,7 +988,7 @@ describe("Contract 'SharedWalletController'", () => {
 
         await expect(connect(sharedWalletController, admin).resumeWallet(ADDRESS_ZERO)).to.be.revertedWithCustomError(
           sharedWalletController,
-          ERROR_NAME_WALLET_NONEXISTENT
+          ERROR_NAME_WALLET_NONEXISTENT,
         );
       });
 
@@ -994,7 +996,7 @@ describe("Contract 'SharedWalletController'", () => {
         const { sharedWalletController } = await setUpFixture(deployAndConfigureContracts);
 
         await expect(
-          connect(sharedWalletController, admin).resumeWallet(sharedWallets[0].address)
+          connect(sharedWalletController, admin).resumeWallet(sharedWallets[0].address),
         ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_WALLET_NONEXISTENT);
       });
 
@@ -1018,7 +1020,7 @@ describe("Contract 'SharedWalletController'", () => {
         // Try to resume nonexistent wallet
         await expect(connect(sharedWalletController, admin).resumeWallet(walletAddress)).to.be.revertedWithCustomError(
           sharedWalletController,
-          ERROR_NAME_WALLET_NONEXISTENT
+          ERROR_NAME_WALLET_NONEXISTENT,
         );
       });
 
@@ -1030,8 +1032,8 @@ describe("Contract 'SharedWalletController'", () => {
         await proveTx(
           connect(sharedWalletController, admin).createWallet(walletAddress, [
             participants[0].address,
-            participants[1].address
-          ])
+            participants[1].address,
+          ]),
         );
 
         // Suspend the wallet
@@ -1041,14 +1043,14 @@ describe("Contract 'SharedWalletController'", () => {
         await proveTx(
           connect(sharedWalletController, admin).removeParticipants(walletAddress, [
             participants[0].address,
-            participants[1].address
-          ])
+            participants[1].address,
+          ]),
         );
 
         // Try to resume wallet with no participants
         await expect(connect(sharedWalletController, admin).resumeWallet(walletAddress)).to.be.revertedWithCustomError(
           sharedWalletController,
-          ERROR_NAME_WALLET_HAS_NO_PARTICIPANTS
+          ERROR_NAME_WALLET_HAS_NO_PARTICIPANTS,
         );
       });
     });
@@ -1098,7 +1100,7 @@ describe("Contract 'SharedWalletController'", () => {
           connect(sharedWalletController, stranger).addParticipants(walletAddress, [participants[1].address]),
           sharedWalletController,
           stranger.address,
-          ADMIN_ROLE
+          ADMIN_ROLE,
         );
       });
 
@@ -1113,7 +1115,7 @@ describe("Contract 'SharedWalletController'", () => {
 
         await expectPauseError(
           connect(sharedWalletController, admin).addParticipants(walletAddress, [participants[1].address]),
-          sharedWalletController
+          sharedWalletController,
         );
       });
 
@@ -1121,7 +1123,7 @@ describe("Contract 'SharedWalletController'", () => {
         const { sharedWalletController } = await setUpFixture(deployAndConfigureContracts);
 
         await expect(
-          connect(sharedWalletController, admin).addParticipants(sharedWallets[0].address, [participants[0].address])
+          connect(sharedWalletController, admin).addParticipants(sharedWallets[0].address, [participants[0].address]),
         ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_WALLET_NONEXISTENT);
       });
 
@@ -1149,12 +1151,13 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Try to add zero address
         await expect(
-          connect(sharedWalletController, admin).addParticipants(walletAddress, [ADDRESS_ZERO])
+          connect(sharedWalletController, admin).addParticipants(walletAddress, [ADDRESS_ZERO]),
         ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_PARTICIPANT_ADDRESS_ZERO);
 
         // Try to add mixed valid and zero addresses
         await expect(
-          connect(sharedWalletController, admin).addParticipants(walletAddress, [participants[1].address, ADDRESS_ZERO])
+          connect(sharedWalletController, admin)
+            .addParticipants(walletAddress, [participants[1].address, ADDRESS_ZERO]),
         ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_PARTICIPANT_ADDRESS_ZERO);
       });
 
@@ -1166,17 +1169,17 @@ describe("Contract 'SharedWalletController'", () => {
         await proveTx(
           connect(sharedWalletController, admin).createWallet(walletAddress, [
             participants[0].address,
-            participants[1].address
-          ])
+            participants[1].address,
+          ]),
         );
 
         // Try to add already registered participant
         await expect(
-          connect(sharedWalletController, admin).addParticipants(walletAddress, [participants[0].address])
+          connect(sharedWalletController, admin).addParticipants(walletAddress, [participants[0].address]),
         ).to.be.revertedWithCustomError(
           sharedWalletController,
-          ERROR_NAME_PARTICIPANT_REGISTERED_ALREADY
-        ).withArgs(participants[0].address)
+          ERROR_NAME_PARTICIPANT_REGISTERED_ALREADY,
+        ).withArgs(participants[0].address);
       });
 
       it("The participant is a shared wallet", async () => {
@@ -1192,10 +1195,10 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Try to add first wallet as participant to second wallet
         await expect(
-          connect(sharedWalletController, admin).addParticipants(wallet2Address, [walletAddress])
+          connect(sharedWalletController, admin).addParticipants(wallet2Address, [walletAddress]),
         ).to.be.revertedWithCustomError(
           sharedWalletController,
-          ERROR_NAME_PARTICIPANT_IS_SHARED_WALLET
+          ERROR_NAME_PARTICIPANT_IS_SHARED_WALLET,
         ).withArgs(walletAddress);
       });
 
@@ -1212,7 +1215,7 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Try to add one more participant
         await expect(
-          connect(sharedWalletController, admin).addParticipants(walletAddress, [participants[0].address])
+          connect(sharedWalletController, admin).addParticipants(walletAddress, [participants[0].address]),
         ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_PARTICIPANT_COUNT_EXCESS);
       });
 
@@ -1228,11 +1231,11 @@ describe("Contract 'SharedWalletController'", () => {
           connect(sharedWalletController, admin).addParticipants(walletAddress, [
             participants[1].address,
             participants[2].address,
-            participants[1].address // Duplicate
-          ])
+            participants[1].address, // Duplicate
+          ]),
         ).to.be.revertedWithCustomError(
           sharedWalletController,
-          ERROR_NAME_PARTICIPANT_REGISTERED_ALREADY
+          ERROR_NAME_PARTICIPANT_REGISTERED_ALREADY,
         ).withArgs(participants[1].address);
 
         // Verify no participants were added due to reverts
@@ -1257,8 +1260,8 @@ describe("Contract 'SharedWalletController'", () => {
         await proveTx(
           connect(sharedWalletController, admin).createWallet(walletAddress, [
             participants[0].address,
-            participants[1].address
-          ])
+            participants[1].address,
+          ]),
         );
         await proveTx(connect(sharedWalletController, admin).suspendWallet(walletAddress));
 
@@ -1315,7 +1318,7 @@ describe("Contract 'SharedWalletController'", () => {
           participants[1].address, // index 1 - will be removed
           participants[2].address, // index 2
           ethers.Wallet.createRandom().address, // index 3
-          ethers.Wallet.createRandom().address // index 4 - will move to index 1
+          ethers.Wallet.createRandom().address, // index 4 - will move to index 1
         ];
 
         await proveTx(connect(sharedWalletController, admin).createWallet(walletAddress, orderedParticipants));
@@ -1325,7 +1328,7 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Remove middle participant - last participant should swap to fill the gap
         await proveTx(
-          connect(sharedWalletController, admin).removeParticipants(walletAddress, [participants[1].address])
+          connect(sharedWalletController, admin).removeParticipants(walletAddress, [participants[1].address]),
         );
 
         currentParticipants = await sharedWalletController.getWalletParticipants(walletAddress);
@@ -1338,7 +1341,7 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Remove participant at index 0 - should trigger another swap-and-pop
         await proveTx(
-          connect(sharedWalletController, admin).removeParticipants(walletAddress, [participants[0].address])
+          connect(sharedWalletController, admin).removeParticipants(walletAddress, [participants[0].address]),
         );
 
         currentParticipants = await sharedWalletController.getWalletParticipants(walletAddress);
@@ -1348,7 +1351,7 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Remove middle participant again
         await proveTx(
-          connect(sharedWalletController, admin).removeParticipants(walletAddress, [participants[2].address])
+          connect(sharedWalletController, admin).removeParticipants(walletAddress, [participants[2].address]),
         );
 
         currentParticipants = await sharedWalletController.getWalletParticipants(walletAddress);
@@ -1370,7 +1373,7 @@ describe("Contract 'SharedWalletController'", () => {
         // Create wallet with participants
         await createWalletWithParticipants(sharedWalletController, walletAddress, [
           participants[0].address,
-          participants[1].address
+          participants[1].address,
         ]);
 
         // Try to remove participants with unauthorized account
@@ -1378,7 +1381,7 @@ describe("Contract 'SharedWalletController'", () => {
           connect(sharedWalletController, stranger).removeParticipants(walletAddress, [participants[1].address]),
           sharedWalletController,
           stranger.address,
-          ADMIN_ROLE
+          ADMIN_ROLE,
         );
       });
 
@@ -1389,14 +1392,14 @@ describe("Contract 'SharedWalletController'", () => {
         // Create a wallet with multiple participants first
         await createWalletWithParticipants(sharedWalletController, walletAddress, [
           participants[0].address,
-          participants[1].address
+          participants[1].address,
         ]);
 
         await pauseContract(sharedWalletController);
 
         await expectPauseError(
           connect(sharedWalletController, admin).removeParticipants(walletAddress, [participants[1].address]),
-          sharedWalletController
+          sharedWalletController,
         );
       });
 
@@ -1404,7 +1407,8 @@ describe("Contract 'SharedWalletController'", () => {
         const { sharedWalletController } = await setUpFixture(deployAndConfigureContracts);
 
         await expect(
-          connect(sharedWalletController, admin).removeParticipants(sharedWallets[0].address, [participants[0].address])
+          connect(sharedWalletController, admin)
+            .removeParticipants(sharedWallets[0].address, [participants[0].address]),
         ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_WALLET_NONEXISTENT);
       });
 
@@ -1432,7 +1436,7 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Try to remove non-registered participant
         await expect(
-          connect(sharedWalletController, admin).removeParticipants(walletAddress, [participants[1].address])
+          connect(sharedWalletController, admin).removeParticipants(walletAddress, [participants[1].address]),
         )
           .to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_PARTICIPANT_NOT_REGISTERED)
           .withArgs(participants[1].address);
@@ -1448,8 +1452,8 @@ describe("Contract 'SharedWalletController'", () => {
         await proveTx(
           connect(sharedWalletController, admin).createWallet(walletAddress, [
             participant1.address,
-            participant2.address
-          ])
+            participant2.address,
+          ]),
         );
 
         // Transfer tokens to give participant a balance (must be divisible by ACCURACY_FACTOR=10000)
@@ -1458,7 +1462,7 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Verify participant has non-zero balance
         expect(await sharedWalletController.getParticipantBalance(walletAddress, participant1.address)).to.equal(
-          transferAmount
+          transferAmount,
         );
 
         // Try to remove participant with non-zero balance
@@ -1476,7 +1480,7 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Try to remove the only participant from active wallet
         await expect(
-          connect(sharedWalletController, admin).removeParticipants(walletAddress, [participants[0].address])
+          connect(sharedWalletController, admin).removeParticipants(walletAddress, [participants[0].address]),
         ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_WALLET_WOULD_BECOME_EMPTY);
       });
 
@@ -1489,8 +1493,8 @@ describe("Contract 'SharedWalletController'", () => {
           connect(sharedWalletController, admin).createWallet(walletAddress, [
             participants[0].address,
             participants[1].address,
-            participants[2].address
-          ])
+            participants[2].address,
+          ]),
         );
 
         // Try to remove participants with duplicates - the contract will fail on the second occurrence
@@ -1498,16 +1502,16 @@ describe("Contract 'SharedWalletController'", () => {
           connect(sharedWalletController, admin).removeParticipants(walletAddress, [
             participants[1].address,
             participants[2].address,
-            participants[1].address // Duplicate - will trigger ParticipantNotRegistered (already removed)
-          ])
+            participants[1].address, // Duplicate - will trigger ParticipantNotRegistered (already removed)
+          ]),
         ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_PARTICIPANT_NOT_REGISTERED);
 
         // Try to remove same participant twice in array
         await expect(
           connect(sharedWalletController, admin).removeParticipants(walletAddress, [
             participants[1].address,
-            participants[1].address // Immediate duplicate
-          ])
+            participants[1].address, // Immediate duplicate
+          ]),
         ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_PARTICIPANT_NOT_REGISTERED);
 
         // Verify no participants were removed due to reverts
@@ -1516,7 +1520,7 @@ describe("Contract 'SharedWalletController'", () => {
         expect(participantsAfter).to.include.members([
           participants[0].address,
           participants[1].address,
-          participants[2].address
+          participants[2].address,
         ]);
       });
     });
@@ -1531,8 +1535,8 @@ describe("Contract 'SharedWalletController'", () => {
           connect(sharedWalletController, stranger).beforeTokenTransfer(
             participants[0].address,
             sharedWallets[0].address,
-            1000n
-          )
+            1000n,
+          ),
         ).not.to.be.reverted;
       });
     });
@@ -1550,7 +1554,7 @@ describe("Contract 'SharedWalletController'", () => {
         // Get initial balances
         const initialParticipantBalance: bigint = await sharedWalletController.getParticipantBalance(
           walletAddress,
-          participants[0].address
+          participants[0].address,
         );
         const initialWalletBalance: bigint = (await sharedWalletController.getWalletOverviews([walletAddress]))[0]
           .walletBalance;
@@ -1558,7 +1562,7 @@ describe("Contract 'SharedWalletController'", () => {
         // Transfer zero amount from participant
         const tx1 = connect(tokenMock, participants[0]).transfer(walletAddress, 0n);
         // Transfer zero amount from non-participant
-        const tx2 = connect(tokenMock, stranger).transfer(walletAddress, 0n);
+        await connect(tokenMock, stranger).transfer(walletAddress, 0n);
 
         await expect(tx1).not.to.emit(sharedWalletController, EVENT_NAME_DEPOSIT);
         await expect(tx1).not.to.emit(sharedWalletController, EVENT_NAME_TRANSFER_IN);
@@ -1566,7 +1570,7 @@ describe("Contract 'SharedWalletController'", () => {
         // Verify balances unchanged
         const finalParticipantBalance: bigint = await sharedWalletController.getParticipantBalance(
           walletAddress,
-          participants[0].address
+          participants[0].address,
         );
         const finalWalletBalance: bigint = (await sharedWalletController.getWalletOverviews([walletAddress]))[0]
           .walletBalance;
@@ -1590,7 +1594,7 @@ describe("Contract 'SharedWalletController'", () => {
         // Get initial balances
         const initialParticipantBalance: bigint = await sharedWalletController.getParticipantBalance(
           walletAddress,
-          participant.address
+          participant.address,
         );
         const initialWalletBalance: bigint = (await sharedWalletController.getWalletOverviews([walletAddress]))[0]
           .walletBalance;
@@ -1601,13 +1605,13 @@ describe("Contract 'SharedWalletController'", () => {
         await expect(tx).to.changeTokenBalances(
           tokenMock,
           [participant.address, walletAddress],
-          [-depositAmount, depositAmount]
+          [-depositAmount, depositAmount],
         );
 
         // Get final balances
         const finalParticipantBalance: bigint = await sharedWalletController.getParticipantBalance(
           walletAddress,
-          participant.address
+          participant.address,
         );
         const finalWalletBalance: bigint = (await sharedWalletController.getWalletOverviews([walletAddress]))[0]
           .walletBalance;
@@ -1627,7 +1631,7 @@ describe("Contract 'SharedWalletController'", () => {
             finalParticipantBalance,
             initialParticipantBalance,
             finalWalletBalance,
-            initialWalletBalance
+            initialWalletBalance,
           );
       });
 
@@ -1648,7 +1652,7 @@ describe("Contract 'SharedWalletController'", () => {
         // Get balances after deposit
         const balanceAfterDeposit: bigint = await sharedWalletController.getParticipantBalance(
           walletAddress,
-          participant.address
+          participant.address,
         );
         const walletBalanceAfterDeposit: bigint = (await sharedWalletController.getWalletOverviews([walletAddress]))[0]
           .walletBalance;
@@ -1660,13 +1664,13 @@ describe("Contract 'SharedWalletController'", () => {
         await expect(tx).to.changeTokenBalances(
           tokenMock,
           [walletAddress, participant.address],
-          [-withdrawAmount, withdrawAmount]
+          [-withdrawAmount, withdrawAmount],
         );
 
         // Get final balances
         const finalParticipantBalance: bigint = await sharedWalletController.getParticipantBalance(
           walletAddress,
-          participant.address
+          participant.address,
         );
         const finalWalletBalance: bigint = (await sharedWalletController.getWalletOverviews([walletAddress]))[0]
           .walletBalance;
@@ -1686,7 +1690,7 @@ describe("Contract 'SharedWalletController'", () => {
             finalParticipantBalance,
             balanceAfterDeposit,
             finalWalletBalance,
-            walletBalanceAfterDeposit
+            walletBalanceAfterDeposit,
           );
       });
 
@@ -1701,8 +1705,8 @@ describe("Contract 'SharedWalletController'", () => {
         await proveTx(
           connect(sharedWalletController, admin).createWallet(walletAddress, [
             participants[0].address,
-            participants[1].address
-          ])
+            participants[1].address,
+          ]),
         );
 
         // Give participants initial balances through deposits
@@ -1713,11 +1717,11 @@ describe("Contract 'SharedWalletController'", () => {
         // Get initial state before external transfer
         const initialP0Balance: bigint = await sharedWalletController.getParticipantBalance(
           walletAddress,
-          participants[0].address
+          participants[0].address,
         );
         const initialP1Balance: bigint = await sharedWalletController.getParticipantBalance(
           walletAddress,
-          participants[1].address
+          participants[1].address,
         );
         const initialWalletBalance: bigint = (await sharedWalletController.getWalletOverviews([walletAddress]))[0]
           .walletBalance;
@@ -1732,17 +1736,17 @@ describe("Contract 'SharedWalletController'", () => {
         await expect(tx).to.changeTokenBalances(
           tokenMock,
           [stranger.address, walletAddress],
-          [-transferAmount, transferAmount]
+          [-transferAmount, transferAmount],
         );
 
         // Get final balances
         const finalP0Balance: bigint = await sharedWalletController.getParticipantBalance(
           walletAddress,
-          participants[0].address
+          participants[0].address,
         );
         const finalP1Balance: bigint = await sharedWalletController.getParticipantBalance(
           walletAddress,
-          participants[1].address
+          participants[1].address,
         );
         const finalWalletBalance: bigint = (await sharedWalletController.getWalletOverviews([walletAddress]))[0]
           .walletBalance;
@@ -1768,7 +1772,7 @@ describe("Contract 'SharedWalletController'", () => {
           finalP0Balance, // newParticipantBalance
           initialP0Balance, // oldParticipantBalance
           finalWalletBalance, // newWalletBalance
-          initialWalletBalance // oldWalletBalance
+          initialWalletBalance, // oldWalletBalance
         );
 
         await expect(tx).to.emit(sharedWalletController, EVENT_NAME_TRANSFER_IN).withArgs(
@@ -1777,7 +1781,7 @@ describe("Contract 'SharedWalletController'", () => {
           finalP1Balance, // newParticipantBalance
           initialP1Balance, // oldParticipantBalance
           finalWalletBalance, // newWalletBalance
-          initialWalletBalance // oldWalletBalance
+          initialWalletBalance, // oldWalletBalance
         );
       });
 
@@ -1791,8 +1795,8 @@ describe("Contract 'SharedWalletController'", () => {
           connect(sharedWalletController, admin).createWallet(walletAddress, [
             participants[0].address,
             participants[1].address,
-            participants[2].address
-          ])
+            participants[2].address,
+          ]),
         );
 
         // Add external sender as separate account
@@ -1808,7 +1812,7 @@ describe("Contract 'SharedWalletController'", () => {
         await expect(tx).to.changeTokenBalances(
           tokenMock,
           [stranger.address, walletAddress],
-          [-transferAmount, transferAmount]
+          [-transferAmount, transferAmount],
         );
 
         const finalWalletBalance: bigint = (await sharedWalletController.getWalletOverviews([walletAddress]))[0]
@@ -1828,13 +1832,13 @@ describe("Contract 'SharedWalletController'", () => {
         // Contract behavior: when all participants have zero balance, tokens are distributed equally
         // Each participant gets: 30000 / 3 = 10000
         expect(await sharedWalletController.getParticipantBalance(walletAddress, participants[0].address)).to.equal(
-          10000n
+          10000n,
         );
         expect(await sharedWalletController.getParticipantBalance(walletAddress, participants[1].address)).to.equal(
-          10000n
+          10000n,
         );
         expect(await sharedWalletController.getParticipantBalance(walletAddress, participants[2].address)).to.equal(
-          10000n
+          10000n,
         );
 
         // All participants receive TransferIn events since they all got tokens
@@ -1844,7 +1848,7 @@ describe("Contract 'SharedWalletController'", () => {
           10000n, // newParticipantBalance
           0n, // oldParticipantBalance
           finalWalletBalance, // newWalletBalance
-          initialWalletBalance // oldWalletBalance (0)
+          initialWalletBalance, // oldWalletBalance (0)
         );
 
         await expect(tx).to.emit(sharedWalletController, EVENT_NAME_TRANSFER_IN).withArgs(
@@ -1853,7 +1857,7 @@ describe("Contract 'SharedWalletController'", () => {
           10000n, // newParticipantBalance
           0n, // oldParticipantBalance
           finalWalletBalance, // newWalletBalance
-          initialWalletBalance // oldWalletBalance (0)
+          initialWalletBalance, // oldWalletBalance (0)
         );
 
         await expect(tx).to.emit(sharedWalletController, EVENT_NAME_TRANSFER_IN).withArgs(
@@ -1862,7 +1866,7 @@ describe("Contract 'SharedWalletController'", () => {
           10000n, // newParticipantBalance
           0n, // oldParticipantBalance
           finalWalletBalance, // newWalletBalance
-          initialWalletBalance // oldWalletBalance (0)
+          initialWalletBalance, // oldWalletBalance (0)
         );
       });
 
@@ -1875,8 +1879,8 @@ describe("Contract 'SharedWalletController'", () => {
         await proveTx(
           connect(sharedWalletController, admin).createWallet(walletAddress, [
             participants[0].address,
-            participants[1].address
-          ])
+            participants[1].address,
+          ]),
         );
 
         // Give participants equal initial balances to simplify calculation
@@ -1887,11 +1891,11 @@ describe("Contract 'SharedWalletController'", () => {
         // Get initial state
         const initialP0Balance = await sharedWalletController.getParticipantBalance(
           walletAddress,
-          participants[0].address
+          participants[0].address,
         );
         const initialP1Balance = await sharedWalletController.getParticipantBalance(
           walletAddress,
-          participants[1].address
+          participants[1].address,
         );
         const initialWalletBalance: bigint = (await sharedWalletController.getWalletOverviews([walletAddress]))[0]
           .walletBalance;
@@ -1902,17 +1906,17 @@ describe("Contract 'SharedWalletController'", () => {
         await expect(tx).to.changeTokenBalances(
           tokenMock,
           [walletAddress, stranger.address],
-          [-withdrawAmount, withdrawAmount]
+          [-withdrawAmount, withdrawAmount],
         );
 
         // Get final balances
         const finalP0Balance: bigint = await sharedWalletController.getParticipantBalance(
           walletAddress,
-          participants[0].address
+          participants[0].address,
         );
         const finalP1Balance: bigint = await sharedWalletController.getParticipantBalance(
           walletAddress,
-          participants[1].address
+          participants[1].address,
         );
         const finalWalletBalance: bigint = (await sharedWalletController.getWalletOverviews([walletAddress]))[0]
           .walletBalance;
@@ -1943,7 +1947,7 @@ describe("Contract 'SharedWalletController'", () => {
         // Verify balance was updated
         const participantBalance = await sharedWalletController.getParticipantBalance(
           walletAddress,
-          participants[0].address
+          participants[0].address,
         );
         expect(participantBalance).to.equal(validAmount);
       });
@@ -1954,7 +1958,7 @@ describe("Contract 'SharedWalletController'", () => {
         const { sharedWalletController } = await setUpFixture(deployAndConfigureContracts);
 
         await expect(
-          sharedWalletController.afterTokenTransfer(participants[0].address, sharedWallets[0].address, 1000n)
+          sharedWalletController.afterTokenTransfer(participants[0].address, sharedWallets[0].address, 1000n),
         ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_TOKEN_UNAUTHORIZED);
       });
 
@@ -2025,8 +2029,8 @@ describe("Contract 'SharedWalletController'", () => {
         await proveTx(
           connect(sharedWalletController, admin).createWallet(walletAddress, [
             participants[0].address,
-            participants[1].address
-          ])
+            participants[1].address,
+          ]),
         );
 
         // Give participants initial balances
@@ -2037,7 +2041,7 @@ describe("Contract 'SharedWalletController'", () => {
         const walletSigner = await ethers.getImpersonatedSigner(walletAddress);
         const withdrawAmount = 40000n; // More than total balance, must be divisible by ACCURACY_FACTOR
         await expect(
-          connect(tokenMock, walletSigner).transfer(stranger.address, withdrawAmount)
+          connect(tokenMock, walletSigner).transfer(stranger.address, withdrawAmount),
         ).to.be.revertedWithCustomError(tokenMock, ERROR_NAME_ERC20_INSUFFICIENT_BALANCE);
       });
 
@@ -2074,8 +2078,8 @@ describe("Contract 'SharedWalletController'", () => {
         await proveTx(
           connect(sharedWalletController, admin).createWallet(walletAddress, [
             participants[0].address,
-            participants[1].address
-          ])
+            participants[1].address,
+          ]),
         );
 
         // Add tracked amount to wallet via external transfer
@@ -2093,7 +2097,7 @@ describe("Contract 'SharedWalletController'", () => {
         const walletSigner = await ethers.getImpersonatedSigner(walletAddress);
         await expect(connect(tokenMock, walletSigner).transfer(stranger.address, 20000n)).to.be.revertedWithCustomError(
           sharedWalletController,
-          ERROR_NAME_WALLET_BALANCE_INSUFFICIENT
+          ERROR_NAME_WALLET_BALANCE_INSUFFICIENT,
         );
       });
 
@@ -2105,8 +2109,8 @@ describe("Contract 'SharedWalletController'", () => {
         await proveTx(
           connect(sharedWalletController, admin).createWallet(walletAddress, [
             participants[0].address,
-            participants[1].address
-          ])
+            participants[1].address,
+          ]),
         );
 
         // Give participant 0 some balance (must be divisible by ACCURACY_FACTOR)
@@ -2114,7 +2118,7 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Verify participant 0 has balance
         expect(await sharedWalletController.getParticipantBalance(walletAddress, participants[0].address)).to.equal(
-          10000n
+          10000n,
         );
 
         // Verify participant 1 has zero balance
@@ -2124,7 +2128,7 @@ describe("Contract 'SharedWalletController'", () => {
         // This should fail with participant balance insufficient error
         const walletSigner = await ethers.getImpersonatedSigner(walletAddress);
         await expect(
-          connect(tokenMock, walletSigner).transfer(participants[1].address, 10000n)
+          connect(tokenMock, walletSigner).transfer(participants[1].address, 10000n),
         ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_PARTICIPANT_BALANCE_INSUFFICIENT);
       });
 
@@ -2142,7 +2146,7 @@ describe("Contract 'SharedWalletController'", () => {
         // (The ERC20 token reverts before our wallet balance check gets executed)
         await expect(connect(tokenMock, walletSigner).transfer(stranger.address, 10000n)).to.be.revertedWithCustomError(
           tokenMock,
-            ERROR_NAME_ERC20_INSUFFICIENT_BALANCE
+          ERROR_NAME_ERC20_INSUFFICIENT_BALANCE,
         );
       });
 
@@ -2177,8 +2181,8 @@ describe("Contract 'SharedWalletController'", () => {
         await proveTx(
           connect(sharedWalletController, admin).createWallet(walletAddress, [
             participants[0].address,
-            participants[1].address
-          ])
+            participants[1].address,
+          ]),
         );
 
         // Give participants different balances (must be divisible by ACCURACY_FACTOR)
@@ -2207,7 +2211,7 @@ describe("Contract 'SharedWalletController'", () => {
         // Try to transfer amount not divisible by ACCURACY_FACTOR
         const invalidAmount = ACCURACY_FACTOR + 1n; // 10001, not divisible by 10000
         await expect(
-          connect(tokenMock, participants[0]).transfer(walletAddress, invalidAmount)
+          connect(tokenMock, participants[0]).transfer(walletAddress, invalidAmount),
         ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_TRANSFER_AMOUNT_NOT_ROUNDED);
       });
     });
@@ -2223,7 +2227,7 @@ describe("Contract 'SharedWalletController'", () => {
 
         const isParticipant: boolean = await sharedWalletController.isParticipant(
           walletAddress,
-          participants[0].address
+          participants[0].address,
         );
         expect(isParticipant).to.equal(true);
       });
@@ -2241,7 +2245,7 @@ describe("Contract 'SharedWalletController'", () => {
         const { sharedWalletController } = await setUpFixture(deployAndConfigureContracts);
 
         expect(await sharedWalletController.isParticipant(sharedWallets[0].address, participants[0].address)).to.equal(
-          false
+          false,
         );
       });
     });
@@ -2260,7 +2264,7 @@ describe("Contract 'SharedWalletController'", () => {
         await proveTx(connect(tokenMock, participant).transfer(walletAddress, depositAmount));
 
         expect(await sharedWalletController.getParticipantBalance(walletAddress, participant.address)).to.equal(
-          depositAmount
+          depositAmount,
         );
       });
 
@@ -2286,7 +2290,7 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Verify participant is in one wallet
         const participantWallets: string[] = await sharedWalletController.getParticipantWallets(
-          participants[0].address
+          participants[0].address,
         );
         expect(participantWallets).to.deep.equal([walletAddress]);
       });
@@ -2302,7 +2306,7 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Check participant is in both wallets
         const participantWallets: string[] = await sharedWalletController.getParticipantWallets(
-          participants[0].address
+          participants[0].address,
         );
         expect(participantWallets.length).to.equal(2);
         expect(participantWallets).to.include(wallet1Address);
@@ -2314,7 +2318,7 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Verify participant not in any wallet
         const participantWallets: string[] = await sharedWalletController.getParticipantWallets(
-          participants[0].address
+          participants[0].address,
         );
         expect(participantWallets).to.deep.equal([]);
       });
@@ -2335,7 +2339,7 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Get participant overview
         const overviews: ParticipantOverview[] = await sharedWalletController.getParticipantOverviews([
-          participant.address
+          participant.address,
         ]);
         expect(overviews.length).to.equal(1);
 
@@ -2346,7 +2350,7 @@ describe("Contract 'SharedWalletController'", () => {
           walletAddress,
           WalletStatus.Active,
           depositAmount,
-          depositAmount
+          depositAmount,
         );
         expectedOverview.walletSummaries = [expectedWalletSummary];
         checkEquality(overview, expectedOverview);
@@ -2360,8 +2364,8 @@ describe("Contract 'SharedWalletController'", () => {
         await proveTx(
           connect(sharedWalletController, admin).createWallet(walletAddress, [
             participants[0].address,
-            participants[1].address
-          ])
+            participants[1].address,
+          ]),
         );
 
         // Make deposits (must be divisible by ACCURACY_FACTOR)
@@ -2371,7 +2375,7 @@ describe("Contract 'SharedWalletController'", () => {
         // Get participant overviews
         const participantOverviews: ParticipantOverview[] = await sharedWalletController.getParticipantOverviews([
           participants[0].address,
-          participants[1].address
+          participants[1].address,
         ]);
         expect(participantOverviews.length).to.equal(2);
 
@@ -2382,7 +2386,7 @@ describe("Contract 'SharedWalletController'", () => {
           walletAddress,
           WalletStatus.Active,
           30000n,
-          10000n
+          10000n,
         );
         expectedOverview0.walletSummaries = [expectedWalletSummary0];
         checkEquality(overview0, expectedOverview0);
@@ -2394,7 +2398,7 @@ describe("Contract 'SharedWalletController'", () => {
           walletAddress,
           WalletStatus.Active,
           30000n,
-          20000n
+          20000n,
         );
         expectedOverview1.walletSummaries = [expectedWalletSummary1];
         checkEquality(overview1, expectedOverview1);
@@ -2416,7 +2420,7 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Get participant overview
         const participantOverviews: ParticipantOverview[] = await sharedWalletController.getParticipantOverviews([
-          participant.address
+          participant.address,
         ]);
         expect(participantOverviews.length).to.equal(1);
 
@@ -2426,13 +2430,13 @@ describe("Contract 'SharedWalletController'", () => {
           wallet1Address,
           WalletStatus.Active,
           10000n,
-          10000n
+          10000n,
         );
         const expectedWalletSummary2 = createTestWalletSummary(
           wallet2Address,
           WalletStatus.Active,
           20000n,
-          20000n
+          20000n,
         );
         expectedOverview.walletSummaries = [expectedWalletSummary1, expectedWalletSummary2];
         checkEquality(overview, expectedOverview);
@@ -2454,7 +2458,7 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Get participant overview
         const participantOverviews: ParticipantOverview[] = await sharedWalletController.getParticipantOverviews([
-          participant.address
+          participant.address,
         ]);
         const overview: ParticipantOverview = participantOverviews[0];
 
@@ -2464,13 +2468,13 @@ describe("Contract 'SharedWalletController'", () => {
           wallet1Address,
           WalletStatus.Active,
           10000n,
-          10000n
+          10000n,
         );
         const expectedWalletSummary2 = createTestWalletSummary(
           wallet2Address,
           WalletStatus.Active,
           20000n,
-          20000n
+          20000n,
         );
         expectedOverview.walletSummaries = [expectedWalletSummary1, expectedWalletSummary2];
         checkEquality(overview, expectedOverview);
@@ -2557,7 +2561,7 @@ describe("Contract 'SharedWalletController'", () => {
         // Get wallet overviews
         const walletOverviews: WalletOverview[] = await sharedWalletController.getWalletOverviews([
           wallet1Address,
-          wallet2Address
+          wallet2Address,
         ]);
         expect(walletOverviews.length).to.equal(2);
 
@@ -2638,40 +2642,41 @@ describe("Contract 'SharedWalletController'", () => {
           depositAmount,
           WalletStatus.Active,
           depositAmount,
-          ParticipantStatus.Registered
+          ParticipantStatus.Registered,
         );
         checkEquality(overview, expectedOverview);
       });
 
-      it("Returns the correct overview for a specific wallet-participant pair where participant is not registered", async () => {
-        const { sharedWalletController, tokenMock } = await setUpFixture(deployAndConfigureContracts);
-        const walletAddress = sharedWallets[0].address;
-        const participant = participants[0];
-        const participant2 = participants[1];
+      it("Returns the correct overview for a specific wallet-participant pair where participant is not registered",
+        async () => {
+          const { sharedWalletController, tokenMock } = await setUpFixture(deployAndConfigureContracts);
+          const walletAddress = sharedWallets[0].address;
+          const participant = participants[0];
+          const participant2 = participants[1];
 
-        // Create wallet with participant
-        await proveTx(connect(sharedWalletController, admin).createWallet(walletAddress, [participant.address]));
+          // Create wallet with participant
+          await proveTx(connect(sharedWalletController, admin).createWallet(walletAddress, [participant.address]));
 
-        // Make a deposit
-        const depositAmount = 10000n; // Must be divisible by ACCURACY_FACTOR
-        await proveTx(connect(tokenMock, participant).transfer(walletAddress, depositAmount));
+          // Make a deposit
+          const depositAmount = 10000n; // Must be divisible by ACCURACY_FACTOR
+          await proveTx(connect(tokenMock, participant).transfer(walletAddress, depositAmount));
 
-        // Get relationship overview for specific pair
-        const pairs: WalletParticipantPair[] = [{ wallet: walletAddress, participant: participant2.address }];
-        const overviews: RelationshipOverview[] = await sharedWalletController.getRelationshipOverviews(pairs);
-        expect(overviews.length).to.equal(1);
+          // Get relationship overview for specific pair
+          const pairs: WalletParticipantPair[] = [{ wallet: walletAddress, participant: participant2.address }];
+          const overviews: RelationshipOverview[] = await sharedWalletController.getRelationshipOverviews(pairs);
+          expect(overviews.length).to.equal(1);
 
-        const overview: RelationshipOverview = overviews[0];
-        const expectedOverview = createTestRelationshipOverview(
-          walletAddress,
-          participant2.address,
-          0n,
-          WalletStatus.Active,
-          depositAmount,
-          ParticipantStatus.NotRegistered,
-        );
-        checkEquality(overview, expectedOverview);
-      });
+          const overview: RelationshipOverview = overviews[0];
+          const expectedOverview = createTestRelationshipOverview(
+            walletAddress,
+            participant2.address,
+            0n,
+            WalletStatus.Active,
+            depositAmount,
+            ParticipantStatus.NotRegistered,
+          );
+          checkEquality(overview, expectedOverview);
+        });
 
       it("Expands the zero wallet address wildcard correctly", async () => {
         const { sharedWalletController, tokenMock } = await setUpFixture(deployAndConfigureContracts);
@@ -2694,10 +2699,10 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Check both relationships are returned
         const overview1: RelationshipOverview | undefined = overviews.find(
-          (o: RelationshipOverview) => o.wallet === wallet1Address
+          (o: RelationshipOverview) => o.wallet === wallet1Address,
         );
         const overview2: RelationshipOverview | undefined = overviews.find(
-          (o: RelationshipOverview) => o.wallet === wallet2Address
+          (o: RelationshipOverview) => o.wallet === wallet2Address,
         );
 
         expect(overview1).not.to.be.undefined;
@@ -2709,7 +2714,7 @@ describe("Contract 'SharedWalletController'", () => {
           10000n,
           WalletStatus.Active,
           10000n,
-          ParticipantStatus.Registered
+          ParticipantStatus.Registered,
         );
         const expectedOverview2 = createTestRelationshipOverview(
           wallet2Address,
@@ -2717,7 +2722,7 @@ describe("Contract 'SharedWalletController'", () => {
           20000n,
           WalletStatus.Active,
           20000n,
-          ParticipantStatus.Registered
+          ParticipantStatus.Registered,
         );
 
         checkEquality(overview1!, expectedOverview1);
@@ -2734,8 +2739,8 @@ describe("Contract 'SharedWalletController'", () => {
         await proveTx(
           connect(sharedWalletController, admin).createWallet(walletAddress, [
             participant1.address,
-            participant2.address
-          ])
+            participant2.address,
+          ]),
         );
 
         // Make deposits
@@ -2749,10 +2754,10 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Check both relationships are returned
         const overview1: RelationshipOverview | undefined = overviews.find(
-          (o: RelationshipOverview) => o.participant === participant1.address
+          (o: RelationshipOverview) => o.participant === participant1.address,
         );
         const overview2: RelationshipOverview | undefined = overviews.find(
-          (o: RelationshipOverview) => o.participant === participant2.address
+          (o: RelationshipOverview) => o.participant === participant2.address,
         );
 
         expect(overview1).not.to.be.undefined;
@@ -2764,7 +2769,7 @@ describe("Contract 'SharedWalletController'", () => {
           10000n,
           WalletStatus.Active,
           30000n, // Total wallet balance: 10000 + 20000
-          ParticipantStatus.Registered
+          ParticipantStatus.Registered,
         );
         const expectedOverview2 = createTestRelationshipOverview(
           walletAddress,
@@ -2772,7 +2777,7 @@ describe("Contract 'SharedWalletController'", () => {
           20000n,
           WalletStatus.Active,
           30000n, // Total wallet balance: 10000 + 20000
-          ParticipantStatus.Registered
+          ParticipantStatus.Registered,
         );
 
         checkEquality(overview1!, expectedOverview1);
@@ -2790,8 +2795,8 @@ describe("Contract 'SharedWalletController'", () => {
         await proveTx(
           connect(sharedWalletController, admin).createWallet(wallet1Address, [
             participant1.address,
-            participant2.address
-          ])
+            participant2.address,
+          ]),
         );
         await proveTx(connect(sharedWalletController, admin).createWallet(wallet2Address, [participant1.address]));
 
@@ -2803,7 +2808,7 @@ describe("Contract 'SharedWalletController'", () => {
         // Get relationship overview with specific pairs only (wildcard expansion may not work as expected)
         const pairs: WalletParticipantPair[] = [
           { wallet: wallet1Address, participant: participant1.address }, // specific pair
-          { wallet: wallet1Address, participant: participant2.address } // specific pair
+          { wallet: wallet1Address, participant: participant2.address }, // specific pair
         ];
         const overviews: RelationshipOverview[] = await sharedWalletController.getRelationshipOverviews(pairs);
 
@@ -2811,10 +2816,10 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Check first specific pair
         const overview1: RelationshipOverview | undefined = overviews.find(
-          (o: RelationshipOverview) => o.wallet === wallet1Address && o.participant === participant1.address
+          (o: RelationshipOverview) => o.wallet === wallet1Address && o.participant === participant1.address,
         );
         const overview2: RelationshipOverview | undefined = overviews.find(
-          (o: RelationshipOverview) => o.wallet === wallet1Address && o.participant === participant2.address
+          (o: RelationshipOverview) => o.wallet === wallet1Address && o.participant === participant2.address,
         );
 
         expect(overview1).not.to.be.undefined;
@@ -2826,7 +2831,7 @@ describe("Contract 'SharedWalletController'", () => {
           10000n,
           WalletStatus.Active,
           30000n, // Total wallet1 balance: 10000 + 20000
-          ParticipantStatus.Registered
+          ParticipantStatus.Registered,
         );
         const expectedOverview2 = createTestRelationshipOverview(
           wallet1Address,
@@ -2834,7 +2839,7 @@ describe("Contract 'SharedWalletController'", () => {
           20000n,
           WalletStatus.Active,
           30000n, // Total wallet1 balance: 10000 + 20000
-          ParticipantStatus.Registered
+          ParticipantStatus.Registered,
         );
 
         checkEquality(overview1!, expectedOverview1);
@@ -2850,14 +2855,14 @@ describe("Contract 'SharedWalletController'", () => {
         await proveTx(
           connect(sharedWalletController, admin).createWallet(wallet1Address, [
             participants[0].address,
-            participants[1].address
-          ])
+            participants[1].address,
+          ]),
         );
         await proveTx(
           connect(sharedWalletController, admin).createWallet(wallet2Address, [
             participants[0].address,
-            participants[2].address
-          ])
+            participants[2].address,
+          ]),
         );
 
         // Add some balances for verification
@@ -2868,7 +2873,7 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Test wildcard expansion: all wallets for participant[0]
         const participant0Pairs: WalletParticipantPair[] = [
-          { wallet: ADDRESS_ZERO, participant: participants[0].address }
+          { wallet: ADDRESS_ZERO, participant: participants[0].address },
         ];
         const participant0Overviews = await sharedWalletController.getRelationshipOverviews(participant0Pairs);
 
@@ -2877,10 +2882,10 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Verify both wallet relationships are returned
         const wallet1Overview = participant0Overviews.find(
-          (o: RelationshipOverview) => o.wallet === wallet1Address
+          (o: RelationshipOverview) => o.wallet === wallet1Address,
         );
         const wallet2Overview = participant0Overviews.find(
-          (o: RelationshipOverview) => o.wallet === wallet2Address
+          (o: RelationshipOverview) => o.wallet === wallet2Address,
         );
 
         expect(wallet1Overview).not.to.be.undefined;
@@ -2897,10 +2902,10 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Verify both participant relationships are returned
         const p0Overview = wallet1Overviews.find(
-          (o: RelationshipOverview) => o.participant === participants[0].address
+          (o: RelationshipOverview) => o.participant === participants[0].address,
         );
         const p1Overview = wallet1Overviews.find(
-          (o: RelationshipOverview) => o.participant === participants[1].address
+          (o: RelationshipOverview) => o.participant === participants[1].address,
         );
 
         expect(p0Overview).not.to.be.undefined;
@@ -2914,14 +2919,14 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Test wildcard for non-existent participant (should return empty array)
         const nonExistentParticipantPairs: WalletParticipantPair[] = [
-          { wallet: ADDRESS_ZERO, participant: stranger.address }
+          { wallet: ADDRESS_ZERO, participant: stranger.address },
         ];
         const emptyOverviews1 = await sharedWalletController.getRelationshipOverviews(nonExistentParticipantPairs);
         expect(emptyOverviews1.length).to.equal(0);
 
         // Test wildcard for non-existent wallet (should return empty array)
         const nonExistentWalletPairs: WalletParticipantPair[] = [
-          { wallet: stranger.address, participant: ADDRESS_ZERO }
+          { wallet: stranger.address, participant: ADDRESS_ZERO },
         ];
         const emptyOverviews2 = await sharedWalletController.getRelationshipOverviews(nonExistentWalletPairs);
         expect(emptyOverviews2.length).to.equal(0);
@@ -2936,8 +2941,8 @@ describe("Contract 'SharedWalletController'", () => {
         await proveTx(
           connect(sharedWalletController, admin).createWallet(wallet1Address, [
             participants[0].address,
-            participants[1].address
-          ])
+            participants[1].address,
+          ]),
         );
         await proveTx(connect(sharedWalletController, admin).createWallet(wallet2Address, [participants[2].address]));
 
@@ -2949,7 +2954,7 @@ describe("Contract 'SharedWalletController'", () => {
         // Mix of wildcard and specific pairs
         const mixedPairs: WalletParticipantPair[] = [
           { wallet: wallet1Address, participant: ADDRESS_ZERO }, // wildcard: all participants in wallet1
-          { wallet: wallet2Address, participant: participants[2].address } // specific pair
+          { wallet: wallet2Address, participant: participants[2].address }, // specific pair
         ];
 
         const mixedOverviews = await sharedWalletController.getRelationshipOverviews(mixedPairs);
@@ -2959,13 +2964,13 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Verify all expected pairs are present
         const wallet1P0 = mixedOverviews.find(
-          (o: RelationshipOverview) => o.wallet === wallet1Address && o.participant === participants[0].address
+          (o: RelationshipOverview) => o.wallet === wallet1Address && o.participant === participants[0].address,
         );
         const wallet1P1 = mixedOverviews.find(
-          (o: RelationshipOverview) => o.wallet === wallet1Address && o.participant === participants[1].address
+          (o: RelationshipOverview) => o.wallet === wallet1Address && o.participant === participants[1].address,
         );
         const wallet2P2 = mixedOverviews.find(
-          (o: RelationshipOverview) => o.wallet === wallet2Address && o.participant === participants[2].address
+          (o: RelationshipOverview) => o.wallet === wallet2Address && o.participant === participants[2].address,
         );
 
         expect(wallet1P0).not.to.be.undefined;
@@ -2983,7 +2988,7 @@ describe("Contract 'SharedWalletController'", () => {
         const invalidPairs: WalletParticipantPair[] = [{ wallet: ADDRESS_ZERO, participant: ADDRESS_ZERO }];
         await expect(sharedWalletController.getRelationshipOverviews(invalidPairs)).to.be.revertedWithCustomError(
           sharedWalletController,
-          ERROR_NAME_WALLET_AND_PARTICIPANT_ADDRESSES_BOTH_ZERO
+          ERROR_NAME_WALLET_AND_PARTICIPANT_ADDRESSES_BOTH_ZERO,
         );
       });
     });
@@ -2997,13 +3002,13 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Create first wallet
         await proveTx(
-          connect(sharedWalletController, admin).createWallet(sharedWallets[0].address, [participants[0].address])
+          connect(sharedWalletController, admin).createWallet(sharedWallets[0].address, [participants[0].address]),
         );
         expect(await sharedWalletController.getWalletCount()).to.equal(1);
 
         // Create second wallet
         await proveTx(
-          connect(sharedWalletController, admin).createWallet(sharedWallets[1].address, [participants[1].address])
+          connect(sharedWalletController, admin).createWallet(sharedWallets[1].address, [participants[1].address]),
         );
         expect(await sharedWalletController.getWalletCount()).to.equal(2);
       });
@@ -3116,8 +3121,8 @@ describe("Contract 'SharedWalletController'", () => {
       await proveTx(
         connect(sharedWalletController, admin).addParticipants(walletAddress, [
           participants[1].address,
-          participants[2].address
-        ])
+          participants[2].address,
+        ]),
       );
 
       // Verify participants added
@@ -3134,13 +3139,13 @@ describe("Contract 'SharedWalletController'", () => {
 
       // Verify balances
       expect(await sharedWalletController.getParticipantBalance(walletAddress, participants[0].address)).to.equal(
-        10000n
+        10000n,
       );
       expect(await sharedWalletController.getParticipantBalance(walletAddress, participants[1].address)).to.equal(
-        20000n
+        20000n,
       );
       expect(await sharedWalletController.getParticipantBalance(walletAddress, participants[2].address)).to.equal(
-        10000n
+        10000n,
       );
       expect(await sharedWalletController.getAggregatedBalance()).to.equal(40000n);
 
@@ -3156,13 +3161,13 @@ describe("Contract 'SharedWalletController'", () => {
       // Step 6: Remove participants (clear balances first)
       const participant2Balance: bigint = await sharedWalletController.getParticipantBalance(
         walletAddress,
-        participants[2].address
+        participants[2].address,
       );
       if (participant2Balance > 0) {
         await proveTx(connect(tokenMock, walletSigner).transfer(participants[2].address, participant2Balance));
       }
       await proveTx(
-        connect(sharedWalletController, admin).removeParticipants(walletAddress, [participants[2].address])
+        connect(sharedWalletController, admin).removeParticipants(walletAddress, [participants[2].address]),
       );
 
       // Verify participant removed
@@ -3173,11 +3178,11 @@ describe("Contract 'SharedWalletController'", () => {
       // Step 7: Clear all remaining balances for suspension
       const participant0Balance: bigint = await sharedWalletController.getParticipantBalance(
         walletAddress,
-        participants[0].address
+        participants[0].address,
       );
       const participant1Balance: bigint = await sharedWalletController.getParticipantBalance(
         walletAddress,
-        participants[1].address
+        participants[1].address,
       );
 
       if (participant0Balance > 0) {
@@ -3194,7 +3199,7 @@ describe("Contract 'SharedWalletController'", () => {
       const finalOverviews: WalletOverview[] = await sharedWalletController.getWalletOverviews([walletAddress]);
       const expectedSuspendedOverview = createTestWalletOverview(walletAddress, WalletStatus.Suspended, 0n);
       const remainingParticipantSummaries = [participants[0].address, participants[1].address].map(addr =>
-        createTestParticipantSummary(addr, 0n)
+        createTestParticipantSummary(addr, 0n),
       );
       expectedSuspendedOverview.participantSummaries = remainingParticipantSummaries;
       checkEquality(finalOverviews[0], expectedSuspendedOverview);
@@ -3203,7 +3208,7 @@ describe("Contract 'SharedWalletController'", () => {
       expect(finalOverviews[0].participantSummaries.length).to.equal(2);
       expect(await sharedWalletController.getWalletParticipants(walletAddress)).to.deep.equal([
         participants[0].address,
-        participants[1].address
+        participants[1].address,
       ]);
       expect(await sharedWalletController.getWalletCount()).to.equal(1);
     });
@@ -3222,15 +3227,15 @@ describe("Contract 'SharedWalletController'", () => {
         connect(sharedWalletController, admin).createWallet(wallet1Address, [
           participants[0].address,
           participants[1].address,
-          participants[2].address
-        ])
+          participants[2].address,
+        ]),
       );
       await proveTx(
         connect(sharedWalletController, admin).createWallet(wallet2Address, [
           participants[1].address,
           participants[2].address,
-          additionalParticipant
-        ])
+          additionalParticipant,
+        ]),
       );
 
       // Verify overlapping participants are in both wallets
@@ -3259,24 +3264,24 @@ describe("Contract 'SharedWalletController'", () => {
 
       // Verify independent balance tracking
       expect(await sharedWalletController.getParticipantBalance(wallet1Address, participants[1].address)).to.equal(
-        10000n
+        10000n,
       );
       expect(await sharedWalletController.getParticipantBalance(wallet2Address, participants[1].address)).to.equal(
-        10000n
+        10000n,
       );
       expect(await sharedWalletController.getParticipantBalance(wallet1Address, participants[2].address)).to.equal(
-        10000n
+        10000n,
       );
       expect(await sharedWalletController.getParticipantBalance(wallet2Address, participants[2].address)).to.equal(
-        10000n
+        10000n,
       );
 
       // Check participant overviews show total balances across wallets
       const participant1Overviews: ParticipantOverview[] = await sharedWalletController.getParticipantOverviews([
-        participants[1].address
+        participants[1].address,
       ]);
       const participant2Overviews: ParticipantOverview[] = await sharedWalletController.getParticipantOverviews([
-        participants[2].address
+        participants[2].address,
       ]);
 
       expect(participant1Overviews[0].totalBalance).to.equal(20000n); // 10000 + 10000
@@ -3287,15 +3292,15 @@ describe("Contract 'SharedWalletController'", () => {
       const wallet1Signer = await ethers.getImpersonatedSigner(wallet1Address);
       const p1BalanceW1: bigint = await sharedWalletController.getParticipantBalance(
         wallet1Address,
-        participants[0].address
+        participants[0].address,
       );
       const p2BalanceW1: bigint = await sharedWalletController.getParticipantBalance(
         wallet1Address,
-        participants[1].address
+        participants[1].address,
       );
       const p3BalanceW1: bigint = await sharedWalletController.getParticipantBalance(
         wallet1Address,
-        participants[2].address
+        participants[2].address,
       );
 
       if (p1BalanceW1 > 0) {
@@ -3319,12 +3324,12 @@ describe("Contract 'SharedWalletController'", () => {
       const expectedParticipantSummaries1 = [
         createTestParticipantSummary(participants[0].address, 0n),
         createTestParticipantSummary(participants[1].address, 0n),
-        createTestParticipantSummary(participants[2].address, 0n)
+        createTestParticipantSummary(participants[2].address, 0n),
       ];
       const expectedParticipantSummaries2 = [
         createTestParticipantSummary(participants[1].address, 10000n),
         createTestParticipantSummary(participants[2].address, 10000n),
-        createTestParticipantSummary(additionalParticipant, 0n)
+        createTestParticipantSummary(additionalParticipant, 0n),
       ];
       expectedSuspendedOverview.participantSummaries = expectedParticipantSummaries1;
       expectedActiveOverview.participantSummaries = expectedParticipantSummaries2;
@@ -3343,7 +3348,7 @@ describe("Contract 'SharedWalletController'", () => {
       // Remove overlapping participant from one wallet only
       const participant1BalanceWallet1: bigint = await sharedWalletController.getParticipantBalance(
         wallet1Address,
-        participants[1].address
+        participants[1].address,
       );
       if (participant1BalanceWallet1 > 0) {
         const wallet1Signer = await ethers.getImpersonatedSigner(wallet1Address);
@@ -3351,7 +3356,7 @@ describe("Contract 'SharedWalletController'", () => {
       }
 
       await proveTx(
-        connect(sharedWalletController, admin).removeParticipants(wallet1Address, [participants[1].address])
+        connect(sharedWalletController, admin).removeParticipants(wallet1Address, [participants[1].address]),
       );
 
       // Verify participant is removed from wallet 1 but still in wallet 2
@@ -3360,7 +3365,7 @@ describe("Contract 'SharedWalletController'", () => {
 
       // Verify participant wallet list updated
       const updatedParticipant1Wallets: string[] = await sharedWalletController.getParticipantWallets(
-        participants[1].address
+        participants[1].address,
       );
       expect(updatedParticipant1Wallets.length).to.equal(1);
       expect(updatedParticipant1Wallets[0]).to.equal(wallet2Address);
@@ -3374,8 +3379,8 @@ describe("Contract 'SharedWalletController'", () => {
       await proveTx(
         connect(sharedWalletController, admin).createWallet(walletAddress, [
           participants[0].address,
-          participants[1].address
-        ])
+          participants[1].address,
+        ]),
       );
 
       // Verify initial active state
@@ -3383,7 +3388,7 @@ describe("Contract 'SharedWalletController'", () => {
       const expectedActiveOverview = createTestWalletOverview(walletAddress, WalletStatus.Active, 0n);
       const expectedParticipantSummaries = [
         createTestParticipantSummary(participants[0].address, 0n),
-        createTestParticipantSummary(participants[1].address, 0n)
+        createTestParticipantSummary(participants[1].address, 0n),
       ];
       expectedActiveOverview.participantSummaries = expectedParticipantSummaries;
       checkEquality(walletOverviews[0], expectedActiveOverview);
@@ -3400,11 +3405,11 @@ describe("Contract 'SharedWalletController'", () => {
       expect(await sharedWalletController.getAggregatedBalance()).to.be.greaterThan(0);
       const participant0Balance: bigint = await sharedWalletController.getParticipantBalance(
         walletAddress,
-        participants[0].address
+        participants[0].address,
       );
       const participant1Balance: bigint = await sharedWalletController.getParticipantBalance(
         walletAddress,
-        participants[1].address
+        participants[1].address,
       );
       expect(participant0Balance).to.be.greaterThan(0);
       expect(participant1Balance).to.be.greaterThan(0);
@@ -3429,13 +3434,13 @@ describe("Contract 'SharedWalletController'", () => {
 
       // Should be able to remove participants from suspended wallet
       await proveTx(
-        connect(sharedWalletController, admin).removeParticipants(walletAddress, [participants[0].address])
+        connect(sharedWalletController, admin).removeParticipants(walletAddress, [participants[0].address]),
       );
 
       // Should NOT be able to receive transfers while suspended
       await expect(connect(tokenMock, stranger).transfer(walletAddress, 10000n)).to.be.revertedWithCustomError(
         sharedWalletController,
-        ERROR_NAME_WALLET_STATUS_INCOMPATIBLE
+        ERROR_NAME_WALLET_STATUS_INCOMPATIBLE,
       );
 
       // Phase 4: Resume with remaining participants
@@ -3448,7 +3453,7 @@ describe("Contract 'SharedWalletController'", () => {
       walletOverviews = await sharedWalletController.getWalletOverviews([walletAddress]);
       const expectedResumedOverview = createTestWalletOverview(walletAddress, WalletStatus.Active, 0n);
       const remainingParticipantSummaries = remainingParticipants.map(addr =>
-        createTestParticipantSummary(addr, 0n)
+        createTestParticipantSummary(addr, 0n),
       );
       expectedResumedOverview.participantSummaries = remainingParticipantSummaries;
       checkEquality(walletOverviews[0], expectedResumedOverview);
@@ -3456,7 +3461,7 @@ describe("Contract 'SharedWalletController'", () => {
       // Test operations work again after resume
       await proveTx(connect(tokenMock, participants[1]).transfer(walletAddress, 10000n));
       expect(await sharedWalletController.getParticipantBalance(walletAddress, participants[1].address)).to.equal(
-        10000n
+        10000n,
       );
 
       // Phase 5: Clear balances and prepare for final suspension
@@ -3476,7 +3481,7 @@ describe("Contract 'SharedWalletController'", () => {
       walletOverviews = await sharedWalletController.getWalletOverviews([walletAddress]);
       const expectedFinalSuspendedOverview = createTestWalletOverview(walletAddress, WalletStatus.Suspended, 0n);
       const finalParticipantSummaries = finalParticipants.map(addr =>
-        createTestParticipantSummary(addr, 0n)
+        createTestParticipantSummary(addr, 0n),
       );
       expectedFinalSuspendedOverview.participantSummaries = finalParticipantSummaries;
       checkEquality(walletOverviews[0], expectedFinalSuspendedOverview);
@@ -3497,7 +3502,7 @@ describe("Contract 'SharedWalletController'", () => {
       // Verify operations on suspended wallet are still restricted
       await expect(connect(tokenMock, participants[1]).transfer(walletAddress, 10000n)).to.be.revertedWithCustomError(
         sharedWalletController,
-        ERROR_NAME_WALLET_STATUS_INCOMPATIBLE
+        ERROR_NAME_WALLET_STATUS_INCOMPATIBLE,
       );
     });
   });
@@ -3566,7 +3571,7 @@ describe("Contract 'SharedWalletController'", () => {
         // Verify balance
         const participantBalance = await sharedWalletController.getParticipantBalance(
           walletAddress,
-          participants[0].address
+          participants[0].address,
         );
         expect(participantBalance).to.equal(minAmount);
       });
@@ -3580,8 +3585,8 @@ describe("Contract 'SharedWalletController'", () => {
           connect(sharedWalletController, admin).createWallet(walletAddress, [
             participants[0].address,
             participants[1].address,
-            participants[2].address
-          ])
+            participants[2].address,
+          ]),
         );
 
         // Give participants different balances to test remainder distribution (must be divisible by ACCURACY_FACTOR)
@@ -3620,7 +3625,7 @@ describe("Contract 'SharedWalletController'", () => {
         // Transfer zero amount (should be ignored by hook)
         const initialBalance = await sharedWalletController.getParticipantBalance(
           walletAddress,
-          participants[0].address
+          participants[0].address,
         );
 
         await proveTx(connect(tokenMock, participants[0]).transfer(walletAddress, 0));
@@ -3638,13 +3643,13 @@ describe("Contract 'SharedWalletController'", () => {
         await proveTx(
           connect(sharedWalletController, admin).createWallet(walletAddress, [
             participants[0].address,
-            participants[1].address
-          ])
+            participants[1].address,
+          ]),
         );
 
         // Remove participant with zero balance (should work)
         await expect(
-          connect(sharedWalletController, admin).removeParticipants(walletAddress, [participants[0].address])
+          connect(sharedWalletController, admin).removeParticipants(walletAddress, [participants[0].address]),
         ).not.to.be.reverted;
 
         // Verify participant was removed
@@ -3687,8 +3692,8 @@ describe("Contract 'SharedWalletController'", () => {
         await proveTx(
           connect(sharedWalletController, admin).createWallet(wallet1Address, [
             participants[0].address,
-            participants[1].address
-          ])
+            participants[1].address,
+          ]),
         );
         await proveTx(connect(sharedWalletController, admin).createWallet(wallet2Address, [participants[0].address]));
 
@@ -3728,8 +3733,8 @@ describe("Contract 'SharedWalletController'", () => {
           connect(sharedWalletController, admin).createWallet(walletAddress, [
             participants[0].address,
             participants[1].address,
-            participants[2].address
-          ])
+            participants[2].address,
+          ]),
         );
 
         // Add various balances
@@ -3742,13 +3747,13 @@ describe("Contract 'SharedWalletController'", () => {
         const participantOverviews = await sharedWalletController.getParticipantOverviews([
           participants[0].address,
           participants[1].address,
-          participants[2].address
+          participants[2].address,
         ]);
 
         // Verify wallet balance equals sum of participant balances
         const totalFromParticipantOverviews = participantOverviews.reduce(
           (sum: bigint, overview: ParticipantOverview) => sum + overview.totalBalance,
-          0n
+          0n,
         );
         expect(walletOverview.walletBalance).to.equal(totalFromParticipantOverviews);
 
@@ -3756,7 +3761,7 @@ describe("Contract 'SharedWalletController'", () => {
         for (let i = 0; i < 3; i++) {
           const directBalance = await sharedWalletController.getParticipantBalance(
             walletAddress,
-            participants[i].address
+            participants[i].address,
           );
           const overviewBalance = participantOverviews[i].totalBalance;
           const summaryBalance = walletOverview.participantSummaries[i].participantBalance;
@@ -3780,9 +3785,9 @@ describe("Contract 'SharedWalletController'", () => {
           sharedWalletController.getRelationshipOverviews([
             {
               wallet: ADDRESS_ZERO,
-              participant: ADDRESS_ZERO
-            }
-          ])
+              participant: ADDRESS_ZERO,
+            },
+          ]),
         ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_WALLET_AND_PARTICIPANT_ADDRESSES_BOTH_ZERO);
       });
 
@@ -3794,8 +3799,8 @@ describe("Contract 'SharedWalletController'", () => {
         const result = await sharedWalletController.getRelationshipOverviews([
           {
             wallet: ADDRESS_ZERO,
-            participant: nonExistentParticipant
-          }
+            participant: nonExistentParticipant,
+          },
         ]);
 
         expect(result.length).to.equal(0); // Should return empty array
@@ -3805,8 +3810,8 @@ describe("Contract 'SharedWalletController'", () => {
         const result2 = await sharedWalletController.getRelationshipOverviews([
           {
             wallet: nonExistentWallet,
-            participant: ADDRESS_ZERO
-          }
+            participant: ADDRESS_ZERO,
+          },
         ]);
 
         expect(result2.length).to.equal(0); // Should return empty array
