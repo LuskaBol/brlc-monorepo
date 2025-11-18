@@ -1,3 +1,50 @@
+## Main Changes
+
+- Replaced ERC20 approval-based spending model with recipient limits and allowlist system.
+  - Breaking change: Removed `approve()` and `clearAllApprovals()` functions.
+  - Breaking change: Removed `approvedSpenders()` view function.
+  - Breaking change: Removed `MANAGER_ROLE` — both `withdraw()` and `withdrawTo()` now require `WITHDRAWER_ROLE`.
+
+- Added recipient limits enforcement with configurable policy:
+  - `setRecipientLimit(address recipient, uint256 limit)` — Configure withdrawal limits per recipient (owner-only).
+  - `setRecipientLimitPolicy(RecipientLimitPolicy policy)` — Set the enforcement policy (owner-only).
+  - Introduced `RecipientLimitPolicy` enum with two values:
+    - `Disabled` (0) — No limit checks performed. Any address can receive funds.
+    - `EnforceAll` (1) — Full enforcement. Only allowlisted recipients can receive funds with limit checks.
+
+- Updated events to track recipient limit changes:
+  - `UnderlyingTokenSet(address indexed token)` — Emitted when the underlying token is set during initialization.
+  - `RecipientLimitUpdated(address indexed recipient, uint256 oldLimit, uint256 newLimit)` — Emitted when a recipient's limit is updated.
+  - `RecipientLimitPolicyUpdated(RecipientLimitPolicy indexed policy)` — Emitted when the enforcement policy is changed.
+
+- Added view functions to inspect recipient limits:
+  - `getRecipientLimits() → RecipientLimitView[]` — Returns all configured recipients and their limits as an array of structs.
+  - `recipientLimitPolicy() → RecipientLimitPolicy` — Returns the current enforcement policy.
+
+- Updated custom errors:
+  - Added `Treasury_InsufficientRecipientLimit(address recipient, uint256 requested, uint256 available)` — Prevents withdrawals exceeding recipient limits.
+  - Replaced `Treasury_SpenderAddressZero` with `Treasury_RecipientAddressZero`.
+
+- Storage changes:
+  - Renamed storage field `token` to `underlyingToken`.
+  - Replaced `EnumerableSet.AddressSet approvedSpenders` with `EnumerableMap.AddressToUintMap recipientLimits`.
+  - Added `recipientLimitPolicy` field to storage for enforcement policy tracking.
+
+## Recipient Limits Behavior
+
+### When Policy is EnforceAll (default)
+- Only recipients with configured limits can receive funds (allowlist enforcement).
+- Recipients not in the map are treated as having a 0 limit and cannot receive funds.
+- Each withdrawal decrements the recipient's limit.
+- Recipients remain in the map even when their limit reaches 0 after withdrawals.
+- Setting limit to 0 explicitly removes the recipient from the allowed list.
+- Recipients with `type(uint256).max` have unlimited withdrawals (limit is not decremented).
+
+### When Policy is Disabled
+- Withdrawals can be made to any address without checks.
+- Recipient limits are NOT decremented.
+- Configured limits are preserved and can be re-enforced by switching policy back to `EnforceAll`.
+
 # 1.0.0
 
 ## Overview
@@ -47,7 +94,7 @@ The Treasury contract is a secure, upgradeable vault for a single ERC20 token wi
 
 #### `underlyingToken()`
 - **Purpose**: Returns the address of the managed ERC20 token
-- **Access**: Public view  
+- **Access**: Public view
 - **Returns**: `address` - Token contract address
 
 ## Events
@@ -57,7 +104,7 @@ The Treasury contract is a secure, upgradeable vault for a single ERC20 token wi
 - **Purpose**: Logs token withdrawal operations
 - **Parameters**:
   - `to`: Address that received the tokens (indexed)
-  - `withdrawer`: Address that initiated the withdrawal (indexed)  
+  - `withdrawer`: Address that initiated the withdrawal (indexed)
   - `amount`: Amount of tokens withdrawn
 
 ## Roles
@@ -70,7 +117,7 @@ The Treasury contract is a secure, upgradeable vault for a single ERC20 token wi
 - **Admin Role**: GRANTOR_ROLE
 - **Intended Recipients**: Smart contracts that need programmatic access to treasury funds
 
-#### `MANAGER_ROLE`  
+#### `MANAGER_ROLE`
 - **Purpose**: Allows withdrawing tokens to any specified address
 - **Functions**: `withdrawTo()`
 - **Admin Role**: GRANTOR_ROLE

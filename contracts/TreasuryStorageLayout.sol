@@ -2,14 +2,15 @@
 
 pragma solidity ^0.8.30;
 
-import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import { EnumerableMap } from "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
+import { ITreasuryTypes } from "./interfaces/ITreasury.sol";
 
 /**
  * @title TreasuryStorageLayout contract
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev Defines the storage layout for the Treasury smart contract.
  */
-abstract contract TreasuryStorageLayout {
+abstract contract TreasuryStorageLayout is ITreasuryTypes {
     // ------------------ Storage layout -------------------------- //
 
     /*
@@ -24,18 +25,20 @@ abstract contract TreasuryStorageLayout {
      *
      * Fields:
      *
-     * - token -------------- The address of the underlying ERC20 token.
-     * - approvedSpenders --- The EnumerableSet of approved spender addresses.
+     * - underlyingToken ------- The address of the underlying ERC20 token.
+     * - recipientLimitPolicy -- The active policy for recipient limit enforcement.
+     * - recipientLimits ------- The EnumerableMap of recipient addresses to their withdrawal limits.
      *
      * @custom:storage-location erc7201:cloudwalk.storage.Treasury
      */
     struct TreasuryStorage {
         // Slot 1
-        address token;
-        // uint96 __reserved1; // Reserved until the end of the storage slot
+        address underlyingToken;
+        RecipientLimitPolicy recipientLimitPolicy;
+        // uint88 __reserved1; // Reserved until the end of the storage slot
 
         // Slot 2, 3
-        EnumerableSet.AddressSet approvedSpenders;
+        EnumerableMap.AddressToUintMap recipientLimits;
     }
 
     // ------------------ Internal functions ---------------------- //

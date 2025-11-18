@@ -4,7 +4,7 @@ pragma solidity 0.8.30;
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import { EnumerableMap } from "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
 
 import { AccessControlExtUpgradeable } from "./base/AccessControlExtUpgradeable.sol";
 import { PausableExtUpgradeable } from "./base/PausableExtUpgradeable.sol";
@@ -32,15 +32,12 @@ contract Treasury is
     // ------------------ Types ----------------------------------- //
 
     using SafeERC20 for IERC20;
-    using EnumerableSet for EnumerableSet.AddressSet;
+    using EnumerableMap for EnumerableMap.AddressToUintMap;
 
     // ------------------ Constants ------------------------------- //
 
     /// @dev The role of a withdrawer that is allowed to withdraw tokens from the treasury.
     bytes32 public constant WITHDRAWER_ROLE = keccak256("WITHDRAWER_ROLE");
-
-    /// @dev The role of a manager that is allowed to withdraw tokens to any address.
-    bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
 
     // ------------------ Constructor ----------------------------- //
 
@@ -75,9 +72,13 @@ contract Treasury is
         }
 
         TreasuryStorage storage $ = _getTreasuryStorage();
-        $.token = tokenAddress;
 
-        _setRoleAdmin(MANAGER_ROLE, GRANTOR_ROLE);
+        $.underlyingToken = tokenAddress;
+        emit UnderlyingTokenSet(tokenAddress);
+
+        $.recipientLimitPolicy = RecipientLimitPolicy.EnforceAll;
+        emit RecipientLimitPolicyUpdated(RecipientLimitPolicy.EnforceAll);
+
         _setRoleAdmin(WITHDRAWER_ROLE, GRANTOR_ROLE);
         _grantRole(OWNER_ROLE, _msgSender());
     }
@@ -102,9 +103,9 @@ contract Treasury is
      * @dev Requirements:
      *
      * - The contract must not be paused.
-     * - The caller must have the {MANAGER_ROLE} role.
+     * - The caller must have the {WITHDRAWER_ROLE} role.
      */
-    function withdrawTo(address to, uint256 amount) external whenNotPaused onlyRole(MANAGER_ROLE) {
+    function withdrawTo(address to, uint256 amount) external whenNotPaused onlyRole(WITHDRAWER_ROLE) {
         _withdraw(to, _msgSender(), amount);
     }
 
@@ -114,16 +115,24 @@ contract Treasury is
      * @dev Requirements:
      *
      * - The caller must have the {OWNER_ROLE} role.
-     * - The spender address must not be zero.
+     * - The recipient address must not be zero.
      */
-    function approve(address spender, uint256 amount) external onlyRole(OWNER_ROLE) {
-        if (spender == address(0)) {
-            revert Treasury_SpenderAddressZero();
+    function setRecipientLimit(address recipient, uint256 limit) external onlyRole(OWNER_ROLE) {
+        if (recipient == address(0)) {
+            revert Treasury_RecipientAddressZero();
         }
 
         TreasuryStorage storage $ = _getTreasuryStorage();
-        IERC20($.token).approve(spender, amount);
-        $.approvedSpenders.add(spender);
+        (, uint256 oldLimit) = $.recipientLimits.tryGet(recipient);
+
+        // Setting limit to 0 removes the recipient from the allowed list
+        if (limit == 0) {
+            $.recipientLimits.remove(recipient);
+        } else {
+            $.recipientLimits.set(recipient, limit);
+        }
+
+        emit RecipientLimitUpdated(recipient, oldLimit, limit);
     }
 
     /**
@@ -132,30 +141,41 @@ contract Treasury is
      * @dev Requirements:
      *
      * - The caller must have the {OWNER_ROLE} role.
+     * - The provided policy must differ from the current one.
      */
-    function clearAllApprovals() external onlyRole(OWNER_ROLE) {
+    function setRecipientLimitPolicy(RecipientLimitPolicy policy) external onlyRole(OWNER_ROLE) {
         TreasuryStorage storage $ = _getTreasuryStorage();
-        uint256 length = $.approvedSpenders.length();
 
-        // Iterate backwards to avoid index issues when removing elements
-        for (uint256 i = length; i > 0; i--) {
-            address spender = $.approvedSpenders.at(i - 1);
-            IERC20($.token).approve(spender, 0);
-            $.approvedSpenders.remove(spender);
+        if ($.recipientLimitPolicy == policy) {
+            revert Treasury_RecipientLimitPolicyAlreadySet();
         }
+
+        $.recipientLimitPolicy = policy;
+        emit RecipientLimitPolicyUpdated(policy);
     }
 
     // ------------------ View functions -------------------------- //
 
     /// @inheritdoc ITreasuryPrimary
-    function approvedSpenders() external view returns (address[] memory) {
+    function getRecipientLimits() external view returns (RecipientLimitView[] memory recipientLimits) {
         TreasuryStorage storage $ = _getTreasuryStorage();
-        return $.approvedSpenders.values();
+        uint256 length = $.recipientLimits.length();
+        recipientLimits = new RecipientLimitView[](length);
+
+        for (uint256 i = 0; i < length; i++) {
+            (address recipient, uint256 limit) = $.recipientLimits.at(i);
+            recipientLimits[i] = RecipientLimitView({ recipient: recipient, limit: limit });
+        }
     }
 
     /// @inheritdoc ITreasuryPrimary
-    function underlyingToken() external view returns (address) {
-        return _getTreasuryStorage().token;
+    function recipientLimitPolicy() external view returns (RecipientLimitPolicy policy) {
+        policy = _getTreasuryStorage().recipientLimitPolicy;
+    }
+
+    /// @inheritdoc ITreasuryPrimary
+    function underlyingToken() external view returns (address token) {
+        token = _getTreasuryStorage().underlyingToken;
     }
 
     // ------------------ Pure functions -------------------------- //
@@ -166,9 +186,46 @@ contract Treasury is
     // ------------------ Internal functions ---------------------- //
 
     function _withdraw(address to, address withdrawer, uint256 amount) internal {
+        if (to == address(0)) {
+            revert Treasury_RecipientAddressZero();
+        }
+
         TreasuryStorage storage $ = _getTreasuryStorage();
 
-        IERC20($.token).safeTransfer(to, amount);
+        if ($.recipientLimitPolicy == RecipientLimitPolicy.EnforceAll) {
+            _processRecipientLimit($, to, amount);
+        }
+        // Disabled: no checks performed at all
+
+        IERC20($.underlyingToken).safeTransfer(to, amount);
         emit Withdrawal(to, withdrawer, amount);
+    }
+
+    /**
+     * @dev Processes and enforces recipient limit for withdrawal operations.
+     *
+     * @param $ The treasury storage pointer.
+     * @param recipient The address of the withdrawal recipient.
+     * @param amount The withdrawal amount to check against the recipient's limit.
+     */
+    function _processRecipientLimit(TreasuryStorage storage $, address recipient, uint256 amount) internal {
+        // Get current limit for recipient (returns 0 if recipient not in map)
+        // Allowlist enforcement: only explicitly configured recipients can receive funds
+        (, uint256 currentLimit) = $.recipientLimits.tryGet(recipient);
+
+        // Recipients with type(uint256).max have unlimited withdrawals
+        if (currentLimit != type(uint256).max) {
+            if (currentLimit < amount) {
+                revert Treasury_InsufficientRecipientLimit(recipient, amount, currentLimit);
+            }
+
+            // Decrement the limit
+            // Recipients remain in the map even when limit reaches 0 (not auto-removed)
+            uint256 newLimit;
+            unchecked {
+                newLimit = currentLimit - amount;
+            }
+            $.recipientLimits.set(recipient, newLimit);
+        }
     }
 }
