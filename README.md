@@ -6,8 +6,7 @@
 
 [![codecov](https://codecov.io/gh/cloudwalk/brlc-shared-wallet-controller/branch/main/graph/badge.svg)](https://codecov.io/gh/cloudwalk/brlc-shared-wallet-controller)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-![example branch parameter](https://github.com/cloudwalk/brlc-shared-wallet-controller/actions/workflows/build.yml/badge.svg?branch=main)
-![example branch parameter](https://github.com/cloudwalk/brlc-shared-wallet-controller/actions/workflows/test.yml/badge.svg?branch=main)
+[![Branch Workflow](https://github.com/cloudwalk/brlc-shared-wallet-controller/actions/workflows/branch.yml/badge.svg?branch=main)](https://github.com/cloudwalk/brlc-shared-wallet-controller/actions/workflows/branch.yml)
 
 This repository contains SharedWalletController smart contracts.
 The SharedWalletController smart contract manages shared wallets and integrates them with ERC20 tokens through hooks.
