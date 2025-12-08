@@ -514,11 +514,11 @@ interface ICardPaymentProcessorErrors is ICardPaymentProcessorTypes {
     /// @dev The zero payer address has been passed as a function argument.
     error AccountZeroAddress();
 
-    /// @dev The cash-out account is not configured.
-    error CashOutAccountNotConfigured();
-
     /// @dev A new cash-out account is the same as the previously set one.
     error CashOutAccountUnchanged();
+
+    /// @dev The zero cash-out account address has been passed as a function argument.
+    error CashOutAccountZeroAddress();
 
     /// @dev The provided cashback rate exceeds the allowed maximum.
     error CashbackRateExcess();

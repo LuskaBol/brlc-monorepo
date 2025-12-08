@@ -1,3 +1,8 @@
+## Minor changes
+- Set the cashout address in the initializer and prohibit setting it to the zero address, so the cashout address is always non-zero.
+- Updated the Solidity version of contracts to 0.8.28 (latest supported by Hardhat 2).
+- Updated the EVM target to Cancun.
+
 # 2.4.0
 
 ## Main Changes

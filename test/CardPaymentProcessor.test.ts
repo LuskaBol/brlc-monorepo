@@ -1534,8 +1534,8 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
   const ERROR_NAME_ACCOUNT_ZERO_ADDRESS = "AccountZeroAddress";
   const ERROR_NAME_CASHBACK_RATE_EXCESS = "CashbackRateExcess";
   const ERROR_NAME_DEFAULT_CASHBACK_RATE_UNCHANGED = "DefaultCashbackRateUnchanged";
-  const ERROR_NAME_CASH_OUT_ACCOUNT_NOT_CONFIGURED = "CashOutAccountNotConfigured";
   const ERROR_NAME_CASH_OUT_ACCOUNT_UNCHANGED = "CashOutAccountUnchanged";
+  const ERROR_NAME_CASH_OUT_ACCOUNT_ZERO_ADDRESS = "CashOutAccountZeroAddress";
   const ERROR_NAME_IMPLEMENTATION_ADDRESS_INVALID = "ImplementationAddressInvalid";
   const ERROR_NAME_INAPPROPRIATE_CONFIRMATION_AMOUNT = "InappropriateConfirmationAmount";
   const ERROR_NAME_INAPPROPRIATE_REFUNDING_AMOUNT = "InappropriateRefundingAmount";
@@ -1602,7 +1602,10 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
     const { tokenMock } = await deployTokenMock();
 
     let cardPaymentProcessor =
-      await upgrades.deployProxy(cardPaymentProcessorFactory, [getAddress(tokenMock)]) as Contract;
+      await upgrades.deployProxy(
+        cardPaymentProcessorFactory,
+        [getAddress(tokenMock), cashOutAccount.address],
+      ) as Contract;
     await cardPaymentProcessor.waitForDeployment();
     cardPaymentProcessor = connect(cardPaymentProcessor, deployer); // Explicitly specifying the initial account
 
@@ -1634,7 +1637,6 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
     await proveTx(cashbackController.setCashbackTreasury(cashbackTreasury.address));
     await proveTx(cardPaymentProcessor.setDefaultCashbackRate(CASHBACK_RATE_DEFAULT));
 
-    await proveTx(cardPaymentProcessor.setCashOutAccount(cashOutAccount.address));
     await proveTx(connect(tokenMock, cashOutAccount).approve(getAddress(cardPaymentProcessor), MAX_UINT256));
 
     await proveTx(tokenMock.mint(cashbackTreasury.address, MAX_INT256));
@@ -1731,7 +1733,7 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
       expect(await cardPaymentProcessor.MAX_CASHBACK_RATE()).to.equal(CASHBACK_RATE_MAX);
 
       // The cash-out account
-      expect(await cardPaymentProcessor.cashOutAccount()).to.equal(ZERO_ADDRESS);
+      expect(await cardPaymentProcessor.cashOutAccount()).to.equal(cashOutAccount.address);
 
       // Additional constrains
       expect(await cardPaymentProcessor.MAX_CASHBACK_RATE()).to.be.lessThanOrEqual(0xFFFF);
@@ -1739,7 +1741,7 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
 
     it("Is reverted if it is called a second time", async () => {
       const { cardPaymentProcessor, tokenMock } = await setUpFixture(deployTokenMockAndCardPaymentProcessor);
-      await expect(cardPaymentProcessor.initialize(getAddress(tokenMock)))
+      await expect(cardPaymentProcessor.initialize(getAddress(tokenMock), cashOutAccount.address))
         .to.be.revertedWithCustomError(cardPaymentProcessor, ERROR_NAME_INVALID_INITIALIZATION);
     });
 
@@ -1747,7 +1749,7 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
       const anotherCardPaymentProcessor =
         await upgrades.deployProxy(cardPaymentProcessorFactory, [], { initializer: false }) as Contract;
 
-      await expect(anotherCardPaymentProcessor.initialize(ZERO_ADDRESS))
+      await expect(anotherCardPaymentProcessor.initialize(ZERO_ADDRESS, cashOutAccount.address))
         .to.be.revertedWithCustomError(anotherCardPaymentProcessor, ERROR_NAME_TOKEN_ZERO_ADDRESS);
     });
 
@@ -1756,8 +1758,17 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
       const cashierImplementation = await cardPaymentProcessorFactory.deploy() as Contract;
       await cashierImplementation.waitForDeployment();
 
-      await expect(cashierImplementation.initialize(tokenAddress))
+      await expect(cashierImplementation.initialize(tokenAddress, cashOutAccount.address))
         .to.be.revertedWithCustomError(cashierImplementation, ERROR_NAME_INVALID_INITIALIZATION);
+    });
+
+    it("Is reverted if the passed cash-out account address is zero", async () => {
+      const tokenAddress = user1.address;
+      const anotherCardPaymentProcessor =
+        await upgrades.deployProxy(cardPaymentProcessorFactory, [], { initializer: false }) as Contract;
+
+      await expect(anotherCardPaymentProcessor.initialize(tokenAddress, ZERO_ADDRESS))
+        .to.be.revertedWithCustomError(anotherCardPaymentProcessor, ERROR_NAME_CASH_OUT_ACCOUNT_ZERO_ADDRESS);
     });
   });
 
@@ -1814,37 +1825,36 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
   describe("Function 'setCashOutAccount()'", () => {
     it("Executes as expected and emits the correct event", async () => {
       const { cardPaymentProcessor } = await setUpFixture(deployTokenMockAndCardPaymentProcessor);
+      const newCashOutAccount = user1.address;
+      const oldCashOutAccount = await cardPaymentProcessor.cashOutAccount();
 
-      await expect(cardPaymentProcessor.setCashOutAccount(cashOutAccount.address))
+      await expect(cardPaymentProcessor.setCashOutAccount(newCashOutAccount))
         .to.emit(cardPaymentProcessor, EVENT_NAME_CASH_OUT_ACCOUNT_CHANGED)
-        .withArgs(ZERO_ADDRESS, cashOutAccount.address);
+        .withArgs(oldCashOutAccount, newCashOutAccount);
 
-      expect(await cardPaymentProcessor.cashOutAccount()).to.equal(cashOutAccount.address);
-
-      // Can be set to the zero address
-      await expect(cardPaymentProcessor.setCashOutAccount(ZERO_ADDRESS))
-        .to.emit(cardPaymentProcessor, EVENT_NAME_CASH_OUT_ACCOUNT_CHANGED)
-        .withArgs(cashOutAccount.address, ZERO_ADDRESS);
-
-      expect(await cardPaymentProcessor.cashOutAccount()).to.equal(ZERO_ADDRESS);
+      expect(await cardPaymentProcessor.cashOutAccount()).to.equal(newCashOutAccount);
     });
 
     it("Is reverted if the caller does not have the owner role", async () => {
       const { cardPaymentProcessor } = await setUpFixture(deployTokenMockAndCardPaymentProcessor);
-      await expect(connect(cardPaymentProcessor, user1).setCashOutAccount(cashOutAccount.address))
+      const newCashOutAccount = user1.address;
+
+      await expect(connect(cardPaymentProcessor, user1).setCashOutAccount(newCashOutAccount))
         .to.be.revertedWithCustomError(cardPaymentProcessor, ERROR_NAME_ACCESS_CONTROL_UNAUTHORIZED_ACCOUNT)
         .withArgs(user1.address, OWNER_ROLE);
     });
 
     it("Is reverted if the new cash-out account is the same as the previous set one", async () => {
       const { cardPaymentProcessor } = await setUpFixture(deployTokenMockAndCardPaymentProcessor);
-      await expect(cardPaymentProcessor.setCashOutAccount(ZERO_ADDRESS))
-        .to.be.revertedWithCustomError(cardPaymentProcessor, ERROR_NAME_CASH_OUT_ACCOUNT_UNCHANGED);
-
-      await proveTx(cardPaymentProcessor.setCashOutAccount(cashOutAccount.address));
 
       await expect(cardPaymentProcessor.setCashOutAccount(cashOutAccount.address))
         .to.be.revertedWithCustomError(cardPaymentProcessor, ERROR_NAME_CASH_OUT_ACCOUNT_UNCHANGED);
+    });
+
+    it("Is reverted if the new cash-out account is the zero address", async () => {
+      const { cardPaymentProcessor } = await setUpFixture(deployTokenMockAndCardPaymentProcessor);
+      await expect(cardPaymentProcessor.setCashOutAccount(ZERO_ADDRESS))
+        .to.be.revertedWithCustomError(cardPaymentProcessor, ERROR_NAME_CASH_OUT_ACCOUNT_ZERO_ADDRESS);
     });
   });
 
@@ -3391,18 +3401,6 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
           ERROR_NAME_INAPPROPRIATE_CONFIRMATION_AMOUNT,
         );
       });
-
-      it("The cash-out account is the zero address", async () => {
-        const context = await beforeMakingPayments();
-        const { cardPaymentProcessorShell, payments: [payment] } = context;
-        await cardPaymentProcessorShell.makeCommonPayments([payment]);
-
-        await proveTx(cardPaymentProcessorShell.contract.setCashOutAccount(ZERO_ADDRESS));
-
-        await expect(
-          connect(cardPaymentProcessorShell.contract, executor).confirmPayment(payment.id, ZERO_CONFIRMATION_AMOUNT),
-        ).to.be.revertedWithCustomError(cardPaymentProcessorShell.contract, ERROR_NAME_CASH_OUT_ACCOUNT_NOT_CONFIGURED);
-      });
     });
   });
 
@@ -3882,16 +3880,6 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
         await expect(
           connect(cardPaymentProcessorShell.contract, executor).refundAccount(ZERO_ADDRESS, nonZeroTokenAmount),
         ).to.be.revertedWithCustomError(cardPaymentProcessorShell.contract, ERROR_NAME_ACCOUNT_ZERO_ADDRESS);
-      });
-
-      it("The cash-out account is not configured", async () => {
-        const { cardPaymentProcessorShell } = await prepareForPayments();
-        const tokenAmount = nonZeroTokenAmount;
-        await proveTx(cardPaymentProcessorShell.contract.setCashOutAccount(ZERO_ADDRESS));
-
-        await expect(
-          connect(cardPaymentProcessorShell.contract, executor).refundAccount(user1.address, tokenAmount),
-        ).to.be.revertedWithCustomError(cardPaymentProcessorShell.contract, ERROR_NAME_CASH_OUT_ACCOUNT_NOT_CONFIGURED);
       });
 
       it("The cash-out account does not have enough token balance", async () => {

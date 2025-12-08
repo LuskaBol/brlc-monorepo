@@ -57,6 +57,7 @@ describe("Contract 'CashbackController'", () => {
   let sponsor: HardhatEthersSigner;
   let cashbackOperator: HardhatEthersSigner;
   let pauser: HardhatEthersSigner;
+  let cashOutAccount: HardhatEthersSigner;
 
   type PaymentHookData = ICardPaymentProcessorHookTypes.PaymentHookDataStruct;
 
@@ -147,7 +148,7 @@ describe("Contract 'CashbackController'", () => {
   }
 
   before(async () => {
-    [deployer, hookTrigger, stranger, treasury, treasury2, payer, sponsor, cashbackOperator, pauser] =
+    [deployer, hookTrigger, stranger, treasury, treasury2, payer, sponsor, cashbackOperator, pauser, cashOutAccount] =
       await ethers.getSigners();
 
     // Contract factories with the explicitly specified deployer account
@@ -251,7 +252,10 @@ describe("Contract 'CashbackController'", () => {
     describe("Should execute as expected when called properly and", () => {
       it("should grant the role to the caller contract with the correct underlying token", async () => {
         const cardPaymentProcessor =
-          await upgrades.deployProxy(cardPaymentProcessorFactory, [await specificTokenMock.getAddress()]);
+          await upgrades.deployProxy(
+            cardPaymentProcessorFactory,
+            [await specificTokenMock.getAddress(), cashOutAccount.address],
+          );
 
         await expect(deployedContract.grantRole(HOOK_TRIGGER_ROLE, await cardPaymentProcessor.getAddress()))
           .to.emit(deployedContract, "RoleGranted")
@@ -273,7 +277,10 @@ describe("Contract 'CashbackController'", () => {
       it("provided account is CardPaymentProcessor but the underlying token does not match the controller token",
         async () => {
           const cardPaymentProcessor =
-            await upgrades.deployProxy(cardPaymentProcessorFactory, [await tokenMock.getAddress()]);
+            await upgrades.deployProxy(
+              cardPaymentProcessorFactory,
+              [await tokenMock.getAddress(), cashOutAccount.address],
+            );
           await expect(deployedContract.grantRole(HOOK_TRIGGER_ROLE, await cardPaymentProcessor.getAddress()))
             .to.be.revertedWithCustomError(deployedContract, "CashbackController_HookTriggerRoleIncompatible");
         });

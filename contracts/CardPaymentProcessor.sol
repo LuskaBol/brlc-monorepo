@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.24;
+pragma solidity 0.8.28;
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -126,12 +126,18 @@ contract CardPaymentProcessor is
      * Requirements:
      *
      * - The passed token address must not be zero.
+     * - The passed cash-out account address must not be zero.
      *
      * @param token_ The address of a token to set as the underlying one.
+     * @param cashOutAccount_ The cash-out account that will receive tokens of confirmed payments.
      */
-    function initialize(address token_) external initializer {
+    function initialize(address token_, address cashOutAccount_) external initializer {
         if (token_ == address(0)) {
             revert TokenZeroAddress();
+        }
+
+        if (cashOutAccount_ == address(0)) {
+            revert CashOutAccountZeroAddress();
         }
 
         __AccessControlExt_init_unchained();
@@ -140,6 +146,7 @@ contract CardPaymentProcessor is
         __UUPSExt_init_unchained(); // This is needed only to avoid errors during coverage assessment
 
         _token = token_;
+        _cashOutAccount = cashOutAccount_;
 
         _setRoleAdmin(EXECUTOR_ROLE, GRANTOR_ROLE);
         _grantRole(OWNER_ROLE, _msgSender());
@@ -160,6 +167,10 @@ contract CardPaymentProcessor is
 
         if (newCashOutAccount == oldCashOutAccount) {
             revert CashOutAccountUnchanged();
+        }
+
+        if (newCashOutAccount == address(0)) {
+            revert CashOutAccountZeroAddress();
         }
 
         _cashOutAccount = newCashOutAccount;
@@ -351,7 +362,7 @@ contract CardPaymentProcessor is
         _paymentStatistics.totalUnconfirmedRemainder = uint128(
             uint256(_paymentStatistics.totalUnconfirmedRemainder) - totalConfirmedAmount
         );
-        IERC20(_token).safeTransfer(_requireCashOutAccount(), totalConfirmedAmount);
+        IERC20(_token).safeTransfer(_cashOutAccount, totalConfirmedAmount);
     }
 
     /**
@@ -419,7 +430,7 @@ contract CardPaymentProcessor is
             bytes("")
         );
 
-        IERC20(_token).safeTransferFrom(_requireCashOutAccount(), account, refundingAmount);
+        IERC20(_token).safeTransferFrom(_cashOutAccount, account, refundingAmount);
     }
 
     /**
@@ -740,7 +751,7 @@ contract CardPaymentProcessor is
         _paymentStatistics.totalUnconfirmedRemainder = uint128(
             uint256(_paymentStatistics.totalUnconfirmedRemainder) - confirmationAmount
         );
-        IERC20(_token).safeTransfer(_requireCashOutAccount(), confirmationAmount);
+        IERC20(_token).safeTransfer(_cashOutAccount, confirmationAmount);
     }
 
     /// @dev Makes a refund for a payment internally.
@@ -849,7 +860,7 @@ contract CardPaymentProcessor is
         // Cash-out account token transferring
         if (newPaymentDetails.confirmedAmount < oldPaymentDetails.confirmedAmount) {
             uint256 amount = oldPaymentDetails.confirmedAmount - newPaymentDetails.confirmedAmount;
-            erc20Token.safeTransferFrom(_requireCashOutAccount(), address(this), amount);
+            erc20Token.safeTransferFrom(_cashOutAccount, address(this), amount);
             _emitPaymentConfirmedAmountChanged(
                 paymentId,
                 payment.payer,
@@ -1037,14 +1048,6 @@ contract CardPaymentProcessor is
             return commonRemainder;
         } else {
             return oldConfirmedAmount;
-        }
-    }
-
-    /// @dev Checks if the cash-out account exists and returns if it does. Otherwise reverts the execution.
-    function _requireCashOutAccount() internal view returns (address account) {
-        account = _cashOutAccount;
-        if (account == address(0)) {
-            revert CashOutAccountNotConfigured();
         }
     }
 

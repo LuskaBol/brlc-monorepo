@@ -21,6 +21,7 @@ const ERROR_NAME_REVERT_FROM_AFTER_PAYMENT_MADE = "RevertFromAfterPaymentMade";
 
 let deployer: HardhatEthersSigner;
 let user1: HardhatEthersSigner;
+let cashOutAccount: HardhatEthersSigner;
 
 let cardPaymentProcessorFactory: Contracts.CardPaymentProcessor__factory;
 let tokenMockFactory: Contracts.ERC20TokenMock__factory;
@@ -44,7 +45,9 @@ async function deployContracts() {
   await tokenMockDeployment.waitForDeployment();
 
   const tokenMock = tokenMockDeployment.connect(deployer);
-  const cardPaymentProcessor = await upgrades.deployProxy(cardPaymentProcessorFactory, [await tokenMock.getAddress()]);
+  const cardPaymentProcessor = await upgrades.deployProxy(
+    cardPaymentProcessorFactory, [await tokenMock.getAddress(), cashOutAccount.address],
+  );
   await cardPaymentProcessor.waitForDeployment();
 
   return { cardPaymentProcessor, tokenMock };
@@ -84,7 +87,7 @@ describe("Contract 'CardPaymentProcessorHookable'", () => {
   }
 
   before(async () => {
-    [deployer, user1] = await ethers.getSigners();
+    [deployer, user1, cashOutAccount] = await ethers.getSigners();
 
     cardPaymentProcessorFactory = await ethers.getContractFactory("CardPaymentProcessor")
       .then(factory => factory.connect(deployer));
