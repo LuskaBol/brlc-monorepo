@@ -20,7 +20,7 @@ const RESCUER_ROLE = ethers.id("RESCUER_ROLE");
 const EXPECTED_VERSION = {
   major: 2n,
   minor: 4n,
-  patch: 0n,
+  patch: 1n,
 } as const;
 
 let cashbackVaultFactory: Contracts.CashbackVault__factory;

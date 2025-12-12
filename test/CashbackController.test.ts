@@ -21,7 +21,7 @@ describe("Contract 'CashbackController'", () => {
   const EXPECTED_VERSION = {
     major: 2n,
     minor: 4n,
-    patch: 0n,
+    patch: 1n,
   } as const;
 
   const OWNER_ROLE: string = ethers.id("OWNER_ROLE");

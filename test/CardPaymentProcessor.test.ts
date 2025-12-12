@@ -1521,7 +1521,7 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
   const EXPECTED_VERSION: Version = {
     major: 2,
     minor: 4,
-    patch: 0,
+    patch: 1,
   };
 
   // Errors of the library contracts
