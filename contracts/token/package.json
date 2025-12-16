@@ -1,0 +1,25 @@
+{
+  "dependencies": {
+    "@openzeppelin/contracts-upgradeable": "5.4.0",
+    "@openzeppelin/contracts": "5.4.0"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/hardhat-upgrades": "^3.9.1",
+    "dotenv": "^17.2.1",
+    "hardhat-contract-sizer": "^2.10.1",
+    "typescript": "^5.9.2"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "onFail": "error"
+    }
+  },
+  "scripts": {
+    "build": "npx hardhat compile",
+    "test": "npx hardhat test",
+    "test:coverage": "npx hardhat coverage",
+    "contracts:size": "npx hardhat size-contracts"
+  }
+}
