@@ -10,22 +10,22 @@ This repository contains utilities for smart contracts development
     - [@cloudwalk/chainshot](./packages/chainshot/README.md) library
 1. Shared workflows to use in every Smart-contract repos
 1. Smart-contracts:
-    - [ ] brlc-asset-transit-desk
-    - [ ] brlc-balance-freezer
-    - [ ] brlc-balance-tracker
-    - [ ] brlc-blueprint
-    - [ ] brlc-capybara-finance
-    - [ ] brlc-capybara-finance-v2
-    - [ ] brlc-card-payment-processor
-    - [ ] brlc-card-payment-processor-v2
-    - [ ] brlc-cashier
-    - [ ] brlc-credit-agent
-    - [ ] brlc-multisig
-    - [ ] brlc-net-yield-distributor
-    - [ ] brlc-periphery
-    - [ ] brlc-shared-wallet-controller
-    - [ ] brlc-token
-    - [ ] brlc-treasury
+    - [ ] asset-transit-desk
+    - [ ] balance-freezer
+    - [ ] balance-tracker
+    - [x] blueprint
+    - [ ] capybara-finance
+    - [ ] capybara-finance-v2
+    - [ ] card-payment-processor
+    - [ ] card-payment-processor-v2
+    - [ ] cashier
+    - [ ] credit-agent
+    - [ ] multisig
+    - [ ] net-yield-distributor
+    - [ ] periphery
+    - [ ] shared-wallet-controller
+    - [x] token
+    - [ ] treasury
 
 ### Monorepo
 #### Tasks
