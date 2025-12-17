@@ -16,10 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ## TODO: we use only direct object described by include for now. Later we will use name matrix.
-        # name:
-        #   - blueprint
-        #   - token
+        ## TODO: we use only direct object described by include for now. Later we will dynamically generate this matrix.
         include:
           - name: blueprint
             target_branch: monorepo # TODO: change to main
