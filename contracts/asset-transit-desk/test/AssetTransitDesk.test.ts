@@ -30,7 +30,7 @@ let stranger: HardhatEthersSigner; // has no roles
 
 const EXPECTED_VERSION = {
   major: 1,
-  minor: 2,
+  minor: 3,
   patch: 0,
 };
 

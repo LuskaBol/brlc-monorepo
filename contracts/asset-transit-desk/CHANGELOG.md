@@ -1,3 +1,5 @@
+# 1.3.0
+
 ## Main Changes
 
 - **Breaking**: Replaced LiquidityPool integration with Treasury contract.
@@ -6,7 +8,7 @@
 
 - **Storage Layout Changes** (backwards compatible for upgrades):
   - Renamed `surplusTreasury` storage field to `treasury`.
-  - Marked `liquidityPool` storage field as obsolete (`_obsolete`).
+  - Marked `liquidityPool` storage field as obsolete (`_reserve`).
   - Storage slot positions preserved for safe contract upgrades.
 
 - **Behavior Changes**:
@@ -44,23 +46,24 @@
   - Added treasury zero-address checks in both `issueAsset()` and `redeemAsset()`.
   - Treasury validation checks interface compliance via `proveTreasury()`.
   - Treasury validation ensures token match with underlying token.
+  - Added automatic cleanup of obsolete storage fields via `_resetReserveFields()`.
 
 ## Migration
 
-### For Existing Contract Upgrades
+### Upgrade Steps
 1. Deploy new implementation contract.
-2. Call `upgradeToAndCall()` to upgrade the proxy.
-3. **IMPORTANT**: Call `setTreasury(treasuryAddress)` immediately after upgrade.
-   - The old `surplusTreasury` value becomes the new `treasury` value.
-   - If `surplusTreasury` was not configured, treasury will be zero and operations will revert until configured.
-4. Ensure AssetTransitDesk has `WITHDRAWER_ROLE` in the Treasury contract.
-5. All historical operation data is preserved.
+2. Upgrade proxy via `upgradeToAndCall()`.
+3. **Call `setTreasury(treasuryAddress)` immediately after upgrade** to:
+   - Clean up obsolete `_reserve` field (old `liquidityPool` address).
+   - Validate treasury interface compliance.
+   - Note: The `surplusTreasury` value persists as `treasury` (same storage slot).
+4. Grant AssetTransitDesk the `WITHDRAWER_ROLE` in the Treasury contract.
 
-### Storage Slot Reuse (Future Development)
-- **Slot 3 (`_obsolete` field)** is now available for future reuse.
-- This slot contains the old `liquidityPool` address from previous versions.
-- **IMPORTANT**: Before reusing this field or slot in future upgrades, it MUST be explicitly cleaned up (set to zero) during the upgrade process.
-- Failure to clean up may result in unexpected behavior if the old address value is misinterpreted.
+### Important Notes
+- Historical operation data is fully preserved.
+- If `surplusTreasury` was not previously set, operations will revert until `setTreasury()` is called.
+- **Storage Slot 3 (`_reserve`)** is auto-zeroed on every `setTreasury()` call. If repurposing this slot in
+  future versions, remove/modify `_resetReserveFields()` to avoid conflicts.
 
 # 1.2.0
 
