@@ -12,16 +12,16 @@ This repository contains utilities for smart contracts development
    - [@cloudwalk/chainshot](./packages/chainshot/README.md) library
 1. Shared workflows to use in every Smart-contract repos
 1. Smart-contracts:
-   - [ ] asset-transit-desk
-   - [ ] balance-freezer
-   - [ ] balance-tracker
+   - [x] asset-transit-desk
+   - [x] balance-freezer
+   - [x] balance-tracker
    - [x] blueprint
-   - [ ] capybara-finance
+   - [x] capybara-finance
    - [ ] capybara-finance-v2
-   - [ ] card-payment-processor
-   - [ ] card-payment-processor-v2
-   - [ ] cashier
-   - [ ] credit-agent
+   - [x] card-payment-processor
+   - [x] card-payment-processor-v2
+   - [x] cashier
+   - [x] credit-agent
    - [ ] multisig
    - [ ] net-yield-distributor
    - [ ] periphery
