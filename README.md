@@ -34,13 +34,15 @@ This repository contains utilities for smart contracts development
 #### Tasks
 
 - [x] Setup components codecov
-- [ ] Setup common precommit hooks and linting
+- [x] Setup common precommit hooks and linting
 - [x] Create CI to sync contracts from monorepo to legacy repos
 - [x] Create CI to use in monorepo instead
+- [x] Backstage files
+- [x] Rename repository
 
 #### Monorepo migration roadmap
 
-- [ ] Move all contracts to the monorepo
+- [x] Move all contracts to the monorepo
 - [ ] Configure github repo with right permissions and rules
 - [ ] Change readmes to use monorepo links
   - Codecov badges to use component name
@@ -49,10 +51,3 @@ This repository contains utilities for smart contracts development
 - [ ] Migrate Stratus to the monorepo contracts
 - [ ] Join contracts by workspace and cross-reference contracts
 - [ ] Extract common contracts to a separate packages
-
-#### Monorepo migration checklist
-
-- Remove from repo some folders and files:
-  - .github
-  - .cursor
-  - lint configs
