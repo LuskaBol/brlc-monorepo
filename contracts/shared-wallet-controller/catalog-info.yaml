@@ -1,0 +1,25 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: brlc-shared-wallet-controller
+  description: SharedWalletController smart contracts
+  annotations:
+    github.com/project-slug: cloudwalk/brlc-shared-wallet-controller
+    backstage.io/techdocs-ref: dir:.
+  tags:
+    - solidity
+    - typescript
+    - blockchain
+    - smart-contract
+  links:
+    - url: https://github.com/cloudwalk/brlc-shared-wallet-controller
+      title: Repository
+      icon: github
+  labels:
+    cloudwalk.io/regulation-scope: none
+    cloudwalk.io/critical-level: low
+spec:
+  type: smart-contract
+  system: Blockchain
+  lifecycle: production
+  owner: team-blockchain
