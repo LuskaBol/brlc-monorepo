@@ -1,3 +1,5 @@
+# 1.1.0
+
 ## Main Changes
 
 - Added token mint and burn operations with role-based access control.
