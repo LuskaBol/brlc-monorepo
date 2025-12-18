@@ -1,0 +1,19 @@
+# Project dependencies
+node_modules
+
+# Hardhat files
+contracts/*/cache
+contracts/*/artifacts
+
+# IDE-specific files
+.idea
+
+# Version manager files
+.tool-versions
+
+# Environment variables
+.env
+
+# Other files
+contracts/*/flatten
+contracts/*/tmp
