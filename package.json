@@ -3,8 +3,8 @@
   "description": "BRLC monorepo",
   "scripts": {
     "prepare": "husky",
-    "prettier:fix": "prettier --write \"**/*.{sol}\"",
-    "prettier:check": "prettier --check \"**/*.{sol}\"",
+    "prettier:fix": "prettier --write \"**/*.sol\"",
+    "prettier:check": "prettier --check \"**/*.sol\"",
     "eslint:fix": "eslint --fix \"**/*.{js,ts}\"",
     "eslint:check": "eslint"
   },
@@ -12,7 +12,7 @@
     "**/*.{js,ts}": [
       "eslint --fix"
     ],
-    "**/*.{sol}": [
+    "**/*.sol": [
       "prettier --write"
     ]
   },

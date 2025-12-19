@@ -1,12 +1,12 @@
-# TODO: add there all components or something like that
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: brlc-monorepo
+  namespace: brlc
+  name: monorepo
   description: Monorepo for CW smart contracts
   annotations:
     github.com/project-slug: cloudwalk/brlc-monorepo
-    backstage.io/techdocs-ref: dir:.
+  # backstage.io/techdocs-ref: dir:.
   tags:
     - solidity
     - typescript
@@ -20,7 +20,391 @@ metadata:
     cloudwalk.io/regulation-scope: none
     cloudwalk.io/critical-level: high
 spec:
+  type: monorepo
+  system: Blockchain
+  lifecycle: production
+  owner: team-blockchain
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  namespace: brlc
+  name: asset-transit-desk
+  description: Asset Transit Desk smart contracts
+  annotations:
+    github.com/project-slug: cloudwalk/brlc-monorepo
+  tags:
+    - solidity
+    - typescript
+    - smart-contract
+  links:
+    - url: https://github.com/cloudwalk/brlc-monorepo/tree/main/contracts/asset-transit-desk
+      title: Package
+      icon: github
+spec:
   type: smart-contract
   system: Blockchain
   lifecycle: production
   owner: team-blockchain
+  subcomponentOf: brlc/monorepo
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  namespace: brlc
+  name: balance-freezer
+  description: Balance Freezer smart contracts
+  annotations:
+    github.com/project-slug: cloudwalk/brlc-monorepo
+  tags:
+    - solidity
+    - typescript
+    - smart-contract
+  links:
+    - url: https://github.com/cloudwalk/brlc-monorepo/tree/main/contracts/balance-freezer
+      title: Package
+      icon: github
+spec:
+  type: smart-contract
+  system: Blockchain
+  lifecycle: production
+  owner: team-blockchain
+  subcomponentOf: brlc/monorepo
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  namespace: brlc
+  name: balance-tracker
+  description: Balance Tracker smart contracts
+  annotations:
+    github.com/project-slug: cloudwalk/brlc-monorepo
+  tags:
+    - solidity
+    - typescript
+    - smart-contract
+  links:
+    - url: https://github.com/cloudwalk/brlc-monorepo/tree/main/contracts/balance-tracker
+      title: Package
+      icon: github
+spec:
+  type: smart-contract
+  system: Blockchain
+  lifecycle: production
+  owner: team-blockchain
+  subcomponentOf: brlc/monorepo
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  namespace: brlc
+  name: blueprint
+  description: Blueprint smart contracts
+  annotations:
+    github.com/project-slug: cloudwalk/brlc-monorepo
+  tags:
+  - solidity
+  - typescript
+  - smart-contract
+  links:
+    - url: https://github.com/cloudwalk/brlc-monorepo/tree/main/contracts/blueprint
+      title: Package
+      icon: github
+spec:
+  type: smart-contract
+  system: Blockchain
+  lifecycle: production
+  owner: team-blockchain
+  subcomponentOf: brlc/monorepo
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  namespace: brlc
+  name: capybara-finance
+  description: Capybara Finance smart contracts
+  annotations:
+    github.com/project-slug: cloudwalk/brlc-monorepo
+  tags:
+    - solidity
+    - typescript
+    - smart-contract
+  links:
+    - url: https://github.com/cloudwalk/brlc-monorepo/tree/main/contracts/capybara-finance
+      title: Package
+      icon: github
+spec:
+  type: smart-contract
+  system: Blockchain
+  lifecycle: production
+  owner: team-blockchain
+  subcomponentOf: brlc/monorepo
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  namespace: brlc
+  name: capybara-finance-v2
+  description: Capybara Finance V2 smart contracts
+  annotations:
+    github.com/project-slug: cloudwalk/brlc-monorepo
+  tags:
+    - solidity
+    - typescript
+    - smart-contract
+  links:
+    - url: https://github.com/cloudwalk/brlc-monorepo/tree/main/contracts/capybara-finance-v2
+      title: Package
+      icon: github
+spec:
+  type: smart-contract
+  system: Blockchain
+  lifecycle: production
+  owner: team-blockchain
+  subcomponentOf: brlc/monorepo
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  namespace: brlc
+  name: card-payment-processor
+  description: Card Payment Processor smart contracts
+  annotations:
+    github.com/project-slug: cloudwalk/brlc-monorepo
+  tags:
+    - solidity
+    - typescript
+    - smart-contract
+  links:
+    - url: https://github.com/cloudwalk/brlc-monorepo/tree/main/contracts/card-payment-processor
+      title: Package
+      icon: github
+spec:
+  type: smart-contract
+  system: Blockchain
+  lifecycle: production
+  owner: team-blockchain
+  subcomponentOf: brlc/monorepo
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  namespace: brlc
+  name: card-payment-processor-v2
+  description: Card Payment Processor V2 smart contracts
+  annotations:
+    github.com/project-slug: cloudwalk/brlc-monorepo
+  tags:
+    - solidity
+    - typescript
+    - smart-contract
+  links:
+    - url: https://github.com/cloudwalk/brlc-monorepo/tree/main/contracts/card-payment-processor-v2
+      title: Package
+      icon: github
+spec:
+  type: smart-contract
+  system: Blockchain
+  lifecycle: production
+  owner: team-blockchain
+  subcomponentOf: brlc/monorepo
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  namespace: brlc
+  name: cashier
+  description: Cashier smart contracts
+  annotations:
+    github.com/project-slug: cloudwalk/brlc-monorepo
+  tags:
+    - solidity
+    - typescript
+    - smart-contract
+  links:
+    - url: https://github.com/cloudwalk/brlc-monorepo/tree/main/contracts/cashier
+      title: Package
+      icon: github
+spec:
+  type: smart-contract
+  system: Blockchain
+  lifecycle: production
+  owner: team-blockchain
+  subcomponentOf: brlc/monorepo
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  namespace: brlc
+  name: credit-agent
+  description: Credit Agent smart contracts
+  annotations:
+    github.com/project-slug: cloudwalk/brlc-monorepo
+  tags:
+    - solidity
+    - typescript
+    - smart-contract
+  links:
+    - url: https://github.com/cloudwalk/brlc-monorepo/tree/main/contracts/credit-agent
+      title: Package
+      icon: github
+spec:
+  type: smart-contract
+  system: Blockchain
+  lifecycle: production
+  owner: team-blockchain
+  subcomponentOf: brlc/monorepo
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  namespace: brlc
+  name: multisig
+  description: Multisig smart contracts
+  annotations:
+    github.com/project-slug: cloudwalk/brlc-monorepo
+  tags:
+    - solidity
+    - typescript
+    - smart-contract
+  links:
+    - url: https://github.com/cloudwalk/brlc-monorepo/tree/main/contracts/multisig
+      title: Package
+      icon: github
+spec:
+  type: smart-contract
+  system: Blockchain
+  lifecycle: production
+  owner: team-blockchain
+  subcomponentOf: brlc/monorepo
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  namespace: brlc
+  name: net-yield-distributor
+  description: Net Yield Distributor smart contracts
+  annotations:
+    github.com/project-slug: cloudwalk/brlc-monorepo
+  tags:
+    - solidity
+    - typescript
+    - smart-contract
+  links:
+    - url: https://github.com/cloudwalk/brlc-monorepo/tree/main/contracts/net-yield-distributor
+      title: Package
+      icon: github
+spec:
+  type: smart-contract
+  system: Blockchain
+  lifecycle: production
+  owner: team-blockchain
+  subcomponentOf: brlc/monorepo
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  namespace: brlc
+  name: periphery
+  description: Periphery smart contracts
+  annotations:
+    github.com/project-slug: cloudwalk/brlc-monorepo
+  tags:
+    - solidity
+    - typescript
+    - smart-contract
+  links:
+    - url: https://github.com/cloudwalk/brlc-monorepo/tree/main/contracts/periphery
+      title: Package
+      icon: github
+spec:
+  type: smart-contract
+  system: Blockchain
+  lifecycle: production
+  owner: team-blockchain
+  subcomponentOf: brlc/monorepo
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  namespace: brlc
+  name: shared-wallet-controller
+  description: Shared Wallet Controller smart contracts
+  annotations:
+    github.com/project-slug: cloudwalk/brlc-monorepo
+  tags:
+    - solidity
+    - typescript
+    - smart-contract
+  links:
+    - url: https://github.com/cloudwalk/brlc-monorepo/tree/main/contracts/shared-wallet-controller
+      title: Package
+      icon: github
+spec:
+  type: smart-contract
+  system: Blockchain
+  lifecycle: production
+  owner: team-blockchain
+  subcomponentOf: brlc/monorepo
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  namespace: brlc
+  name: token
+  description: BRLC Token smart contracts
+  annotations:
+    github.com/project-slug: cloudwalk/brlc-monorepo
+  tags:
+    - solidity
+    - typescript
+    - smart-contract
+  links:
+    - url: https://github.com/cloudwalk/brlc-monorepo/tree/main/contracts/token
+      title: Package
+      icon: github
+spec:
+  type: smart-contract
+  system: Blockchain
+  lifecycle: production
+  owner: team-blockchain
+  subcomponentOf: brlc/monorepo
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  namespace: brlc
+  name: treasury
+  description: Treasury smart contracts
+  annotations:
+    github.com/project-slug: cloudwalk/brlc-monorepo
+  tags:
+    - solidity
+    - typescript
+    - smart-contract
+  links:
+    - url: https://github.com/cloudwalk/brlc-monorepo/tree/main/contracts/treasury
+      title: Package
+      icon: github
+spec:
+  type: smart-contract
+  system: Blockchain
+  lifecycle: production
+  owner: team-blockchain
+  subcomponentOf: brlc/monorepo

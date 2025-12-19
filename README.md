@@ -1,4 +1,4 @@
-# brlc-dev-ex
+# brlc-monorepo
 
 ![brlc-cover](./docs/media/brlc-cover.png)
 This repository contains utilities for smart contracts development

@@ -3,6 +3,10 @@
 ## Play with repo
 
 1. Clone the repo.
+1. Install required pnpm version.
+   ```sh
+   corepack install
+   ```
 1. [Setup npm token](./NPM.md).
 1. Install dependencies:
    ```sh

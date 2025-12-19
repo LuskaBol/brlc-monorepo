@@ -1,12 +1,6 @@
 # Multi-signature Wallet
 
-<p align="center">
-  <img src="./docs/media/brlc-cover.png">
-</p>
-
-[![codecov](https://codecov.io/github/cloudwalk/brlc-multisig/branch/main/graph/badge.svg)](https://codecov.io/github/cloudwalk/brlc-multisig)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Branch Workflow](https://github.com/cloudwalk/brlc-multisig/actions/workflows/branch.yml/badge.svg?branch=main)](https://github.com/cloudwalk/brlc-multisig/actions/workflows/branch.yml)
 
 The purpose of multi-signature wallets is to increase security by requiring multiple parties to agree on transactions before execution. Transactions can be executed only when confirmed by a predefined number of owners. The project provides two implementations:
 
@@ -39,7 +33,7 @@ NOTE: There have been some changes in the contracts since the last audit, but th
 This repository is mirrored from the [BRLC monorepo](https://github.com/cloudwalk/brlc-monorepo).
 All development happens in the monorepo.
 
-Read [Documentation](https://github.com/cloudwalk/brlc-dev-ex/blob/main/docs/DEVELOPMENT.md).
+Read [Documentation](https://github.com/cloudwalk/brlc-monorepo/blob/main/docs/DEVELOPMENT.md).
 
 ## Licensing
 

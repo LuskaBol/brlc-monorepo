@@ -30,6 +30,6 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cloudwalk/brlc-dev-ex.git"
+    "url": "git+https://github.com/cloudwalk/brlc-monorepo.git"
   }
 }
