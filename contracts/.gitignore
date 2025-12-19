@@ -1,0 +1,15 @@
+# TypeChain files
+typechain
+typechain-types
+
+# Hardhat files
+cache
+artifacts
+
+# solidity-coverage files
+coverage
+coverage.json
+
+
+# Environment variables
+.env

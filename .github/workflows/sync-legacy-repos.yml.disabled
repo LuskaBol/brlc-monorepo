@@ -17,14 +17,14 @@ jobs:
       fail-fast: false
       matrix:
         target_branch:
-          - monorepo
+          - main
         contract:
           - asset-transit-desk
           - balance-freezer
           - balance-tracker
           - blueprint
           - capybara-finance
-          - capybara-finance-v2
+          # - capybara-finance-v2 never was used
           - card-payment-processor
           - card-payment-processor-v2
           - cashier
