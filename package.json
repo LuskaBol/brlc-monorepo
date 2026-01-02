@@ -6,7 +6,9 @@
     "prettier:fix": "prettier --write \"**/*.sol\"",
     "prettier:check": "prettier --check \"**/*.sol\"",
     "eslint:fix": "eslint --fix \"**/*.{js,ts}\"",
-    "eslint:check": "eslint"
+    "eslint:check": "eslint",
+    "flatten:contract": "./scripts/flatten-contract.bash",
+    "get-e2e-contracts": "./scripts/get-contracts-for-stratus-test.js"
   },
   "lint-staged": {
     "**/*.{js,ts}": [
@@ -17,7 +19,6 @@
     ]
   },
   "devDependencies": {
-    "@cloudwalk/eslint-config-smart-contracts": "^1.0.0",
     "eslint": "^9.39.2",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
@@ -35,5 +36,5 @@
       "onFail": "error"
     }
   },
-  "packageManager": "pnpm@10.26.1+sha512.664074abc367d2c9324fdc18037097ce0a8f126034160f709928e9e9f95d98714347044e5c3164d65bd5da6c59c6be362b107546292a8eecb7999196e5ce58fa"
+  "packageManager": "pnpm@10.27.0+sha512.72d699da16b1179c14ba9e64dc71c9a40988cbdc65c264cb0e489db7de917f20dcf4d64d8723625f2969ba52d4b7e2a1170682d9ac2a5dcaeaab732b7e16f04a"
 }

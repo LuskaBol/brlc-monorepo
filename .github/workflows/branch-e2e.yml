@@ -1,0 +1,164 @@
+name: E2E tests in Stratus
+
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+    branches:
+      - "*"
+env:
+  STRATUS_REF: v0.25.1-beta
+  STRATUS_PORT: "3000"
+jobs:
+  build-stratus:
+    runs-on: ubuntu-latest
+    name: Build Stratus artifact
+
+    steps:
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            pkg-config \
+            libssl-dev \
+            libsasl2-dev \
+            curl \
+            git \
+            clang \
+            libclang-dev
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Checkout Stratus sources
+        uses: actions/checkout@v6
+        with:
+          repository: cloudwalk/stratus
+          ref: ${{ env.STRATUS_REF }}
+
+      - name: Cache Stratus target dir
+        id: stratus-target-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: stratus-build-${{ runner.os }}-${{ env.STRATUS_REF }}
+
+      - name: Build Stratus (debug, cached)
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ steps.stratus-target-cache.outputs.cache-hit }}" == "true" && -x target/debug/stratus ]]; then
+            echo "Stratus binary already present from cache; skipping cargo build."
+            exit 0
+          fi
+
+          cargo build --features dev
+
+      - name: Upload Stratus artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: stratus-bin-${{ runner.os }}-${{ env.STRATUS_REF }}
+          path: target/debug/stratus
+          if-no-files-found: error
+          overwrite: true
+
+  contract-matrix:
+    runs-on: ubuntu-latest
+    name: Build test matrix
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Use Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .tool-versions
+
+      - name: Generate matrix from repo scripts
+        id: matrix
+        shell: bash
+        run: |
+          contracts_json="$(corepack pnpm -s run get-e2e-contracts)"
+          echo "Got contracts for E2E tests: ${contracts_json}"
+          echo "matrix=${contracts_json}" >> "$GITHUB_OUTPUT"
+
+  stratus-e2e:
+    runs-on: ubuntu-latest
+    name: Stratus E2E (${{ matrix.contract }})
+    needs: [build-stratus, contract-matrix]
+    if: needs.contract-matrix.outputs.matrix != '' && needs.contract-matrix.outputs.matrix != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        contract: ${{ fromJSON(needs.contract-matrix.outputs.matrix) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .tool-versions
+          cache: pnpm
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@cloudwalk"
+
+      - name: Install dependencies
+        run: pnpm install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GHA_PAT }}
+
+      - name: Download Stratus artifact
+        uses: actions/download-artifact@v7
+        with:
+          name: stratus-bin-${{ runner.os }}-${{ env.STRATUS_REF }}
+          path: ./stratus-bin
+
+      - name: Start Stratus
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x ./stratus-bin/stratus
+          export CHAIN_ID=1337
+
+          nohup ./stratus-bin/stratus --leader -a=127.0.0.1:${STRATUS_PORT} > stratus.log 2>&1 &
+          echo $! > stratus.pid
+
+          # Wait for TCP port to accept connections
+          for i in {1..60}; do
+            if nc -z 127.0.0.1 "${STRATUS_PORT}"; then
+              exit 0
+            fi
+            sleep 1
+          done
+
+          echo "Stratus failed to start. Last logs:"
+          tail -n 200 stratus.log || true
+          exit 1
+
+      - name: Run contract Stratus tests
+        shell: bash
+        run: |
+          pnpm -C "contracts/${{ matrix.contract }}" test:stratus
+        env:
+          STRATUS_PORT: ${{ env.STRATUS_PORT }}
+
+      - name: Stop Stratus
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          if [[ -f stratus.pid ]]; then
+            kill "$(cat stratus.pid)" 2>/dev/null || true
+          fi
+          tail -n 200 stratus.log || true

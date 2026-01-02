@@ -1,0 +1,95 @@
+name: Collect contract signatures and make PR to update them in Stratus repository
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  collect-signatures:
+    runs-on: ubuntu-latest
+    name: Collect signatures
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install mise
+        uses: jdx/mise-action@v3
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .tool-versions
+          cache: pnpm
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@cloudwalk"
+
+      - run: pnpm install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GHA_PAT }}
+
+      - name: Generate signatures
+        run: ./scripts/generate-signatures.bash
+        shell: bash
+
+      - name: Save artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: contract-signatures
+          path: signatures
+          overwrite: true
+  make-pr:
+    runs-on: ubuntu-latest
+    name: Update signatures in Stratus repository
+    needs: collect-signatures
+    permissions:
+      contents: write
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.DEV_EX_APP_ID }}
+          private-key: ${{ secrets.DEV_EX_APP_PRIVATE_KEY }}
+          repositories: stratus
+          owner: cloudwalk
+
+      - name: Checkout Stratus repository
+        uses: actions/checkout@v6
+        with:
+          repository: cloudwalk/stratus
+          path: stratus
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Download artifact
+        uses: actions/download-artifact@v6
+        with:
+          name: contract-signatures
+          path: stratus/static/contracts-signatures
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v8
+        with:
+          path: stratus
+          token: ${{ steps.app-token.outputs.token }}
+          branch: brlc/update-contract-signatures
+          delete-branch: true
+          sign-commits: true
+          title: "auto: update contract signatures"
+          body: |
+            This PR updates the contract signatures.
+
+            The updated signature files are located in `static/contracts-signatures`.
+
+            This is an automated PR created by changes in smart contracts in the `brlc-monorepo` repository.
+          base: main
+          labels: |
+            automated
+          draft: true
+          maintainer-can-modify: false
+          commit-message: "auto: update contract signatures"
