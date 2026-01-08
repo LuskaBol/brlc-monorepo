@@ -3,9 +3,9 @@
 import type { HardhatRuntimeEnvironment } from "hardhat/types";
 import type { RootHookObject } from "mocha";
 
-import { Scenario, ScenarioConfig } from "./Scenario.js";
+import { Scenario, ScenarioConfig } from "./Scenario";
 import { jestSnapshotPlugin } from "mocha-chai-jest-snapshot";
-import { dumpScenariosToHumans } from "./scenarioLogs2Humans.js";
+import { dumpScenariosToHumans } from "./scenarioLogs2Humans";
 
 type FirstFunctionArgument<T> = T extends (arg: infer A) => unknown ? A : never;
 
@@ -31,7 +31,7 @@ export function mochaHooks(options: {
       if (scenariosCache.has(currentTest.id)) {
         return; // scenariosCache.get(runnable.id) as Scenario;
       }
-      const scenario: Scenario = new Scenario (
+      const scenario: Scenario = new Scenario(
         hre,
         {
           test: currentTest,

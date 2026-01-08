@@ -1,14 +1,18 @@
 # Project dependencies
 node_modules
 
+# Build artifacts
+dist
+
 # IDE-specific files
 .idea
+.vscode
 
 # Environment variables
 .env
 
+# OS files
 .DS_Store
 
+# Generated files
 signatures/
-
-.vscode

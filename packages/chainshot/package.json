@@ -1,6 +1,6 @@
 {
   "name": "@cloudwalk/chainshot",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "description": "",
   "license": "MIT",
   "main": "dist/index.js",
@@ -8,36 +8,30 @@
   "scripts": {
     "clean": "rm -rf dist",
     "build": "tsc -p tsconfig.json && cp -r src/templates dist/",
-    "build:watch": "tsc -p tsconfig.json --watch",
-    "prepare": "rm -rf dist && pnpm run build"
+    "build:watch": "tsc -p tsconfig.json --watch"
   },
   "dependencies": {
-    "ethers": "^6.15.0",
+    "ethers": "catalog:",
     "handlebars": "^4.7.8",
     "mocha-chai-jest-snapshot": "^1.1.7",
     "pretty-format": "^30.2.0"
   },
   "devDependencies": {
-    "@nomicfoundation/hardhat-ethers": "^3.0.0",
+    "@nomicfoundation/hardhat-ethers": "catalog:hardhat2",
     "@types/chai": "^4.0.0",
     "@types/mocha": "^10.0.0",
     "@types/node": "^22.0.0",
-    "hardhat": "^2.0.0"
+    "hardhat": "catalog:hardhat2"
   },
   "peerDependencies": {
-    "@nomicfoundation/hardhat-ethers": "^3.0.0",
-    "chai": "^4.5.0",
-    "hardhat": "^2.0.0",
-    "mocha": ">=10"
+    "@cloudwalk/hardhat2-config": "workspace:"
   },
   "exports": {
     ".": {
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./src/index.ts"
     },
     "./hook": {
-      "require": "./dist/hook.js",
-      "types": "./dist/hook.d.ts"
+      "require": "./src/hook.ts"
     }
   },
   "files": [

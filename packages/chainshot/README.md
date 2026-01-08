@@ -1,17 +1,6 @@
 # @cloudwalk/chainshot
 
-Chai plugin for Hardhat tests that records on-chain scenarios: every method call, emitted events, and token balances after each transaction. It creates machine-readable snapshots for regression testing and human-readable Markdown reports with Mermaid sequence diagrams.
-
-- **Works with**: Mocha + Chai in Hardhat
-- **Active on**: `hardhat` network (no-ops on others)
-
-## Installation
-
-```bash
-npm i -D @cloudwalk/chainshot
-# peer deps you likely already have in a Hardhat project
-npm i -D @nomicfoundation/hardhat-ethers chai mocha hardhat
-```
+That package is not published, and exports typescript files directly.
 
 ## Quick start
 

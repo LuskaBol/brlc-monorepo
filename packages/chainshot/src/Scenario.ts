@@ -1,7 +1,7 @@
 import { type HardhatRuntimeEnvironment } from "hardhat/types";
 import type { BaseContract, Log, TransactionReceipt, FunctionFragment, AddressLike } from "ethers";
 import { getBigInt } from "ethers";
-import { normalizeAddress, normalizeAddressAsync, revertMap } from "./utils.js";
+import { normalizeAddress, normalizeAddressAsync, revertMap } from "./utils";
 
 type HREProvider = HardhatRuntimeEnvironment["ethers"]["provider"];
 

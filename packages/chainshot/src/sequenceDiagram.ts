@@ -1,5 +1,5 @@
-import { stringifyValue } from "./utils.js";
-import { Scenario } from "./Scenario.js";
+import { stringifyValue } from "./utils";
+import { Scenario } from "./Scenario";
 
 function sanitizeMermaidLabel(text: string): string {
   return String(text).replace(/"/g, "'");

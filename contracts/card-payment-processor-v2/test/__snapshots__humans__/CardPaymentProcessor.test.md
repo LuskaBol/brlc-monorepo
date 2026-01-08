@@ -24,15 +24,15 @@ sequenceDiagram
   participant payer
   rect rgb(230,255,230)
     deployer->>cashbackVault: deployer calls cashbackVault.grantRole
-    Note over CPP: CPP.RoleGranted
+    Note over cashbackVault: cashbackVault.RoleGranted
   end
   rect rgb(230,255,230)
     deployer->>cashbackVault: deployer calls cashbackVault.grantRole
-    Note over CPP: CPP.RoleGranted
+    Note over cashbackVault: cashbackVault.RoleGranted
   end
   rect rgb(230,255,230)
     deployer->>cashbackVault: deployer calls cashbackVault.grantRole
-    Note over CPP: CPP.RoleGranted
+    Note over cashbackVault: cashbackVault.RoleGranted
   end
   rect rgb(230,255,230)
     deployer->>cashbackController: deployer calls cashbackController.setCashbackVault
@@ -85,7 +85,7 @@ sequenceDiagram
 
 | # | Contract | Event | Args |
 | - | -------- | ----- | ---- |
-| 1 | CPP | RoleGranted | `[0xd10feaa7..70c5af57cf, deployer, deployer]` |
+| 1 | cashbackVault | RoleGranted | `[0xd10feaa7..70c5af57cf, deployer, deployer]` |
 
 **Balances**
 
@@ -120,7 +120,7 @@ sequenceDiagram
 
 | # | Contract | Event | Args |
 | - | -------- | ----- | ---- |
-| 1 | CPP | RoleGranted | `[0xb9c949ce..0c572ffcc2, cashbackController, deployer]` |
+| 1 | cashbackVault | RoleGranted | `[0xb9c949ce..0c572ffcc2, cashbackController, deployer]` |
 
 **Balances**
 
@@ -155,7 +155,7 @@ sequenceDiagram
 
 | # | Contract | Event | Args |
 | - | -------- | ----- | ---- |
-| 1 | CPP | RoleGranted | `[0x241ecf16..7caa831b08, deployer, deployer]` |
+| 1 | cashbackVault | RoleGranted | `[0x241ecf16..7caa831b08, deployer, deployer]` |
 
 **Balances**
 

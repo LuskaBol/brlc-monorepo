@@ -1,5 +1,22 @@
 /**
  * @type {import("prettier").Config}
  */
-import config from "./packages/prettier-config/index.js"; // TODO remove that package after migration to monorepo
-export default config;
+const config = {
+  plugins: ["prettier-plugin-solidity"],
+  overrides: [
+    {
+      files: "*.sol",
+      options: {
+        compiler: "0.8.28",
+        parser: "slang",
+        printWidth: 120,
+        tabWidth: 4,
+        semi: true,
+        useTabs: false,
+        singleQuote: false,
+        bracketSpacing: true,
+      },
+    },
+  ],
+};
+module.exports = config;

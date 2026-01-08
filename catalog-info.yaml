@@ -6,7 +6,6 @@ metadata:
   description: Monorepo for CW smart contracts
   annotations:
     github.com/project-slug: cloudwalk/brlc-monorepo
-  # backstage.io/techdocs-ref: dir:.
   tags:
     - solidity
     - typescript
@@ -21,9 +20,9 @@ metadata:
     cloudwalk.io/critical-level: high
 spec:
   type: monorepo
-  system: Blockchain
+  system: default/blockchain
   lifecycle: production
-  owner: team-blockchain
+  owner: default/team-blockchain
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -44,9 +43,9 @@ metadata:
       icon: github
 spec:
   type: smart-contract
-  system: Blockchain
+  system: default/blockchain
   lifecycle: production
-  owner: team-blockchain
+  owner: default/team-blockchain
   subcomponentOf: brlc/monorepo
 
 ---
@@ -68,9 +67,9 @@ metadata:
       icon: github
 spec:
   type: smart-contract
-  system: Blockchain
+  system: default/blockchain
   lifecycle: production
-  owner: team-blockchain
+  owner: default/team-blockchain
   subcomponentOf: brlc/monorepo
 
 ---
@@ -92,9 +91,9 @@ metadata:
       icon: github
 spec:
   type: smart-contract
-  system: Blockchain
+  system: default/blockchain
   lifecycle: production
-  owner: team-blockchain
+  owner: default/team-blockchain
   subcomponentOf: brlc/monorepo
 
 ---
@@ -107,18 +106,18 @@ metadata:
   annotations:
     github.com/project-slug: cloudwalk/brlc-monorepo
   tags:
-  - solidity
-  - typescript
-  - smart-contract
+    - solidity
+    - typescript
+    - smart-contract
   links:
     - url: https://github.com/cloudwalk/brlc-monorepo/tree/main/contracts/blueprint
       title: Package
       icon: github
 spec:
   type: smart-contract
-  system: Blockchain
+  system: default/blockchain
   lifecycle: production
-  owner: team-blockchain
+  owner: default/team-blockchain
   subcomponentOf: brlc/monorepo
 
 ---
@@ -140,9 +139,9 @@ metadata:
       icon: github
 spec:
   type: smart-contract
-  system: Blockchain
+  system: default/blockchain
   lifecycle: production
-  owner: team-blockchain
+  owner: default/team-blockchain
   subcomponentOf: brlc/monorepo
 
 ---
@@ -164,9 +163,9 @@ metadata:
       icon: github
 spec:
   type: smart-contract
-  system: Blockchain
+  system: default/blockchain
   lifecycle: production
-  owner: team-blockchain
+  owner: default/team-blockchain
   subcomponentOf: brlc/monorepo
 
 ---
@@ -188,9 +187,9 @@ metadata:
       icon: github
 spec:
   type: smart-contract
-  system: Blockchain
+  system: default/blockchain
   lifecycle: production
-  owner: team-blockchain
+  owner: default/team-blockchain
   subcomponentOf: brlc/monorepo
 
 ---
@@ -212,9 +211,9 @@ metadata:
       icon: github
 spec:
   type: smart-contract
-  system: Blockchain
+  system: default/blockchain
   lifecycle: production
-  owner: team-blockchain
+  owner: default/team-blockchain
   subcomponentOf: brlc/monorepo
 
 ---
@@ -236,9 +235,9 @@ metadata:
       icon: github
 spec:
   type: smart-contract
-  system: Blockchain
+  system: default/blockchain
   lifecycle: production
-  owner: team-blockchain
+  owner: default/team-blockchain
   subcomponentOf: brlc/monorepo
 
 ---
@@ -260,9 +259,9 @@ metadata:
       icon: github
 spec:
   type: smart-contract
-  system: Blockchain
+  system: default/blockchain
   lifecycle: production
-  owner: team-blockchain
+  owner: default/team-blockchain
   subcomponentOf: brlc/monorepo
 
 ---
@@ -284,9 +283,9 @@ metadata:
       icon: github
 spec:
   type: smart-contract
-  system: Blockchain
+  system: default/blockchain
   lifecycle: production
-  owner: team-blockchain
+  owner: default/team-blockchain
   subcomponentOf: brlc/monorepo
 
 ---
@@ -308,9 +307,9 @@ metadata:
       icon: github
 spec:
   type: smart-contract
-  system: Blockchain
+  system: default/blockchain
   lifecycle: production
-  owner: team-blockchain
+  owner: default/team-blockchain
   subcomponentOf: brlc/monorepo
 
 ---
@@ -332,9 +331,9 @@ metadata:
       icon: github
 spec:
   type: smart-contract
-  system: Blockchain
+  system: default/blockchain
   lifecycle: production
-  owner: team-blockchain
+  owner: default/team-blockchain
   subcomponentOf: brlc/monorepo
 
 ---
@@ -356,9 +355,9 @@ metadata:
       icon: github
 spec:
   type: smart-contract
-  system: Blockchain
+  system: default/blockchain
   lifecycle: production
-  owner: team-blockchain
+  owner: default/team-blockchain
   subcomponentOf: brlc/monorepo
 
 ---
@@ -380,9 +379,9 @@ metadata:
       icon: github
 spec:
   type: smart-contract
-  system: Blockchain
+  system: default/blockchain
   lifecycle: production
-  owner: team-blockchain
+  owner: default/team-blockchain
   subcomponentOf: brlc/monorepo
 
 ---
@@ -404,7 +403,7 @@ metadata:
       icon: github
 spec:
   type: smart-contract
-  system: Blockchain
+  system: default/blockchain
   lifecycle: production
-  owner: team-blockchain
+  owner: default/team-blockchain
   subcomponentOf: brlc/monorepo

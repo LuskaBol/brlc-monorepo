@@ -5,14 +5,13 @@
     "@openzeppelin/contracts-upgradeable": "5.4.0"
   },
   "devDependencies": {
-    "@nomicfoundation/hardhat-toolbox": "catalog:",
-    "@nomicfoundation/hardhat-ethers": "catalog:",
-    "@nomicfoundation/hardhat-network-helpers": "catalog:",
-    "@openzeppelin/hardhat-upgrades": "catalog:",
-    "ethers": "catalog:",
-    "dotenv": "catalog:",
-    "hardhat": "catalog:",
-    "hardhat-contract-sizer": "catalog:"
+    "@nomicfoundation/hardhat-ethers": "catalog:hardhat2",
+    "@nomicfoundation/hardhat-network-helpers": "catalog:hardhat2",
+    "hardhat": "catalog:hardhat2",
+    "chai": "catalog:hardhat2",
+    "typescript": "catalog:",
+    "@cloudwalk/hardhat2-config": "workspace:",
+    "ethers": "catalog:"
   },
   "devEngines": {
     "runtime": {

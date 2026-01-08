@@ -1,9 +1,9 @@
 import path from "node:path";
 import fs from "node:fs/promises";
-import type { Scenario } from "./Scenario.js";
+import type { Scenario } from "./Scenario";
 import Handlebars from "handlebars";
-import { strigifyLogArgumentsVerbose, stringifyInline, stringifyMultiline } from "./utils.js";
-import { renderSequenceDiagram } from "./sequenceDiagram.js";
+import { strigifyLogArgumentsVerbose, stringifyInline, stringifyMultiline } from "./utils";
+import { renderSequenceDiagram } from "./sequenceDiagram";
 
 async function getFileName(testFile: string) {
   const parsed = path.parse(testFile);

@@ -8,7 +8,10 @@
     "eslint:fix": "eslint --fix \"**/*.{js,ts}\"",
     "eslint:check": "eslint",
     "flatten:contract": "./scripts/flatten-contract.bash",
-    "get-e2e-contracts": "./scripts/get-contracts-for-stratus-test.js"
+    "get-e2e-contracts": "./scripts/get-contracts-for-stratus-test.js",
+    "test": "pnpm run -r test",
+    "test:coverage": "pnpm run -r test:coverage",
+    "build": "pnpm run -r build"
   },
   "lint-staged": {
     "**/*.{js,ts}": [
@@ -19,12 +22,16 @@
     ]
   },
   "devDependencies": {
+    "@stylistic/eslint-plugin": "^5.2.3",
     "eslint": "^9.39.2",
+    "eslint-plugin-promise": "^7.2.1",
+    "globals": "^17.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
-    "prettier-plugin-solidity": "^2.2.0",
-    "typescript": "catalog:"
+    "prettier-plugin-solidity": "^2.2.1",
+    "typescript": "catalog:",
+    "typescript-eslint": "^8.38.0"
   },
   "devEngines": {
     "runtime": {
