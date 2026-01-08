@@ -1,4 +1,4 @@
-name: Build and test smart contracts in monorepo
+name: Test smart contracts in hardhat and collect coverage
 
 on:
   push:
@@ -7,21 +7,21 @@ on:
     branches: ["*"]
 
 jobs:
-  build:
+  tests:
     strategy:
       matrix:
         os:
-          - ubuntu-latest
-          - macos-latest
           - windows-latest
+          - macos-latest
     runs-on: ${{ matrix.os }}
-    name: ${{ matrix.os }}
+    name: Tests (${{ matrix.os }})
 
     steps:
       - name: Set git to use LF
         run: |
           git config --global core.autocrlf false
           git config --global core.eol lf
+
       - name: Checkout code
         uses: actions/checkout@v6
 
@@ -40,22 +40,42 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GHA_PAT }}
 
-      - name: Run eslint
-        run: pnpm run eslint:check # check all with concurrency -1 (cpu core count)
+      - name: Build all contracts
+        run: pnpm run -r --workspace-concurrency=-1 build
+
+      - name: Test all contracts
+        run: pnpm run -r --workspace-concurrency=1 test
+
+  tests-coverage:
+    runs-on: ubuntu-latest
+    name: Tests with coverage
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .tool-versions
+          cache: pnpm
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@cloudwalk"
+
+      - run: pnpm install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GHA_PAT }}
 
       - name: Build all contracts
-        run: pnpm run -r --workspace-concurrency=-1 build # build all with concurrency -1 (cpu core count)
+        run: pnpm run -r --workspace-concurrency=-1 build
 
-      - name: Test all contracts in hardhat network without coverage if not on Linux
-        run: pnpm run -r --workspace-concurrency=1 test
-        if: runner.os != 'Linux'
-
-      - name: Test all contracts in hardhat network with coverage if on Linux
+      - name: Test all contracts with coverage
         run: pnpm run -r --workspace-concurrency=1 test:coverage
-        if: runner.os == 'Linux'
 
       - name: Upload results to Codecov
-        if: runner.os == 'Linux'
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
