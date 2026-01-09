@@ -1,8 +1,7 @@
-import { ethers, network, upgrades } from "hardhat";
+import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
 import { Contract, ContractFactory, TransactionResponse } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import {
   connect,
   getAddress,
@@ -10,7 +9,8 @@ import {
   getTxTimestamp,
   increaseBlockTimestamp,
   proveTx,
-} from "../test-utils/eth";
+  setUpFixture,
+} from "@cloudwalk/brlc-test-utils";
 
 const HOUR_IN_SECONDS = 3600;
 const DAY_IN_SECONDS = 24 * HOUR_IN_SECONDS;
@@ -61,14 +61,6 @@ interface Version {
   patch: number;
 
   [key: string]: number; // Indexing signature to ensure that fields are iterated over in a key-value style
-}
-
-export async function setUpFixture<T>(func: () => Promise<T>): Promise<T> {
-  if (network.name === "hardhat") {
-    return loadFixture(func);
-  } else {
-    return func();
-  }
 }
 
 function toDayAndTime(timestampInSeconds: number): { dayIndex: number; secondsOfDay: number } {

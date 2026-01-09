@@ -4,6 +4,7 @@ import { Contract, ContractFactory, TransactionResponse } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import {
   checkContractUupsUpgrading,
+  checkEquality,
   connect,
   deployAndConnectContract,
   getAddress,
@@ -11,9 +12,11 @@ import {
   getNumberOfEvents,
   getTxTimestamp,
   increaseBlockTimestampTo,
+  maxUintForBits,
   proveTx,
-} from "../test-utils/eth";
-import { checkEquality, maxUintForBits, roundMath, setUpFixture } from "../test-utils/common";
+  roundMath,
+  setUpFixture,
+} from "@cloudwalk/brlc-test-utils";
 import { EXPECTED_VERSION } from "../test-utils/specific";
 
 enum LoanType {

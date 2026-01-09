@@ -1,0 +1,42 @@
+{
+  "name": "@cloudwalk/brlc-test-utils",
+  "description": "Shared test utilities for BRLC contracts",
+  "license": "MIT",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "ts:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "chai": "catalog:hardhat2",
+    "ethers": "catalog:"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-ethers": "catalog:hardhat2",
+    "@nomicfoundation/hardhat-network-helpers": "catalog:hardhat2",
+    "@nomicfoundation/hardhat-chai-matchers": "catalog:hardhat2",
+    "@openzeppelin/hardhat-upgrades": "catalog:hardhat2",
+    "@types/chai": "^4.0.0",
+    "@types/mocha": "^10.0.0",
+    "@types/node": "^22.0.0",
+    "hardhat": "catalog:hardhat2",
+    "typescript": "catalog:"
+  },
+  "peerDependencies": {
+    "hardhat": "catalog:hardhat2"
+  },
+  "exports": {
+    ".": {
+      "require": "./src/index.ts"
+    },
+    "./common": {
+      "require": "./src/common.ts"
+    },
+    "./eth": {
+      "require": "./src/eth.ts"
+    },
+    "./checkers": {
+      "require": "./src/checkers.ts"
+    }
+  }
+}

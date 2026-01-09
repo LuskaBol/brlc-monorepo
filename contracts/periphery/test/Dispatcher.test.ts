@@ -2,8 +2,7 @@ import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
 import { Contract, ContractFactory } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { checkContractUupsUpgrading, connect, getAddress, proveTx } from "../test-utils/eth";
-import { setUpFixture } from "../test-utils/common";
+import { checkContractUupsUpgrading, connect, getAddress, proveTx, setUpFixture } from "@cloudwalk/brlc-test-utils";
 
 const ADDRESS_ZERO = ethers.ZeroAddress;
 

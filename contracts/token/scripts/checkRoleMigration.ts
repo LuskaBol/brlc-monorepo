@@ -1,7 +1,7 @@
 import { ethers, upgrades } from "hardhat";
 import { Contract, ContractFactory } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { proveTx } from "../test-utils/eth";
+import { proveTx } from "@cloudwalk/brlc-test-utils";
 import { expect } from "chai";
 
 // Script input parameters

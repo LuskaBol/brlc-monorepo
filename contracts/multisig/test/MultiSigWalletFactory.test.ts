@@ -2,7 +2,7 @@ import { ethers } from "hardhat";
 import { expect } from "chai";
 import { Contract, ContractFactory } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { setUpFixture } from "../test-utils/common";
+import { setUpFixture } from "@cloudwalk/brlc-test-utils";
 
 describe("Contract 'MultiSigWalletFactory'", () => {
   const ADDRESS_ZERO = ethers.ZeroAddress;

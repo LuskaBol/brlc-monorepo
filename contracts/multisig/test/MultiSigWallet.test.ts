@@ -2,8 +2,14 @@ import { ethers, network, upgrades } from "hardhat";
 import { expect } from "chai";
 import { Contract, ContractFactory } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { connect, getAddress, getTxTimestamp, increaseBlockTimestamp, proveTx } from "../test-utils/eth";
-import { setUpFixture } from "../test-utils/common";
+import {
+  connect,
+  getAddress,
+  getTxTimestamp,
+  increaseBlockTimestamp,
+  proveTx,
+  setUpFixture,
+} from "@cloudwalk/brlc-test-utils";
 
 interface Tx {
   to: string;

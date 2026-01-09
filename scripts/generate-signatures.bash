@@ -9,7 +9,6 @@ mkdir -p -- "$SIGNATURES_DIR"
 
 export MISE_BACKENDS_SOLIDITY=asdf:diegodorado/asdf-solidity
 
-
 for dir in "$ROOT_DIR"/contracts/*/; do
     [ -d "$dir" ] || continue
   cd "$dir"

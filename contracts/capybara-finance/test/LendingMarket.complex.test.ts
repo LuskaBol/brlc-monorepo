@@ -9,7 +9,7 @@ import {
   getLatestBlockTimestamp,
   increaseBlockTimestampTo,
   proveTx,
-} from "../test-utils/eth";
+} from "@cloudwalk/brlc-test-utils";
 
 const GRANTOR_ROLE = ethers.id("GRANTOR_ROLE");
 const ADMIN_ROLE = ethers.id("ADMIN_ROLE");

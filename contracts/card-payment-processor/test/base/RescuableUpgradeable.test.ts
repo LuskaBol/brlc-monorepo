@@ -2,8 +2,13 @@ import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
 import { Contract } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { connect, getAddress, proveTx } from "../../test-utils/eth";
-import { createRevertMessageDueToMissingRole, setUpFixture } from "../../test-utils/common";
+import {
+  connect,
+  createRevertMessageDueToMissingRole,
+  getAddress,
+  proveTx,
+  setUpFixture,
+} from "@cloudwalk/brlc-test-utils";
 
 describe("Contract 'RescuableUpgradeable'", () => {
   // Events of the library contracts

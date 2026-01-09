@@ -4,34 +4,30 @@ on:
   push:
     branches:
       - main
+      - shared-test-utils
   workflow_dispatch:
 
 jobs:
   collect-signatures:
     runs-on: ubuntu-latest
     name: Collect signatures
-
+    env:
+      MISE_BACKENDS_SOLIDITY: asdf:diegodorado/asdf-solidity
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
 
+      - name: Bootstrap workspace
+        uses: ./.github/actions/bootstrap-workspace
+        with:
+          node-auth-token: ${{ secrets.GHA_PAT }}
+
       - name: Install mise
         uses: jdx/mise-action@v3
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Use Node.js
-        uses: actions/setup-node@v6
         with:
-          node-version-file: .tool-versions
-          cache: pnpm
-          registry-url: "https://npm.pkg.github.com"
-          scope: "@cloudwalk"
-
-      - run: pnpm install
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GHA_PAT }}
+          cache_key: "mise-{{platform}}-{{install_args_hash}}"
+          # not necessary to install but to keep binaries cached by gh
+          install_args: solidity@0.8.24 solidity@0.8.28 solidity@0.8.30 solidity@0.8.16
 
       - name: Generate signatures
         run: ./scripts/generate-signatures.bash
@@ -44,6 +40,7 @@ jobs:
           path: signatures
           overwrite: true
   make-pr:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     name: Update signatures in Stratus repository
     needs: collect-signatures

@@ -2,8 +2,7 @@ import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
 import { Contract, ContractFactory } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { connect, getAddress, proveTx } from "../test-utils/eth";
-import { setUpFixture } from "../test-utils/common";
+import { connect, getAddress, proveTx, setUpFixture } from "@cloudwalk/brlc-test-utils";
 
 describe("Contract 'MultiSigWalletUpgradeable'", () => {
   const ADDRESS_ZERO = ethers.ZeroAddress;

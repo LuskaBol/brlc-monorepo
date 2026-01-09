@@ -13,3 +13,5 @@ coverage.json
 
 # Environment variables
 .env
+
+*/.openzeppelin/unknown-1337.json

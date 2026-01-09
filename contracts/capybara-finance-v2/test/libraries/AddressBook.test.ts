@@ -1,8 +1,7 @@
 import { ethers } from "hardhat";
 import { expect } from "chai";
 import * as Contracts from "../../typechain-types";
-import { setUpFixture } from "../../test-utils/common";
-import { proveTx } from "../../test-utils/eth";
+import { proveTx, setUpFixture } from "@cloudwalk/brlc-test-utils";
 import { ContractTransactionResponse } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 

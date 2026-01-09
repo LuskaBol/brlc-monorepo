@@ -7,8 +7,8 @@ import type { ContractTransactionResponse } from "ethers";
 import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { checkContractUupsUpgrading, connect, getAddress, proveTx } from "../test-utils/eth";
-import { checkEquality, setUpFixture } from "../test-utils/common";
+import { checkContractUupsUpgrading, connect, getAddress, proveTx, setUpFixture } from "@cloudwalk/brlc-test-utils";
+import { checkEquality } from "../test-utils/common";
 
 // Expected version of the contract
 const EXPECTED_VERSION = {
@@ -1726,6 +1726,7 @@ describe("Contract 'SharedWalletController'", () => {
         // Verify that participant balances are correctly decremented
         // and that appropriate events are emitted
         const { sharedWalletController, tokenMock } = await setUpFixture(deployAndConfigureContracts);
+        const walletSigner = sharedWallets[0];
         const walletAddress = sharedWallets[0].address;
         const participant = participants[0];
         const depositAmount = 10000n; // Must be divisible by ACCURACY_FACTOR
@@ -1744,8 +1745,6 @@ describe("Contract 'SharedWalletController'", () => {
           .walletBalance;
         const aggregatedBalanceAfterDeposit: bigint = await sharedWalletController.getAggregatedBalance();
 
-        // Execute withdrawal transfer using impersonated wallet signer
-        const walletSigner = await ethers.getImpersonatedSigner(walletAddress);
         const tx = connect(tokenMock, walletSigner).transfer(participant.address, withdrawAmount);
         await expect(tx).to.changeTokenBalances(
           tokenMock,
@@ -1958,7 +1957,8 @@ describe("Contract 'SharedWalletController'", () => {
 
       it("Distributes withdrawal among participants proportionally and emits required events", async () => {
         const { sharedWalletController, tokenMock } = await setUpFixture(deployAndConfigureContracts);
-        const walletAddress = sharedWallets[0].address;
+        const walletSigner = sharedWallets[0];
+        const walletAddress = walletSigner.address;
         const withdrawAmount = 10000n; // Must be divisible by ACCURACY_FACTOR
 
         // Create wallet with 2 participants and give them specific balances
@@ -1986,8 +1986,6 @@ describe("Contract 'SharedWalletController'", () => {
         const initialWalletBalance: bigint = (await sharedWalletController.getWalletOverviews([walletAddress]))[0]
           .walletBalance;
 
-        // External transfer out should deduct proportionally using impersonated wallet signer
-        const walletSigner = await ethers.getImpersonatedSigner(walletAddress);
         const tx = connect(tokenMock, walletSigner).transfer(stranger.address, withdrawAmount);
         await expect(tx).to.changeTokenBalances(
           tokenMock,
@@ -2066,9 +2064,9 @@ describe("Contract 'SharedWalletController'", () => {
 
       it("The wallet is suspended (transfer FROM a suspended wallet)", async () => {
         const { sharedWalletController, tokenMock } = await setUpFixture(deployAndConfigureContracts);
-        const walletAddress = sharedWallets[0].address;
+        const walletSigner = sharedWallets[0];
+        const walletAddress = walletSigner.address;
         const participant = participants[0];
-        const walletSigner = await ethers.getImpersonatedSigner(walletAddress);
 
         // Create wallet and suspend it (empty wallet can be suspended)
         await proveTx(connect(sharedWalletController, admin).createWallet(walletAddress, [participant.address]));
@@ -2082,7 +2080,8 @@ describe("Contract 'SharedWalletController'", () => {
 
       it("The participant balance is insufficient for proportional withdrawal", async () => {
         const { sharedWalletController, tokenMock } = await setUpFixture(deployAndConfigureContracts);
-        const walletAddress = sharedWallets[0].address;
+        const walletSigner = sharedWallets[0];
+        const walletAddress = walletSigner.address;
 
         // Create wallet with 2 participants
         await proveTx(
@@ -2097,7 +2096,6 @@ describe("Contract 'SharedWalletController'", () => {
         await proveTx(connect(tokenMock, participants[1]).transfer(walletAddress, 10000n));
 
         // Try to withdraw more than the wallet has (total is 30000n)
-        const walletSigner = await ethers.getImpersonatedSigner(walletAddress);
         const withdrawAmount = 40000n; // More than total balance, must be divisible by ACCURACY_FACTOR
         await expect(
           connect(tokenMock, walletSigner).transfer(stranger.address, withdrawAmount),
@@ -2106,7 +2104,8 @@ describe("Contract 'SharedWalletController'", () => {
 
       it("The participant balance is insufficient for a direct withdrawal", async () => {
         const { sharedWalletController, tokenMock } = await setUpFixture(deployAndConfigureContracts);
-        const walletAddress = sharedWallets[0].address;
+        const walletSigner = sharedWallets[0];
+        const walletAddress = walletSigner.address;
 
         // Create wallet with 2 participants
         await proveTx(
@@ -2129,7 +2128,6 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Try to make participant 1 (with zero balance) transfer to external address
         // This should fail with participant balance insufficient error
-        const walletSigner = await ethers.getImpersonatedSigner(walletAddress);
         await expect(
           connect(tokenMock, walletSigner).transfer(participants[1].address, 10000n),
         ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_PARTICIPANT_BALANCE_INSUFFICIENT);
@@ -2137,13 +2135,11 @@ describe("Contract 'SharedWalletController'", () => {
 
       it("The wallet balance is insufficient", async () => {
         const { sharedWalletController, tokenMock } = await setUpFixture(deployAndConfigureContracts);
-        const walletAddress = sharedWallets[0].address;
+        const walletSigner = sharedWallets[0];
+        const walletAddress = walletSigner.address;
 
         // Create wallet with participant but no balance
         await createWalletWithParticipants(sharedWalletController, walletAddress, [participants[0].address]);
-
-        // Execute withdrawal transfer using impersonated wallet signer
-        const walletSigner = await ethers.getImpersonatedSigner(walletAddress);
 
         // Try to withdraw from empty wallet - should revert with ERC20 insufficient balance
         // (The ERC20 token reverts before our wallet balance check gets executed)
@@ -2235,9 +2231,7 @@ describe("Contract 'SharedWalletController'", () => {
           walletAddress2,
           [participants[2].address],
         );
-
-        tokenMock.mint(stranger.address, MAX_UINT64 * 2n);
-
+        await tokenMock.mint(stranger.address, MAX_UINT64 * 2n);
         // first transfer almost max amount to wallet1
         await tokenMock.connect(stranger).transfer(walletAddress1, ACCURACY_FACTOR * (MAX_UINT64 / ACCURACY_FACTOR));
 
@@ -3104,7 +3098,8 @@ describe("Contract 'SharedWalletController'", () => {
 
       it("Updates correctly after withdrawals", async () => {
         const { sharedWalletController, tokenMock } = await setUpFixture(deployAndConfigureContracts);
-        const walletAddress = sharedWallets[0].address;
+        const walletSigner = sharedWallets[0];
+        const walletAddress = walletSigner.address;
         const participant = participants[0];
 
         // Create wallet and make initial deposit
@@ -3113,7 +3108,6 @@ describe("Contract 'SharedWalletController'", () => {
         expect(await sharedWalletController.getAggregatedBalance()).to.equal(20000n);
 
         // Make partial withdrawal (must be divisible by ACCURACY_FACTOR)
-        const walletSigner = await ethers.getImpersonatedSigner(walletAddress);
         await proveTx(connect(tokenMock, walletSigner).transfer(participant.address, 10000n));
         expect(await sharedWalletController.getAggregatedBalance()).to.equal(10000n);
       });
@@ -3139,7 +3133,8 @@ describe("Contract 'SharedWalletController'", () => {
   describe("Integration Workflows", () => {
     it("Handles the full workflow: create → add participants → transfers → remove participants → suspend", async () => {
       const { sharedWalletController, tokenMock } = await setUpFixture(deployAndConfigureContracts);
-      const walletAddress = sharedWallets[0].address;
+      const walletSigner = sharedWallets[0];
+      const walletAddress = walletSigner.address;
 
       // Step 1: Create wallet with initial participants
       await proveTx(connect(sharedWalletController, admin).createWallet(walletAddress, [participants[0].address]));
@@ -3186,7 +3181,6 @@ describe("Contract 'SharedWalletController'", () => {
       await proveTx(connect(tokenMock, stranger).transfer(walletAddress, 30000n));
 
       // Step 5: Withdrawals
-      const walletSigner = await ethers.getImpersonatedSigner(walletAddress);
       await proveTx(connect(tokenMock, walletSigner).transfer(participants[0].address, 10000n));
       await proveTx(connect(tokenMock, walletSigner).transfer(participants[1].address, 10000n));
 
@@ -3247,8 +3241,10 @@ describe("Contract 'SharedWalletController'", () => {
 
     it("Handles multiple wallets with overlapping participants", async () => {
       const { sharedWalletController, tokenMock } = await setUpFixture(deployAndConfigureContracts);
-      const wallet1Address = sharedWallets[0].address;
-      const wallet2Address = sharedWallets[1].address;
+      const wallet1Signer = sharedWallets[0];
+      const wallet2Signer = sharedWallets[1];
+      const wallet1Address = wallet1Signer.address;
+      const wallet2Address = wallet2Signer.address;
 
       // Create overlapping participant sets
       // Wallet 1: participants[0], participants[1], participants[2]
@@ -3321,7 +3317,7 @@ describe("Contract 'SharedWalletController'", () => {
 
       // Test operations on one wallet do not affect the other
       // Clear balance first to allow suspension
-      const wallet1Signer = await ethers.getImpersonatedSigner(wallet1Address);
+
       const p1BalanceW1: bigint = await sharedWalletController.getParticipantBalance(
         wallet1Address,
         participants[0].address,
@@ -3383,7 +3379,6 @@ describe("Contract 'SharedWalletController'", () => {
         participants[1].address,
       );
       if (participant1BalanceWallet1 > 0) {
-        const wallet1Signer = await ethers.getImpersonatedSigner(wallet1Address);
         await proveTx(connect(tokenMock, wallet1Signer).transfer(participants[1].address, participant1BalanceWallet1));
       }
 
@@ -3405,7 +3400,8 @@ describe("Contract 'SharedWalletController'", () => {
 
     it("Handles the wallet lifecycle: create → suspend → resume → suspend", async () => {
       const { sharedWalletController, tokenMock } = await setUpFixture(deployAndConfigureContracts);
-      const walletAddress = sharedWallets[0].address;
+      const walletSigner = sharedWallets[0];
+      const walletAddress = walletSigner.address;
 
       // Phase 1: Creation
       await proveTx(
@@ -3447,7 +3443,6 @@ describe("Contract 'SharedWalletController'", () => {
       expect(participant1Balance).to.be.greaterThan(0);
 
       // Phase 2: Clear balances for suspension
-      const walletSigner = await ethers.getImpersonatedSigner(walletAddress);
       await proveTx(connect(tokenMock, walletSigner).transfer(participants[0].address, participant0Balance));
       await proveTx(connect(tokenMock, walletSigner).transfer(participants[1].address, participant1Balance));
 

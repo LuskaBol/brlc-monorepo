@@ -7,9 +7,6 @@ import {
   maxUintForBits,
   resultToObject,
   setUpFixture,
-} from "../test-utils/common";
-import * as Contracts from "../typechain-types";
-import {
   checkTokenPath,
   getAddress,
   getBlockTimestamp,
@@ -17,7 +14,8 @@ import {
   getTxTimestamp,
   increaseBlockTimestampTo,
   proveTx,
-} from "../test-utils/eth";
+} from "@cloudwalk/brlc-test-utils";
+import * as Contracts from "../typechain-types";
 import { DeployProxyOptions } from "@openzeppelin/hardhat-upgrades/dist/utils";
 import { ContractTransactionResponse } from "ethers";
 

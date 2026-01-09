@@ -1,7 +1,7 @@
 import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { setUpFixture } from "../../test-utils/common";
+import { setUpFixture } from "@cloudwalk/brlc-test-utils";
 import * as Contracts from "../../typechain-types";
 
 const ADDRESS_ZERO = ethers.ZeroAddress;

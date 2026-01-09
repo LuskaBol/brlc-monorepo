@@ -4,13 +4,15 @@ import { Contract, ContractFactory } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import {
   checkContractUupsUpgrading,
+  checkEquality,
   connect,
   deployAndConnectContract,
   getAddress,
   getLatestBlockTimestamp,
+  maxUintForBits,
   proveTx,
-} from "../test-utils/eth";
-import { checkEquality, maxUintForBits, setUpFixture } from "../test-utils/common";
+  setUpFixture,
+} from "@cloudwalk/brlc-test-utils";
 import { EXPECTED_VERSION } from "../test-utils/specific";
 
 enum BorrowingPolicy {

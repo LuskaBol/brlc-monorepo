@@ -11,7 +11,6 @@
     "@cloudwalk/chainshot": "workspace:",
     "hardhat": "catalog:hardhat2",
     "@nomicfoundation/hardhat-ethers": "catalog:hardhat2",
-    "@nomicfoundation/hardhat-network-helpers": "catalog:hardhat2",
     "@nomicfoundation/hardhat-toolbox": "catalog:hardhat2",
     "@openzeppelin/hardhat-upgrades": "catalog:hardhat2",
     "hardhat-contract-sizer": "catalog:hardhat2",

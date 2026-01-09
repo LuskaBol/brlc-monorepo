@@ -1,6 +1,4 @@
 import { expect } from "chai";
-import { network } from "hardhat";
-import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 
 // Define base types for our objects
 type BaseObject = Record<string, unknown>;
@@ -25,6 +23,8 @@ export function checkEquality<T extends Record<string, unknown>>(
   index?: number,
   props: { ignoreObjects: boolean } = { ignoreObjects: false },
 ): void {
+  console.warn(`checkEquality in shared-wallet-controller/test-utils/common.ts is deprecated. 
+    Use checkEquality from @cloudwalk/brlc-test-utils instead.`);
   const indexString = index == null ? "" : ` with index: ${index}`;
 
   // Convert array to object if needed
@@ -61,16 +61,4 @@ export function checkEquality<T extends Record<string, unknown>>(
       `Mismatch in the "${property}" property between the actual object and expected one${indexString}`,
     );
   }
-}
-
-export async function setUpFixture<T>(func: () => Promise<T>): Promise<T> {
-  if (network.name === "hardhat") {
-    return loadFixture(func);
-  } else {
-    return func();
-  }
-}
-
-export function maxUintForBits(numberOfBits: number): bigint {
-  return 2n ** BigInt(numberOfBits) - 1n;
 }

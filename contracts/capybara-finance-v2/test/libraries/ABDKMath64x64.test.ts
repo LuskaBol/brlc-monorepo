@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { maxUintForBits, setUpFixture } from "../../test-utils/common";
+import { maxUintForBits, setUpFixture } from "@cloudwalk/brlc-test-utils";
 import { ethers } from "hardhat";
 import * as Contracts from "../../typechain-types";
 

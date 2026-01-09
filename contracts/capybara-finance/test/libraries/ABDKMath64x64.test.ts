@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 import { expect } from "chai";
 import { Contract, ContractFactory } from "ethers";
-import { maxUintForBits, setUpFixture } from "../../test-utils/common";
+import { maxUintForBits, setUpFixture } from "@cloudwalk/brlc-test-utils";
 
 const uint256Max = maxUintForBits(256);
 const int128Max = maxUintForBits(127);

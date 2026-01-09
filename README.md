@@ -1,5 +1,9 @@
 # BRLC Monorepo
 
+[![E2E tests in Stratus](https://github.com/cloudwalk/brlc-monorepo/actions/workflows/e2e-tests-stratus.yml/badge.svg)](https://github.com/cloudwalk/brlc-monorepo/actions/workflows/e2e-tests-stratus.yml)
+[![Tests](https://github.com/cloudwalk/brlc-monorepo/actions/workflows/tests.yml/badge.svg)](https://github.com/cloudwalk/brlc-monorepo/actions/workflows/tests.yml)
+[![Check code style](https://github.com/cloudwalk/brlc-monorepo/actions/workflows/codestyle.yml/badge.svg)](https://github.com/cloudwalk/brlc-monorepo/actions/workflows/codestyle.yml)
+
 ![brlc-cover](./docs/media/brlc-cover.png)
 
 This repository all smart contracts and utilities for smart contracts development
@@ -35,26 +39,10 @@ This repository all smart contracts and utilities for smart contracts developmen
 
 #### Tasks
 
-- [x] Setup components codecov
-- [x] Setup common precommit hooks and linting
-- [x] Create CI to sync contracts from monorepo to legacy repos
-- [x] Create CI to use in monorepo instead
-- [x] Backstage files
-- [x] Rename repository
 - [ ] Fix typescript
 - [ ] Add ts checker to CI
-- [ ] fix eslint
-- [ ] Add eslint to CI
 
 #### Monorepo migration roadmap
 
-- [x] Move all contracts to the monorepo
-- [ ] Configure github repo with right permissions and rules
-- [ ] Change readmes to use monorepo links
-  - Codecov badges to use component name
-  - Project setup documentation to use monorepo links
-  - License to use monorepo links
-- [ ] Migrate Stratus to the monorepo contracts
 - [ ] Join contracts by workspace and cross-reference contracts
 - [ ] Extract common contracts to a separate packages
-- [ ] Use workspace defined versions for dependencies (hardhat, openzeppelin, etc.)

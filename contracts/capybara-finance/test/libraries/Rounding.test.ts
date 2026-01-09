@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 import { expect } from "chai";
 import { Contract, ContractFactory } from "ethers";
-import { setUpFixture } from "../../test-utils/common";
+import { setUpFixture } from "@cloudwalk/brlc-test-utils";
 
 describe("Library 'Rounding'", () => {
   let roundingContractFactory: ContractFactory;

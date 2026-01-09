@@ -13,10 +13,18 @@ env:
 jobs:
   build-stratus:
     runs-on: ubuntu-latest
-    name: Build Stratus artifact
+    name: Build Stratus binary
 
     steps:
+      - name: Restore Stratus binary from cache
+        id: stratus-cache
+        uses: actions/cache@v4
+        with:
+          path: ./stratus-bin/stratus
+          key: stratus-binary-${{ runner.os }}-${{ env.STRATUS_REF }}
+
       - name: Install system dependencies
+        if: steps.stratus-cache.outputs.cache-hit != 'true'
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
@@ -30,42 +38,24 @@ jobs:
             libclang-dev
 
       - name: Setup Rust toolchain
+        if: steps.stratus-cache.outputs.cache-hit != 'true'
         uses: dtolnay/rust-toolchain@stable
 
       - name: Checkout Stratus sources
+        if: steps.stratus-cache.outputs.cache-hit != 'true'
         uses: actions/checkout@v6
         with:
           repository: cloudwalk/stratus
           ref: ${{ env.STRATUS_REF }}
 
-      - name: Cache Stratus target dir
-        id: stratus-target-cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: stratus-build-${{ runner.os }}-${{ env.STRATUS_REF }}
-
-      - name: Build Stratus (debug, cached)
+      - name: Build Stratus
+        if: steps.stratus-cache.outputs.cache-hit != 'true'
         shell: bash
         run: |
           set -euo pipefail
-          if [[ "${{ steps.stratus-target-cache.outputs.cache-hit }}" == "true" && -x target/debug/stratus ]]; then
-            echo "Stratus binary already present from cache; skipping cargo build."
-            exit 0
-          fi
-
           cargo build --features dev
-
-      - name: Upload Stratus artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: stratus-bin-${{ runner.os }}-${{ env.STRATUS_REF }}
-          path: target/debug/stratus
-          if-no-files-found: error
-          overwrite: true
+          mkdir -p stratus-bin
+          cp target/debug/stratus stratus-bin/stratus
 
   contract-matrix:
     runs-on: ubuntu-latest
@@ -102,27 +92,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Use Node.js
-        uses: actions/setup-node@v6
+      - name: Bootstrap workspace
+        uses: ./.github/actions/bootstrap-workspace
         with:
-          node-version-file: .tool-versions
-          cache: pnpm
-          registry-url: "https://npm.pkg.github.com"
-          scope: "@cloudwalk"
+          node-auth-token: ${{ secrets.GHA_PAT }}
 
-      - name: Install dependencies
-        run: pnpm install
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GHA_PAT }}
-
-      - name: Download Stratus artifact
-        uses: actions/download-artifact@v7
+      - name: Restore Stratus binary from cache
+        uses: actions/cache/restore@v4
         with:
-          name: stratus-bin-${{ runner.os }}-${{ env.STRATUS_REF }}
-          path: ./stratus-bin
+          path: ./stratus-bin/stratus
+          key: stratus-binary-${{ runner.os }}-${{ env.STRATUS_REF }}
+          fail-on-cache-miss: true
 
       - name: Start Stratus
         shell: bash

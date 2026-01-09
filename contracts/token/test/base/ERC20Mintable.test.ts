@@ -2,8 +2,14 @@ import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
 import { Contract, ContractFactory, TransactionResponse } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { connect, getLatestBlockTimestamp, increaseBlockTimestampTo, proveTx } from "../../test-utils/eth";
-import { maxUintForBits, setUpFixture } from "../../test-utils/common";
+import {
+  connect,
+  getLatestBlockTimestamp,
+  increaseBlockTimestampTo,
+  maxUintForBits,
+  proveTx,
+  setUpFixture,
+} from "@cloudwalk/brlc-test-utils";
 
 describe("Contract 'ERC20Mintable'", async () => {
   const TOKEN_NAME = "BRL Coin";

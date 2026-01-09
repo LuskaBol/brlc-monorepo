@@ -5,8 +5,8 @@
     "@openzeppelin/contracts-upgradeable": "5.5.0"
   },
   "devDependencies": {
+    "@cloudwalk/brlc-test-utils": "workspace:",
     "@nomicfoundation/hardhat-ethers": "catalog:hardhat2",
-    "@nomicfoundation/hardhat-network-helpers": "catalog:hardhat2",
     "hardhat": "catalog:hardhat2",
     "chai": "catalog:hardhat2",
     "typescript": "catalog:",
@@ -24,7 +24,7 @@
     "build": "hardhat compile",
     "test": "hardhat test",
     "test:coverage": "hardhat coverage",
-    "test:stratus-disabled": "hardhat test --network stratus",
+    "test:stratus": "hardhat test --network stratus",
     "contracts:size": "hardhat size-contracts"
   }
 }

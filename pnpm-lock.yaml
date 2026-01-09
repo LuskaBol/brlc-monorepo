@@ -16,6 +16,9 @@ catalogs:
       specifier: ^5.9.3
       version: 5.9.3
   hardhat2:
+    '@nomicfoundation/hardhat-chai-matchers':
+      specifier: ^2.1.0
+      version: 2.1.0
     '@nomicfoundation/hardhat-ethers':
       specifier: ^3.1.3
       version: 3.1.3
@@ -87,15 +90,15 @@ importers:
         specifier: 5.4.0
         version: 5.4.0(@openzeppelin/contracts@5.4.0)
     devDependencies:
+      '@cloudwalk/brlc-test-utils':
+        specifier: 'workspace:'
+        version: link:../../packages/brlc-test-utils
       '@cloudwalk/hardhat2-config':
         specifier: 'workspace:'
         version: link:../../packages/hardhat2-config
       '@nomicfoundation/hardhat-ethers':
         specifier: catalog:hardhat2
         version: 3.1.3(ethers@6.16.0)(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
-      '@nomicfoundation/hardhat-network-helpers':
-        specifier: catalog:hardhat2
-        version: 1.1.2(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
       chai:
         specifier: catalog:hardhat2
         version: 4.5.0
@@ -118,15 +121,15 @@ importers:
         specifier: 5.4.0
         version: 5.4.0(@openzeppelin/contracts@5.4.0)
     devDependencies:
+      '@cloudwalk/brlc-test-utils':
+        specifier: 'workspace:'
+        version: link:../../packages/brlc-test-utils
       '@cloudwalk/hardhat2-config':
         specifier: 'workspace:'
         version: link:../../packages/hardhat2-config
       '@nomicfoundation/hardhat-ethers':
         specifier: catalog:hardhat2
         version: 3.1.3(ethers@6.16.0)(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
-      '@nomicfoundation/hardhat-network-helpers':
-        specifier: catalog:hardhat2
-        version: 1.1.2(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
       chai:
         specifier: catalog:hardhat2
         version: 4.5.0
@@ -149,6 +152,9 @@ importers:
         specifier: 4.9.6
         version: 4.9.6
     devDependencies:
+      '@cloudwalk/brlc-test-utils':
+        specifier: 'workspace:'
+        version: link:../../packages/brlc-test-utils
       '@cloudwalk/hardhat2-config':
         specifier: 'workspace:'
         version: link:../../packages/hardhat2-config
@@ -180,15 +186,15 @@ importers:
         specifier: 5.5.0
         version: 5.5.0(@openzeppelin/contracts@5.5.0)
     devDependencies:
+      '@cloudwalk/brlc-test-utils':
+        specifier: 'workspace:'
+        version: link:../../packages/brlc-test-utils
       '@cloudwalk/hardhat2-config':
         specifier: 'workspace:'
         version: link:../../packages/hardhat2-config
       '@nomicfoundation/hardhat-ethers':
         specifier: catalog:hardhat2
         version: 3.1.3(ethers@6.16.0)(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
-      '@nomicfoundation/hardhat-network-helpers':
-        specifier: catalog:hardhat2
-        version: 1.1.2(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
       chai:
         specifier: catalog:hardhat2
         version: 4.5.0
@@ -211,15 +217,15 @@ importers:
         specifier: 5.4.0
         version: 5.4.0(@openzeppelin/contracts@5.4.0)
     devDependencies:
+      '@cloudwalk/brlc-test-utils':
+        specifier: 'workspace:'
+        version: link:../../packages/brlc-test-utils
       '@cloudwalk/hardhat2-config':
         specifier: 'workspace:'
         version: link:../../packages/hardhat2-config
       '@nomicfoundation/hardhat-ethers':
         specifier: catalog:hardhat2
         version: 3.1.3(ethers@6.16.0)(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
-      '@nomicfoundation/hardhat-network-helpers':
-        specifier: catalog:hardhat2
-        version: 1.1.2(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
       chai:
         specifier: catalog:hardhat2
         version: 4.5.0
@@ -242,15 +248,18 @@ importers:
         specifier: 5.5.0
         version: 5.5.0(@openzeppelin/contracts@5.5.0)
     devDependencies:
+      '@cloudwalk/brlc-test-utils':
+        specifier: 'workspace:'
+        version: link:../../packages/brlc-test-utils
       '@cloudwalk/hardhat2-config':
         specifier: 'workspace:'
         version: link:../../packages/hardhat2-config
       '@nomicfoundation/hardhat-ethers':
         specifier: catalog:hardhat2
         version: 3.1.3(ethers@6.16.0)(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
-      '@nomicfoundation/hardhat-network-helpers':
+      '@openzeppelin/hardhat-upgrades':
         specifier: catalog:hardhat2
-        version: 1.1.2(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+        version: 3.9.1(@nomicfoundation/hardhat-ethers@3.1.3(ethers@6.16.0)(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(@nomicfoundation/hardhat-verify@2.1.3(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(ethers@6.16.0)(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
       chai:
         specifier: catalog:hardhat2
         version: 4.5.0
@@ -273,15 +282,18 @@ importers:
         specifier: 4.9.6
         version: 4.9.6
     devDependencies:
+      '@cloudwalk/brlc-test-utils':
+        specifier: 'workspace:'
+        version: link:../../packages/brlc-test-utils
       '@cloudwalk/hardhat2-config':
         specifier: 'workspace:'
         version: link:../../packages/hardhat2-config
+      '@nomicfoundation/hardhat-chai-matchers':
+        specifier: catalog:hardhat2
+        version: 2.1.0(@nomicfoundation/hardhat-ethers@3.1.3(ethers@6.16.0)(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(chai@4.5.0)(ethers@6.16.0)(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
       '@nomicfoundation/hardhat-ethers':
         specifier: catalog:hardhat2
         version: 3.1.3(ethers@6.16.0)(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
-      '@nomicfoundation/hardhat-network-helpers':
-        specifier: catalog:hardhat2
-        version: 1.1.2(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
       chai:
         specifier: catalog:hardhat2
         version: 4.5.0
@@ -304,15 +316,15 @@ importers:
         specifier: 5.4.0
         version: 5.4.0(@openzeppelin/contracts@5.4.0)
     devDependencies:
+      '@cloudwalk/brlc-test-utils':
+        specifier: 'workspace:'
+        version: link:../../packages/brlc-test-utils
       '@cloudwalk/hardhat2-config':
         specifier: 'workspace:'
         version: link:../../packages/hardhat2-config
       '@nomicfoundation/hardhat-ethers':
         specifier: catalog:hardhat2
         version: 3.1.3(ethers@6.16.0)(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
-      '@nomicfoundation/hardhat-network-helpers':
-        specifier: catalog:hardhat2
-        version: 1.1.2(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
       chai:
         specifier: catalog:hardhat2
         version: 4.5.0
@@ -335,15 +347,15 @@ importers:
         specifier: 5.4.0
         version: 5.4.0(@openzeppelin/contracts@5.4.0)
     devDependencies:
+      '@cloudwalk/brlc-test-utils':
+        specifier: 'workspace:'
+        version: link:../../packages/brlc-test-utils
       '@cloudwalk/hardhat2-config':
         specifier: 'workspace:'
         version: link:../../packages/hardhat2-config
       '@nomicfoundation/hardhat-ethers':
         specifier: catalog:hardhat2
         version: 3.1.3(ethers@6.16.0)(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
-      '@nomicfoundation/hardhat-network-helpers':
-        specifier: catalog:hardhat2
-        version: 1.1.2(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
       chai:
         specifier: catalog:hardhat2
         version: 4.5.0
@@ -366,15 +378,15 @@ importers:
         specifier: 5.5.0
         version: 5.5.0(@openzeppelin/contracts@5.5.0)
     devDependencies:
+      '@cloudwalk/brlc-test-utils':
+        specifier: 'workspace:'
+        version: link:../../packages/brlc-test-utils
       '@cloudwalk/hardhat2-config':
         specifier: 'workspace:'
         version: link:../../packages/hardhat2-config
       '@nomicfoundation/hardhat-ethers':
         specifier: catalog:hardhat2
         version: 3.1.3(ethers@6.16.0)(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
-      '@nomicfoundation/hardhat-network-helpers':
-        specifier: catalog:hardhat2
-        version: 1.1.2(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
       chai:
         specifier: catalog:hardhat2
         version: 4.5.0
@@ -397,15 +409,15 @@ importers:
         specifier: 4.9.6
         version: 4.9.6
     devDependencies:
+      '@cloudwalk/brlc-test-utils':
+        specifier: 'workspace:'
+        version: link:../../packages/brlc-test-utils
       '@cloudwalk/hardhat2-config':
         specifier: 'workspace:'
         version: link:../../packages/hardhat2-config
       '@nomicfoundation/hardhat-ethers':
         specifier: catalog:hardhat2
         version: 3.1.3(ethers@6.16.0)(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
-      '@nomicfoundation/hardhat-network-helpers':
-        specifier: catalog:hardhat2
-        version: 1.1.2(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
       chai:
         specifier: catalog:hardhat2
         version: 4.5.0
@@ -428,15 +440,15 @@ importers:
         specifier: 5.4.0
         version: 5.4.0(@openzeppelin/contracts@5.4.0)
     devDependencies:
+      '@cloudwalk/brlc-test-utils':
+        specifier: 'workspace:'
+        version: link:../../packages/brlc-test-utils
       '@cloudwalk/hardhat2-config':
         specifier: 'workspace:'
         version: link:../../packages/hardhat2-config
       '@nomicfoundation/hardhat-ethers':
         specifier: catalog:hardhat2
         version: 3.1.3(ethers@6.16.0)(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
-      '@nomicfoundation/hardhat-network-helpers':
-        specifier: catalog:hardhat2
-        version: 1.1.2(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
       chai:
         specifier: catalog:hardhat2
         version: 4.5.0
@@ -459,15 +471,15 @@ importers:
         specifier: 5.4.0
         version: 5.4.0(@openzeppelin/contracts@5.4.0)
     devDependencies:
+      '@cloudwalk/brlc-test-utils':
+        specifier: 'workspace:'
+        version: link:../../packages/brlc-test-utils
       '@cloudwalk/hardhat2-config':
         specifier: 'workspace:'
         version: link:../../packages/hardhat2-config
       '@nomicfoundation/hardhat-ethers':
         specifier: catalog:hardhat2
         version: 3.1.3(ethers@6.16.0)(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
-      '@nomicfoundation/hardhat-network-helpers':
-        specifier: catalog:hardhat2
-        version: 1.1.2(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
       chai:
         specifier: catalog:hardhat2
         version: 4.5.0
@@ -490,15 +502,15 @@ importers:
         specifier: 5.5.0
         version: 5.5.0(@openzeppelin/contracts@5.5.0)
     devDependencies:
+      '@cloudwalk/brlc-test-utils':
+        specifier: 'workspace:'
+        version: link:../../packages/brlc-test-utils
       '@cloudwalk/hardhat2-config':
         specifier: 'workspace:'
         version: link:../../packages/hardhat2-config
       '@nomicfoundation/hardhat-ethers':
         specifier: catalog:hardhat2
         version: 3.1.3(ethers@6.16.0)(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
-      '@nomicfoundation/hardhat-network-helpers':
-        specifier: catalog:hardhat2
-        version: 1.1.2(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
       chai:
         specifier: catalog:hardhat2
         version: 4.5.0
@@ -521,15 +533,15 @@ importers:
         specifier: 5.4.0
         version: 5.4.0(@openzeppelin/contracts@5.4.0)
     devDependencies:
+      '@cloudwalk/brlc-test-utils':
+        specifier: 'workspace:'
+        version: link:../../packages/brlc-test-utils
       '@cloudwalk/hardhat2-config':
         specifier: 'workspace:'
         version: link:../../packages/hardhat2-config
       '@nomicfoundation/hardhat-ethers':
         specifier: catalog:hardhat2
         version: 3.1.3(ethers@6.16.0)(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
-      '@nomicfoundation/hardhat-network-helpers':
-        specifier: catalog:hardhat2
-        version: 1.1.2(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
       chai:
         specifier: catalog:hardhat2
         version: 4.5.0
@@ -552,21 +564,58 @@ importers:
         specifier: 5.5.0
         version: 5.5.0(@openzeppelin/contracts@5.5.0)
     devDependencies:
+      '@cloudwalk/brlc-test-utils':
+        specifier: 'workspace:'
+        version: link:../../packages/brlc-test-utils
       '@cloudwalk/hardhat2-config':
         specifier: 'workspace:'
         version: link:../../packages/hardhat2-config
       '@nomicfoundation/hardhat-ethers':
         specifier: catalog:hardhat2
         version: 3.1.3(ethers@6.16.0)(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
-      '@nomicfoundation/hardhat-network-helpers':
-        specifier: catalog:hardhat2
-        version: 1.1.2(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
       chai:
         specifier: catalog:hardhat2
         version: 4.5.0
       ethers:
         specifier: 'catalog:'
         version: 6.16.0
+      hardhat:
+        specifier: catalog:hardhat2
+        version: 2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  packages/brlc-test-utils:
+    dependencies:
+      chai:
+        specifier: catalog:hardhat2
+        version: 4.5.0
+      ethers:
+        specifier: 'catalog:'
+        version: 6.16.0
+    devDependencies:
+      '@nomicfoundation/hardhat-chai-matchers':
+        specifier: catalog:hardhat2
+        version: 2.1.0(@nomicfoundation/hardhat-ethers@3.1.3(ethers@6.16.0)(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(chai@4.5.0)(ethers@6.16.0)(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+      '@nomicfoundation/hardhat-ethers':
+        specifier: catalog:hardhat2
+        version: 3.1.3(ethers@6.16.0)(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+      '@nomicfoundation/hardhat-network-helpers':
+        specifier: catalog:hardhat2
+        version: 1.1.2(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+      '@openzeppelin/hardhat-upgrades':
+        specifier: catalog:hardhat2
+        version: 3.9.1(@nomicfoundation/hardhat-ethers@3.1.3(ethers@6.16.0)(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(@nomicfoundation/hardhat-verify@2.1.3(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)))(ethers@6.16.0)(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
+      '@types/chai':
+        specifier: ^4.0.0
+        version: 4.3.20
+      '@types/mocha':
+        specifier: ^10.0.0
+        version: 10.0.10
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.19.3
       hardhat:
         specifier: catalog:hardhat2
         version: 2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3)
@@ -616,9 +665,6 @@ importers:
       '@nomicfoundation/hardhat-ethers':
         specifier: catalog:hardhat2
         version: 3.1.3(ethers@6.16.0)(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
-      '@nomicfoundation/hardhat-network-helpers':
-        specifier: catalog:hardhat2
-        version: 1.1.2(hardhat@2.28.2(ts-node@10.9.2(@types/node@22.19.3)(typescript@5.9.3))(typescript@5.9.3))
       '@nomicfoundation/hardhat-toolbox':
         specifier: catalog:hardhat2
         version: 6.1.2(61df17e4580873308f894676d9519b24)

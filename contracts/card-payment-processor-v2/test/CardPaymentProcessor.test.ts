@@ -10,14 +10,14 @@ import {
   getTxTimestamp,
   increaseBlockTimestamp,
   proveTx,
-} from "../test-utils/eth";
+  setUpFixture,
+} from "@cloudwalk/brlc-test-utils";
 import {
   checkEquality,
   checkEventParameter,
   checkEventParameterNotEqual,
   EventParameterCheckingOptions,
-} from "../test-utils/checkers";
-import { setUpFixture } from "../test-utils/common";
+} from "@cloudwalk/brlc-test-utils/checkers";
 import * as Contracts from "../typechain-types";
 
 const MAX_UINT256 = ethers.MaxUint256;

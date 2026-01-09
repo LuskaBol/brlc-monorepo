@@ -6,13 +6,14 @@ import * as Contracts from "../typechain-types";
 import {
   checkContractUupsUpgrading,
   checkEquality,
+  getAddress,
   maxUintForBits,
+  proveTx,
   resultToObject,
   setUpFixture,
-} from "../test-utils/common";
+} from "@cloudwalk/brlc-test-utils";
 import { EXPECTED_VERSION } from "../test-utils/specific";
 import { ContractTransactionResponse } from "ethers";
-import { getAddress, proveTx } from "../test-utils/eth";
 
 const ADDRESS_ZERO = ethers.ZeroAddress;
 
@@ -500,7 +501,7 @@ describe("Contract 'CreditLineV2'", () => {
           totalActiveLoanAmount: initialBorrowerStateLinked.totalActiveLoanAmount +
             initialBorrowerStateMain.totalActiveLoanAmount + borrowedAmount,
           totalClosedLoanAmount:
-              initialBorrowerStateLinked.totalClosedLoanAmount + initialBorrowerStateMain.totalClosedLoanAmount,
+            initialBorrowerStateLinked.totalClosedLoanAmount + initialBorrowerStateMain.totalClosedLoanAmount,
         };
         checkEquality(resultToObject(actualBorrowerStateView), expectedBorrowerStateView);
 

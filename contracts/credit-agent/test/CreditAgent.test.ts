@@ -8,8 +8,8 @@ import {
   getAddress,
   proveTx,
   checkEquality,
-} from "../test-utils/eth";
-import { setUpFixture } from "../test-utils/common";
+  setUpFixture,
+} from "@cloudwalk/brlc-test-utils";
 import {
   AgentState,
   Fixture,

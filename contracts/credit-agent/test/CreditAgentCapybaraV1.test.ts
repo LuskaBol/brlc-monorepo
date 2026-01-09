@@ -2,17 +2,18 @@ import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
 import { Contract, ContractFactory, TransactionResponse } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { time } from "@nomicfoundation/hardhat-network-helpers";
 
 import {
   connect,
   getAddress,
   proveTx,
-  checkEquality,
   getBlockTimestamp,
   checkContractUupsUpgrading,
-} from "../test-utils/eth";
-import { setUpFixture } from "../test-utils/common";
+  checkEquality,
+  setUpFixture,
+  increaseBlockTimestampTo,
+} from "@cloudwalk/brlc-test-utils";
+
 import {
   AgentState,
   Fixture,
@@ -41,7 +42,7 @@ interface InstallmentCredit {
   borrower: string;
   programId: number;
   status: CreditRequestStatus;
-  durationsInPeriods: number[];
+  durationsInPeriods: bigint[];
   borrowAmounts: bigint[];
   addonAmounts: bigint[];
   penaltyInterestRates: number[];
@@ -265,7 +266,7 @@ describe("Contract 'CreditAgentCapybaraV1'", () => {
       borrower: props.borrower ?? borrower.address,
       programId: props.programId ?? LOAN_PROGRAM_ID_STUB,
       status: props.status ?? CreditRequestStatus.Nonexistent,
-      durationsInPeriods: props.durationsInPeriods ?? [10, 20],
+      durationsInPeriods: props.durationsInPeriods ?? [10n, 20n],
       borrowAmounts: props.borrowAmounts ?? [BigInt(1000), BigInt(2000)],
       addonAmounts: props.addonAmounts ?? [BigInt(100), BigInt(200)],
       penaltyInterestRates: props.penaltyInterestRates ?? [0, 0],
@@ -397,7 +398,7 @@ describe("Contract 'CreditAgentCapybaraV1'", () => {
       let creditRequest = await fixture.creditAgent.getOrdinaryCredit(txId);
       expect(creditRequest.status).to.equal(CreditRequestStatus.Initiated);
       expect(creditRequest.deadline).to.be.closeTo(txTimestamp + EXPIRATION_TIME_SECONDS, 10);
-      await time.increaseTo(creditRequest.deadline + 1n);
+      await increaseBlockTimestampTo(creditRequest.deadline + 1n);
       creditRequest = await fixture.creditAgent.getOrdinaryCredit(txId);
       expect(creditRequest.status).to.equal(CreditRequestStatus.Expired);
     });
@@ -553,7 +554,7 @@ describe("Contract 'CreditAgentCapybaraV1'", () => {
       const initiateCreditTx = await proveTx(initiateOrdinaryCredit(creditAgent, { txId }));
       const initCreditTxTimestamp = await getBlockTimestamp(initiateCreditTx);
 
-      await time.increaseTo(initCreditTxTimestamp + EXPIRATION_TIME_SECONDS * 2);
+      await increaseBlockTimestampTo(initCreditTxTimestamp + EXPIRATION_TIME_SECONDS * 2);
       const creditRequest = await creditAgent.getOrdinaryCredit(txId);
       // check that the credit is expired
       expect(creditRequest.status).to.equal(CreditRequestStatus.Expired);
@@ -840,7 +841,7 @@ describe("Contract 'CreditAgentCapybaraV1'", () => {
       it("The credit status is inappropriate to the provided hook because it is expired", async () => {
         const { fixture, txId, initCreditTxTimestamp } =
           await setUpFixture(deployAndConfigureContractsThenInitiateOrdinaryCredit);
-        await time.increaseTo(initCreditTxTimestamp + EXPIRATION_TIME_SECONDS + 1);
+        await increaseBlockTimestampTo(initCreditTxTimestamp + EXPIRATION_TIME_SECONDS + 1);
         await checkCashierHookInappropriateStatusError(fixture, {
           txId,
           hookIndex: HookIndex.CashOutRequestBefore,
@@ -1064,7 +1065,7 @@ describe("Contract 'CreditAgentCapybaraV1'", () => {
       let creditRequest = await fixture.creditAgent.getInstallmentCredit(txId);
       expect(creditRequest.status).to.equal(CreditRequestStatus.Initiated);
       expect(creditRequest.deadline).to.be.closeTo(txTimestamp + EXPIRATION_TIME_SECONDS, 10);
-      await time.increaseTo(creditRequest.deadline + 1n);
+      await increaseBlockTimestampTo(creditRequest.deadline + 1n);
       creditRequest = await fixture.creditAgent.getInstallmentCredit(txId);
       expect(creditRequest.status).to.equal(CreditRequestStatus.Expired);
     });
@@ -1128,7 +1129,7 @@ describe("Contract 'CreditAgentCapybaraV1'", () => {
 
       it("The 'durationsInPeriods' array contains a zero value", async () => {
         const { creditAgent } = await setUpFixture(deployAndConfigureContracts);
-        const credit = defineInstallmentCredit({ durationsInPeriods: [20, 0] });
+        const credit = defineInstallmentCredit({ durationsInPeriods: ["20", "0"] });
 
         await expect(initiateInstallmentCredit(creditAgent, { credit }))
           .to.be.revertedWithCustomError(creditAgent, ERROR_NAME_LOAN_DURATION_ZERO);
@@ -1163,7 +1164,7 @@ describe("Contract 'CreditAgentCapybaraV1'", () => {
 
       it("The 'durationsInPeriods' array contains a value greater than unsigned 32-bit integer", async () => {
         const { creditAgent } = await setUpFixture(deployAndConfigureContracts);
-        const credit = defineInstallmentCredit({ durationsInPeriods: [OVERFLOW_UINT32, 20] });
+        const credit = defineInstallmentCredit({ durationsInPeriods: [OVERFLOW_UINT32.toString(), "20"] });
         await expect(initiateInstallmentCredit(creditAgent, { credit }))
           .to.be.revertedWithCustomError(creditAgent, ERROR_NAME_SAFE_CAST_OVERFLOWED_UINT_DOWNCAST)
           .withArgs(32, credit.durationsInPeriods[0]);
@@ -1207,7 +1208,7 @@ describe("Contract 'CreditAgentCapybaraV1'", () => {
       it("The 'durationsInPeriods' array has different length than other arrays", async () => {
         const { creditAgent } = await setUpFixture(deployAndConfigureContracts);
         const credit = defineInstallmentCredit({
-          durationsInPeriods: [10],
+          durationsInPeriods: ["10"],
           borrowAmounts: [1000n, 2000n],
           addonAmounts: [100n, 200n],
         });
@@ -1281,7 +1282,7 @@ describe("Contract 'CreditAgentCapybaraV1'", () => {
       const txId = TX_ID_STUB_INSTALLMENT;
       const initiateInstallmentCreditTx = await proveTx(initiateInstallmentCredit(creditAgent, { txId, credit }));
       const initCreditTxTimestamp = await getBlockTimestamp(initiateInstallmentCreditTx);
-      await time.increaseTo(initCreditTxTimestamp + EXPIRATION_TIME_SECONDS * 2);
+      await increaseBlockTimestampTo(initCreditTxTimestamp + EXPIRATION_TIME_SECONDS * 2);
       const creditRequest = await creditAgent.getInstallmentCredit(txId);
       // check that the credit is expired
       expect(creditRequest.status).to.equal(CreditRequestStatus.Expired);
@@ -1579,7 +1580,7 @@ describe("Contract 'CreditAgentCapybaraV1'", () => {
       it("The credit status is inappropriate to the provided hook because it is expired", async () => {
         const { fixture, txId, initCreditTxTimestamp } =
           await setUpFixture(deployAndConfigureContractsThenInitiateInstallmentCredit);
-        await time.increaseTo(initCreditTxTimestamp + EXPIRATION_TIME_SECONDS + 1);
+        await increaseBlockTimestampTo(initCreditTxTimestamp + EXPIRATION_TIME_SECONDS + 1);
         await checkCashierHookInappropriateStatusError(fixture, {
           txId,
           hookIndex: HookIndex.CashOutRequestBefore,

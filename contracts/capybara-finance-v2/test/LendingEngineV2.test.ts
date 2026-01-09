@@ -1,9 +1,8 @@
 import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { checkContractUupsUpgrading, setUpFixture } from "../test-utils/common";
+import { checkContractUupsUpgrading, proveTx, setUpFixture } from "@cloudwalk/brlc-test-utils";
 import * as Contracts from "../typechain-types";
-import { proveTx } from "../test-utils/eth";
 
 const OWNER_ROLE = ethers.id("OWNER_ROLE");
 

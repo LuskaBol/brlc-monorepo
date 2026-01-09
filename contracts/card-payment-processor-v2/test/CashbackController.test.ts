@@ -6,8 +6,14 @@ import { AddressLike, TransactionResponse } from "ethers";
 import * as Contracts from "../typechain-types";
 import { ICardPaymentProcessorHookTypes } from "../typechain-types/contracts/CashbackController";
 
-import { checkEquality, resultToObject, setUpFixture } from "../test-utils/common";
-import { checkTokenPath, getTxTimestamp, increaseBlockTimestamp } from "../test-utils/eth";
+import {
+  checkEquality,
+  checkTokenPath,
+  getTxTimestamp,
+  increaseBlockTimestamp,
+  resultToObject,
+  setUpFixture,
+} from "@cloudwalk/brlc-test-utils";
 
 describe("Contract 'CashbackController'", () => {
   const TOKEN_DECIMALS = 6n;

@@ -3,9 +3,14 @@ import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
 import { TransactionResponse } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { setUpFixture, maxUintForBits, resultToObject, checkEquality } from "../test-utils/common";
+import {
+  checkEquality,
+  getTxTimestamp,
+  maxUintForBits,
+  resultToObject,
+  setUpFixture,
+} from "@cloudwalk/brlc-test-utils";
 import * as Contracts from "../typechain-types";
-import { getTxTimestamp } from "../test-utils/eth";
 
 const ADDRESS_ZERO = ethers.ZeroAddress;
 const BALANCE_INITIAL = ethers.MaxUint256 / 2n;

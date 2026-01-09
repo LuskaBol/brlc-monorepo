@@ -1,6 +1,6 @@
 import { ethers } from "hardhat";
 import { Contract, ContractFactory } from "ethers";
-import { connect, getAddress, proveTx } from "./eth";
+import { connect, getAddress, proveTx } from "@cloudwalk/brlc-test-utils";
 
 export interface CashOut {
   account: string;

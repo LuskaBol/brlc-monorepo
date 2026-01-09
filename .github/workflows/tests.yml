@@ -25,20 +25,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Use Node.js
-        uses: actions/setup-node@v6
+      - name: Bootstrap workspace
+        uses: ./.github/actions/bootstrap-workspace
         with:
-          node-version-file: .tool-versions
-          cache: pnpm
-          registry-url: "https://npm.pkg.github.com"
-          scope: "@cloudwalk"
-
-      - run: pnpm install
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GHA_PAT }}
+          node-auth-token: ${{ secrets.GHA_PAT }}
 
       - name: Build all contracts
         run: pnpm run -r --workspace-concurrency=-1 build
@@ -54,20 +44,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Use Node.js
-        uses: actions/setup-node@v6
+      - name: Bootstrap workspace
+        uses: ./.github/actions/bootstrap-workspace
         with:
-          node-version-file: .tool-versions
-          cache: pnpm
-          registry-url: "https://npm.pkg.github.com"
-          scope: "@cloudwalk"
-
-      - run: pnpm install
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GHA_PAT }}
+          node-auth-token: ${{ secrets.GHA_PAT }}
 
       - name: Build all contracts
         run: pnpm run -r --workspace-concurrency=-1 build

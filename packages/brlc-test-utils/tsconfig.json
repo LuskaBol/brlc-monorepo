@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "include": [
+    "src/**/*",
+    "node_modules/@nomicfoundation/hardhat-chai-matchers/dist/src/index.d.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

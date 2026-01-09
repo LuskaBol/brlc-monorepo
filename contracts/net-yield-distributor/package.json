@@ -5,8 +5,8 @@
     "@openzeppelin/contracts-upgradeable": "5.4.0"
   },
   "devDependencies": {
+    "@cloudwalk/brlc-test-utils": "workspace:",
     "@nomicfoundation/hardhat-ethers": "catalog:hardhat2",
-    "@nomicfoundation/hardhat-network-helpers": "catalog:hardhat2",
     "hardhat": "catalog:hardhat2",
     "chai": "catalog:hardhat2",
     "typescript": "catalog:",

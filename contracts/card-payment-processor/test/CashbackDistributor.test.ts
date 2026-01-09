@@ -2,10 +2,16 @@ import { ethers, network, upgrades } from "hardhat";
 import { expect } from "chai";
 import { Block, Contract, ContractFactory, TransactionReceipt, TransactionResponse } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { connect, getAddress, increaseBlockTimestamp, proveTx } from "../test-utils/eth";
+import {
+  connect,
+  createRevertMessageDueToMissingRole,
+  getAddress,
+  increaseBlockTimestamp,
+  proveTx,
+  setUpFixture,
+} from "@cloudwalk/brlc-test-utils";
 import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
-import { checkEquality as checkInterfaceEquality } from "../test-utils/checkers";
-import { createRevertMessageDueToMissingRole, setUpFixture } from "../test-utils/common";
+import { checkEquality as checkInterfaceEquality } from "@cloudwalk/brlc-test-utils/checkers";
 
 const MAX_UINT256 = ethers.MaxUint256;
 const MAX_INT256 = ethers.MaxInt256;

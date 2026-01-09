@@ -2,8 +2,13 @@ import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
 import { Contract, ContractFactory } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { connect, getLatestBlockTimestamp, increaseBlockTimestampTo, proveTx } from "../../test-utils/eth";
-import { setUpFixture } from "../../test-utils/common";
+import {
+  connect,
+  getLatestBlockTimestamp,
+  increaseBlockTimestampTo,
+  proveTx,
+  setUpFixture,
+} from "@cloudwalk/brlc-test-utils";
 
 interface TokenAmounts {
   total: number;

@@ -1,8 +1,7 @@
 import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { connect, proveTx } from "../../test-utils/eth";
-import { setUpFixture } from "../../test-utils/common";
+import { connect, proveTx, setUpFixture } from "@cloudwalk/brlc-test-utils";
 
 describe("Contract 'PausableExtUpgradeable'", async () => {
   // Events of the library contracts

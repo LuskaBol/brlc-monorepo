@@ -3,9 +3,8 @@ import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
 import { TransactionResponse } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { setUpFixture, checkEquality, resultToObject } from "../test-utils/common";
+import { checkEquality, checkTokenPath, resultToObject, setUpFixture } from "@cloudwalk/brlc-test-utils";
 import * as Contracts from "../typechain-types";
-import { checkTokenPath } from "../test-utils/eth";
 
 const ADDRESS_ZERO = ethers.ZeroAddress;
 const SOME_ADDRESS = "0x1234567890123456789012345678901234567890";
@@ -311,8 +310,7 @@ describe("Contract 'AssetTransitDesk'", () => {
 
   describe("Method 'redeemAsset()'", () => {
     for (const netYieldAmount of [0n, 10n]) {
-      describe(`Should execute as expected when called properly with ${
-        netYieldAmount === 0n ? "zero" : "non-zero"
+      describe(`Should execute as expected when called properly with ${netYieldAmount === 0n ? "zero" : "non-zero"
       } net yield amount and`, () => {
         let tx: TransactionResponse;
         const principalAmount = 100n;

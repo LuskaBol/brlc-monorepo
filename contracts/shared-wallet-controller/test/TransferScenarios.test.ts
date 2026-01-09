@@ -2,8 +2,7 @@ import * as Contracts from "@contracts";
 import type { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
-import { connect, getAddress, proveTx } from "../test-utils/eth";
-import { setUpFixture } from "../test-utils/common";
+import { connect, getAddress, proveTx, setUpFixture } from "@cloudwalk/brlc-test-utils";
 
 // Test constants
 const BALANCE_INITIAL = 1000000000000n;
@@ -213,6 +212,7 @@ class TransferTestEngine {
   private sharedWalletController: Contracts.SharedWalletController;
   private tokenMock: Contracts.ERC20TokenMockWithHooks;
   private walletAddress: string;
+  private walletSigner: SignerWithAddress;
   private participants: SignerWithAddress[];
   private admin: SignerWithAddress;
   private stranger: SignerWithAddress;
@@ -220,14 +220,15 @@ class TransferTestEngine {
   constructor(
     sharedWalletController: Contracts.SharedWalletController,
     tokenMock: Contracts.ERC20TokenMockWithHooks,
-    walletAddress: string,
+    walletSigner: SignerWithAddress,
     participants: SignerWithAddress[],
     admin: SignerWithAddress,
     stranger: SignerWithAddress,
   ) {
     this.sharedWalletController = sharedWalletController;
     this.tokenMock = tokenMock;
-    this.walletAddress = walletAddress;
+    this.walletAddress = walletSigner.address;
+    this.walletSigner = walletSigner;
     this.participants = participants;
     this.admin = admin;
     this.stranger = stranger;
@@ -236,14 +237,13 @@ class TransferTestEngine {
   static async create(): Promise<TransferTestEngine> {
     const { sharedWalletController, tokenMock } = await setUpFixture(deployAndConfigureContracts);
 
-    const [deployer, grantor, , admin, stranger, ...allParticipants] = await ethers.getSigners();
+    const [deployer, grantor, walletSigner, admin, stranger, ...allParticipants] = await ethers.getSigners();
 
     // Grant roles to grantor and admin
     await proveTx(connect(sharedWalletController, deployer).grantRole(GRANTOR_ROLE, grantor.address));
     await proveTx(connect(sharedWalletController, grantor).grantRole(ADMIN_ROLE, admin.address));
 
     // Create a test wallet address - use one of the later signers as wallet
-    const walletAddress = allParticipants[10].address;
 
     // Get the first 3 participants for testing
     const participants = allParticipants.slice(0, 3);
@@ -254,7 +254,7 @@ class TransferTestEngine {
       await proveTx(tokenMock.mint(account.address, BALANCE_INITIAL));
     }
 
-    return new TransferTestEngine(sharedWalletController, tokenMock, walletAddress, participants, admin, stranger);
+    return new TransferTestEngine(sharedWalletController, tokenMock, walletSigner, participants, admin, stranger);
   }
 
   async executeTestCase(testCase: TransferTestCase): Promise<void> {
@@ -332,7 +332,7 @@ class TransferTestEngine {
     const participant = this.participants[testCase.participantIndex];
 
     // Execute withdrawal transfer using impersonated wallet signer
-    const walletSigner = await ethers.getImpersonatedSigner(this.walletAddress);
+    const walletSigner = this.walletSigner;
     await proveTx(connect(this.tokenMock, walletSigner).transfer(participant.address, testCase.transferAmount));
   }
 
@@ -342,7 +342,7 @@ class TransferTestEngine {
 
   private async executeSharedOutgoing(testCase: SharedOutgoingTestCase): Promise<void> {
     // Execute outgoing transfer using impersonated wallet signer
-    const walletSigner = await ethers.getImpersonatedSigner(this.walletAddress);
+    const walletSigner = this.walletSigner;
     await proveTx(connect(this.tokenMock, walletSigner).transfer(this.stranger.address, testCase.transferAmount));
   }
 
