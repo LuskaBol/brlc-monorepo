@@ -1,9 +1,9 @@
 {
-  "name": "@cloudwalk/brlc-blueprint",
+  "name": "@cloudwalk/brlc-base",
+  "version": "1.0.0",
   "dependencies": {
     "@openzeppelin/contracts": "catalog:",
-    "@openzeppelin/contracts-upgradeable": "catalog:",
-    "@cloudwalk/brlc-base": "workspace:"
+    "@openzeppelin/contracts-upgradeable": "catalog:"
   },
   "devDependencies": {
     "@cloudwalk/brlc-test-utils": "workspace:",
@@ -13,6 +13,10 @@
     "typescript": "catalog:",
     "@cloudwalk/hardhat2-config": "workspace:",
     "ethers": "catalog:"
+  },
+  "peerDependencies": {
+    "@openzeppelin/contracts": "catalog:",
+    "@openzeppelin/contracts-upgradeable": "catalog:"
   },
   "devEngines": {
     "runtime": {
@@ -24,8 +28,8 @@
     "ts:check": "tsc --noEmit",
     "build": "hardhat compile",
     "test": "hardhat test",
-    "test:coverage": "hardhat coverage",
     "test:stratus": "hardhat test --network stratus",
+    "test:coverage": "hardhat coverage",
     "contracts:size": "hardhat size-contracts"
   }
 }

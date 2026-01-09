@@ -18,6 +18,7 @@ This repository all smart contracts and utilities for smart contracts developmen
 
 | Component                 | Coverage                                                                                                                                                                                    |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Base                      | [![codecov](https://codecov.io/github/cloudwalk/brlc-monorepo/branch/main/graph/badge.svg?component=contract-base)](https://app.codecov.io/gh/cloudwalk/brlc-monorepo)                      |
 | Asset Transit Desk        | [![codecov](https://codecov.io/github/cloudwalk/brlc-monorepo/branch/main/graph/badge.svg?component=contract-asset-transit-desk)](https://app.codecov.io/gh/cloudwalk/brlc-monorepo)        |
 | Balance Freezer           | [![codecov](https://codecov.io/github/cloudwalk/brlc-monorepo/branch/main/graph/badge.svg?component=contract-balance-freezer)](https://app.codecov.io/gh/cloudwalk/brlc-monorepo)           |
 | Balance Tracker           | [![codecov](https://codecov.io/github/cloudwalk/brlc-monorepo/branch/main/graph/badge.svg?component=contract-balance-tracker)](https://app.codecov.io/gh/cloudwalk/brlc-monorepo)           |
@@ -46,3 +47,23 @@ This repository all smart contracts and utilities for smart contracts developmen
 
 - [ ] Join contracts by workspace and cross-reference contracts
 - [ ] Extract common contracts to a separate packages
+
+| Contract                  | Migrated | OZ Version | Uses Base Pkg | Enumerable AC |
+| ------------------------- | -------- | ---------- | ------------- | ------------- |
+| Asset Transit Desk        | [ ]      | 5.4.0      | No            | No            |
+| Balance Freezer           | [ ]      | 5.4.0      | No            | No            |
+| Balance Tracker           | [ ]      | 4.9.6      | No            | No (Ownable)  |
+| Base                      | [x]      | 5.5.0      | N/A           | Both options  |
+| Blueprint                 | [x]      | 5.5.0      | Yes           | No            |
+| Capybara Finance          | [ ]      | 5.4.0      | No            | No            |
+| Capybara Finance V2       | [ ]      | 5.5.0      | No            | No            |
+| Card Payment Processor    | [ ]      | 4.9.6      | No            | No            |
+| Card Payment Processor V2 | [ ]      | 5.4.0      | No            | No            |
+| Cashier                   | [ ]      | 5.4.0      | No            | No            |
+| Credit Agent              | [x]      | 5.5.0      | Yes           | Yes           |
+| Multisig                  | [ ]      | 4.9.6      | No            | No (Custom)   |
+| Net Yield Distributor     | [ ]      | 5.4.0      | No            | No            |
+| Periphery                 | [ ]      | 5.4.0      | No            | No            |
+| Shared Wallet Controller  | [x]      | 5.5.0      | Yes           | No            |
+| Token                     | [ ]      | 5.4.0      | No            | No            |
+| Treasury                  | [x]      | 5.5.0      | Yes           | Yes           |

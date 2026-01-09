@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.28;
+pragma solidity ^0.8.30;
 
-import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
-import { PausableExtUpgradeable } from "./base/PausableExtUpgradeable.sol";
-import { RescuableUpgradeable } from "./base/RescuableUpgradeable.sol";
-import { AccessControlExtUpgradeable } from "./base/AccessControlExtUpgradeable.sol";
-import { UUPSExtUpgradeable } from "./base/UUPSExtUpgradeable.sol";
-import { Versionable } from "./base/Versionable.sol";
+import { PausableEnumerableExtUpgradeable } from "@cloudwalk/brlc-base/contracts/enumerable/PausableEnumerableExtUpgradeable.sol";
+import { RescuableEnumerableUpgradeable } from "@cloudwalk/brlc-base/contracts/enumerable/RescuableEnumerableUpgradeable.sol";
+import { AccessControlEnumerableExtUpgradeable } from "@cloudwalk/brlc-base/contracts/enumerable/AccessControlEnumerableExtUpgradeable.sol";
+import { UUPSExtUpgradeable } from "@cloudwalk/brlc-base/contracts/UUPSExtUpgradeable.sol";
+import { Versionable } from "./Versionable.sol";
 
 import { CreditAgentStorageLayout } from "./CreditAgentStorageLayout.sol";
 
@@ -54,9 +53,9 @@ import { ICashierHookableTypes } from "./interfaces/ICashierHookable.sol";
  */
 abstract contract CreditAgent is
     CreditAgentStorageLayout,
-    AccessControlExtUpgradeable,
-    PausableExtUpgradeable,
-    RescuableUpgradeable,
+    AccessControlEnumerableExtUpgradeable,
+    PausableEnumerableExtUpgradeable,
+    RescuableEnumerableUpgradeable,
     UUPSExtUpgradeable,
     ICreditAgent,
     ICashierHook,
@@ -118,9 +117,9 @@ abstract contract CreditAgent is
      * See details: https://docs.openzeppelin.com/upgrades-plugins/writing-upgradeable
      */
     function initialize() external initializer {
-        __AccessControlExt_init_unchained();
-        __PausableExt_init_unchained();
-        __Rescuable_init_unchained();
+        __AccessControlEnumerableExt_init_unchained();
+        __PausableEnumerableExt_init_unchained();
+        __RescuableEnumerable_init_unchained();
         __UUPSExt_init_unchained(); // This is needed only to avoid errors during coverage assessment
 
         _setRoleAdmin(ADMIN_ROLE, GRANTOR_ROLE);

@@ -175,6 +175,18 @@ describe("Contract 'Treasury'", () => {
         expect(await deployedContract.hasRole(RESERVE_BURNER_ROLE, deployer)).to.be.false;
       });
 
+      it("should return correct role members using enumerable role functionality", async () => {
+        expect(await deployedContract.getRoleMembers(OWNER_ROLE)).to.deep.equal([deployer.address]);
+        expect(await deployedContract.getRoleMembers(GRANTOR_ROLE)).to.deep.equal([]);
+        expect(await deployedContract.getRoleMembers(WITHDRAWER_ROLE)).to.deep.equal([]);
+        expect(await deployedContract.getRoleMembers(PAUSER_ROLE)).to.deep.equal([]);
+        expect(await deployedContract.getRoleMembers(RESCUER_ROLE)).to.deep.equal([]);
+        expect(await deployedContract.getRoleMembers(MINTER_ROLE)).to.deep.equal([]);
+        expect(await deployedContract.getRoleMembers(BURNER_ROLE)).to.deep.equal([]);
+        expect(await deployedContract.getRoleMembers(RESERVE_MINTER_ROLE)).to.deep.equal([]);
+        expect(await deployedContract.getRoleMembers(RESERVE_BURNER_ROLE)).to.deep.equal([]);
+      });
+
       it("should not pause the contract", async () => {
         expect(await deployedContract.paused()).to.equal(false);
       });

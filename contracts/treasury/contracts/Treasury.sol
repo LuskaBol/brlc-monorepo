@@ -6,10 +6,10 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { EnumerableMap } from "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
 
-import { AccessControlExtUpgradeable } from "./base/AccessControlExtUpgradeable.sol";
-import { PausableExtUpgradeable } from "./base/PausableExtUpgradeable.sol";
-import { RescuableUpgradeable } from "./base/RescuableUpgradeable.sol";
-import { Versionable } from "./base/Versionable.sol";
+import { AccessControlEnumerableExtUpgradeable } from "@cloudwalk/brlc-base/contracts/enumerable/AccessControlEnumerableExtUpgradeable.sol";
+import { PausableEnumerableExtUpgradeable } from "@cloudwalk/brlc-base/contracts/enumerable/PausableEnumerableExtUpgradeable.sol";
+import { RescuableEnumerableUpgradeable } from "@cloudwalk/brlc-base/contracts/enumerable/RescuableEnumerableUpgradeable.sol";
+import { Versionable } from "./Versionable.sol";
 
 import { IERC20Mintable } from "./interfaces/IERC20Mintable.sol";
 import { ITreasury, ITreasuryPrimary } from "./interfaces/ITreasury.sol";
@@ -24,9 +24,9 @@ import { TreasuryStorageLayout } from "./TreasuryStorageLayout.sol";
  */
 contract Treasury is
     TreasuryStorageLayout,
-    AccessControlExtUpgradeable,
-    PausableExtUpgradeable,
-    RescuableUpgradeable,
+    AccessControlEnumerableExtUpgradeable,
+    PausableEnumerableExtUpgradeable,
+    RescuableEnumerableUpgradeable,
     Versionable,
     ITreasury
 {
@@ -76,9 +76,9 @@ contract Treasury is
      * @param tokenAddress The address of the ERC20 token to be managed by this treasury.
      */
     function initialize(address tokenAddress) external initializer {
-        __AccessControlExt_init_unchained();
-        __PausableExt_init_unchained();
-        __Rescuable_init_unchained();
+        __AccessControlEnumerableExt_init_unchained();
+        __PausableEnumerableExt_init_unchained();
+        __RescuableEnumerable_init_unchained();
 
         if (tokenAddress == address(0)) {
             revert Treasury_TokenAddressZero();

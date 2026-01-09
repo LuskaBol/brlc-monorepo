@@ -145,6 +145,14 @@ describe("Abstract Contract 'CreditAgent'", () => {
       expect(await creditAgent.cashier()).to.equal(ADDRESS_ZERO);
       expect(await creditAgent.lendingMarket()).to.equal(ADDRESS_ZERO);
       checkEquality(await creditAgent.agentState() as AgentState, initialAgentState);
+
+      // Should return correct role members using enumerable role functionality
+      expect(await creditAgent.getRoleMembers(OWNER_ROLE)).to.deep.equal([deployer.address]);
+      expect(await creditAgent.getRoleMembers(GRANTOR_ROLE)).to.deep.equal([]);
+      expect(await creditAgent.getRoleMembers(ADMIN_ROLE)).to.deep.equal([deployer.address]);
+      expect(await creditAgent.getRoleMembers(MANAGER_ROLE)).to.deep.equal([]);
+      expect(await creditAgent.getRoleMembers(PAUSER_ROLE)).to.deep.equal([]);
+      expect(await creditAgent.getRoleMembers(RESCUER_ROLE)).to.deep.equal([]);
     });
 
     it("Is reverted if it is called a second time", async () => {
@@ -459,6 +467,13 @@ describe("Abstract Contract 'CreditAgent'", () => {
         revokeLoanFunction.selector,
         abiCoder.encode(takeLoanFunction.inputs, [borrower.address, 1, 100, 0, 10]),
       )).to.be.revertedWithCustomError(creditAgent, ERROR_NAME_SAFE_CAST_OVERFLOWED_UINT_DOWNCAST);
+    });
+  });
+
+  describe("Should have enumerable roles functionality", () => {
+    it("Should have getRoleMembers function from OZ AccessControlEnumerable", async () => {
+      const creditAgent = await setUpFixture(deployAndConfigureCreditAgentMock);
+      expect(await creditAgent.getRoleMembers(OWNER_ROLE)).to.deep.equal([deployer.address]);
     });
   });
 });

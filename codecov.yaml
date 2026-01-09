@@ -1,5 +1,9 @@
 component_management:
   individual_components:
+    - component_id: contract-base
+      name: Base
+      paths:
+        - "contracts/base/**"
     - component_id: contract-asset-transit-desk
       name: Asset Transit Desk
       paths:
