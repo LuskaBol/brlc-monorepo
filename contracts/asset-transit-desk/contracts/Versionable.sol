@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.24;
 
 import { IVersionable } from "@cloudwalk/brlc-base/interfaces/IVersionable.sol";
 
@@ -12,6 +12,6 @@ import { IVersionable } from "@cloudwalk/brlc-base/interfaces/IVersionable.sol";
 abstract contract Versionable is IVersionable {
     /// @inheritdoc IVersionable
     function $__VERSION() external pure returns (Version memory) {
-        return Version(1, 5, 2);
+        return Version(1, 3, 0);
     }
 }

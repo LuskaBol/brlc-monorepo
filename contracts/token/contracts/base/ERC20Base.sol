@@ -2,9 +2,9 @@
 
 pragma solidity ^0.8.20;
 
-import { AccessControlExtUpgradeable } from "./core/AccessControlExtUpgradeable.sol";
-import { RescuableUpgradeable } from "./core/RescuableUpgradeable.sol";
-import { PausableExtUpgradeable } from "./core/PausableExtUpgradeable.sol";
+import { AccessControlExtUpgradeable } from "@cloudwalk/brlc-base/contracts/AccessControlExtUpgradeable.sol";
+import { RescuableUpgradeable } from "@cloudwalk/brlc-base/contracts/RescuableUpgradeable.sol";
+import { PausableExtUpgradeable } from "@cloudwalk/brlc-base/contracts/PausableExtUpgradeable.sol";
 
 import { LegacyCorePlaceholder } from "../legacy/LegacyCorePlaceholder.sol";
 import { ERC20Upgradeable } from "../openzeppelin_v4-9-6/ERC20Upgradeable.sol";

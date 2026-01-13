@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.24;
+pragma solidity 0.8.30;
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-import { AccessControlExtUpgradeable } from "./base/AccessControlExtUpgradeable.sol";
-import { PausableExtUpgradeable } from "./base/PausableExtUpgradeable.sol";
-import { UUPSExtUpgradeable } from "./base/UUPSExtUpgradeable.sol";
-import { Versionable } from "./base/Versionable.sol";
+import { AccessControlExtUpgradeable } from "@cloudwalk/brlc-base/contracts/AccessControlExtUpgradeable.sol";
+import { PausableExtUpgradeable } from "@cloudwalk/brlc-base/contracts/PausableExtUpgradeable.sol";
+import { UUPSExtUpgradeable } from "@cloudwalk/brlc-base/contracts/UUPSExtUpgradeable.sol";
+import { Versionable } from "./Versionable.sol";
 
 import { IERC20Mintable } from "./interfaces/IERC20Mintable.sol";
 import { ILiquidityPool } from "./interfaces/ILiquidityPool.sol";

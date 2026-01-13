@@ -298,7 +298,7 @@ describe("Contract 'LiquidityPool'", () => {
 
     it("Is reverted if the provided implementation address is not a liquidity pool contract", async () => {
       const { liquidityPool } = await setUpFixture(deployLiquidityPool);
-      const mockContractFactory: ContractFactory = await ethers.getContractFactory("UUPSExtUpgradeableMock");
+      const mockContractFactory: ContractFactory = await ethers.getContractFactory("ERC20Mock");
       const mockContract = await mockContractFactory.deploy() as Contract;
       await mockContract.waitForDeployment();
 

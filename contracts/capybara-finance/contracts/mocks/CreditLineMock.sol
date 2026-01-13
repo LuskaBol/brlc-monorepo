@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.24;
+pragma solidity ^0.8.30;
 
 import { Constants } from "../libraries/Constants.sol";
 import { Loan } from "../libraries/Loan.sol";

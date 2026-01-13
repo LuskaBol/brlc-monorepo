@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.24;
+pragma solidity 0.8.30;
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-import { AccessControlExtUpgradeable } from "./base/AccessControlExtUpgradeable.sol";
-import { PausableExtUpgradeable } from "./base/PausableExtUpgradeable.sol";
-import { RescuableUpgradeable } from "./base/RescuableUpgradeable.sol";
-import { UUPSExtUpgradeable } from "./base/UUPSExtUpgradeable.sol";
+import { AccessControlExtUpgradeable } from "@cloudwalk/brlc-base/contracts/AccessControlExtUpgradeable.sol";
+import { PausableExtUpgradeable } from "@cloudwalk/brlc-base/contracts/PausableExtUpgradeable.sol";
+import { RescuableUpgradeable } from "@cloudwalk/brlc-base/contracts/RescuableUpgradeable.sol";
+import { UUPSExtUpgradeable } from "@cloudwalk/brlc-base/contracts/UUPSExtUpgradeable.sol";
 
 import { ICashier } from "./interfaces/ICashier.sol";
 import { ICashierPrimary } from "./interfaces/ICashier.sol";
@@ -22,7 +22,7 @@ import { ICashierHookable } from "./interfaces/ICashierHookable.sol";
 import { IERC20Mintable } from "./interfaces/IERC20Mintable.sol";
 
 import { CashierStorage } from "./CashierStorage.sol";
-import { Versionable } from "./base/Versionable.sol";
+import { Versionable } from "./Versionable.sol";
 
 /**
  * @title Cashier contract

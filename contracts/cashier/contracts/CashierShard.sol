@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.24;
+pragma solidity 0.8.30;
 
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import { UUPSExtUpgradeable } from "./base/UUPSExtUpgradeable.sol";
+import { UUPSExtUpgradeable } from "@cloudwalk/brlc-base/contracts/UUPSExtUpgradeable.sol";
 
 import { ICashierShard } from "./interfaces/ICashierShard.sol";
 import { ICashierShardPrimary } from "./interfaces/ICashierShard.sol";
 import { ICashierShardConfiguration } from "./interfaces/ICashierShard.sol";
 import { CashierShardStorage } from "./CashierShardStorage.sol";
-import { Versionable } from "./base/Versionable.sol";
+import { Versionable } from "./Versionable.sol";
 
 /**
  * @title CashierShard contract

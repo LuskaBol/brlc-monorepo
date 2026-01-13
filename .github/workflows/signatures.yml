@@ -25,9 +25,7 @@ jobs:
       - name: Install mise
         uses: jdx/mise-action@v3
         with:
-          cache_key: "mise-{{platform}}-{{install_args_hash}}"
-          # not necessary to install but to keep binaries cached by gh
-          install_args: solidity@0.8.24 solidity@0.8.28 solidity@0.8.30 solidity@0.8.16
+          install_args: solidity # uses root .tool-versions and default version from it
 
       - name: Generate signatures
         run: ./scripts/generate-signatures.bash

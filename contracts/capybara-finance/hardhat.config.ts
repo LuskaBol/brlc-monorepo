@@ -2,11 +2,11 @@ import "@cloudwalk/hardhat2-config";
 
 export default {
   solidity: {
-    version: "0.8.24",
+    version: "0.8.30",
     settings: {
-      evmVersion: "london",
+      evmVersion: "cancun",
       optimizer: {
-        runs: process.env.OPTIMIZER_RUNS ?? 200, // override to default 200
+        runs: Number(process.env.OPTIMIZER_RUNS ?? 200), // override to default 200
       },
     },
   },

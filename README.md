@@ -46,24 +46,24 @@ This repository all smart contracts and utilities for smart contracts developmen
 #### Monorepo migration roadmap
 
 - [ ] Join contracts by workspace and cross-reference contracts
-- [ ] Extract common contracts to a separate packages
+- [x] Extract common contracts to a separate packages
 
 | Contract                  | Migrated | OZ Version | Uses Base Pkg | Enumerable AC |
 | ------------------------- | -------- | ---------- | ------------- | ------------- |
-| Asset Transit Desk        | [ ]      | 5.4.0      | No            | No            |
-| Balance Freezer           | [ ]      | 5.4.0      | No            | No            |
+| Asset Transit Desk        | [x]      | 5.5.0      | Yes           | No            |
+| Balance Freezer           | [x]      | 5.5.0      | Yes           | No            |
 | Balance Tracker           | [ ]      | 4.9.6      | No            | No (Ownable)  |
 | Base                      | [x]      | 5.5.0      | N/A           | Both options  |
 | Blueprint                 | [x]      | 5.5.0      | Yes           | No            |
-| Capybara Finance          | [ ]      | 5.4.0      | No            | No            |
+| Capybara Finance          | [x]      | 5.5.0      | Yes           | No            |
 | Capybara Finance V2       | [ ]      | 5.5.0      | No            | No            |
 | Card Payment Processor    | [ ]      | 4.9.6      | No            | No            |
-| Card Payment Processor V2 | [ ]      | 5.4.0      | No            | No            |
-| Cashier                   | [ ]      | 5.4.0      | No            | No            |
+| Card Payment Processor V2 | [x]      | 5.5.0      | Yes           | No            |
+| Cashier                   | [x]      | 5.5.0      | Yes           | No            |
 | Credit Agent              | [x]      | 5.5.0      | Yes           | Yes           |
 | Multisig                  | [ ]      | 4.9.6      | No            | No (Custom)   |
-| Net Yield Distributor     | [ ]      | 5.4.0      | No            | No            |
-| Periphery                 | [ ]      | 5.4.0      | No            | No            |
+| Net Yield Distributor     | [x]      | 5.5.0      | Yes           | No            |
+| Periphery                 | [x]      | 5.5.0      | Yes           | No            |
 | Shared Wallet Controller  | [x]      | 5.5.0      | Yes           | No            |
-| Token                     | [ ]      | 5.4.0      | No            | No            |
+| Token                     | [x]      | 5.5.0      | Yes           | No            |
 | Treasury                  | [x]      | 5.5.0      | Yes           | Yes           |

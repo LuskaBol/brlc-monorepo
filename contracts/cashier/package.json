@@ -1,8 +1,9 @@
 {
   "name": "@cloudwalk/brlc-cashier",
   "dependencies": {
-    "@openzeppelin/contracts": "5.4.0",
-    "@openzeppelin/contracts-upgradeable": "5.4.0"
+    "@openzeppelin/contracts": "catalog:",
+    "@openzeppelin/contracts-upgradeable": "catalog:",
+    "@cloudwalk/brlc-base": "workspace:"
   },
   "devDependencies": {
     "@cloudwalk/brlc-test-utils": "workspace:",

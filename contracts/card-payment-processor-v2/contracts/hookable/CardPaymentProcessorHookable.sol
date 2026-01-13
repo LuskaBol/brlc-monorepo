@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-import { AccessControlExtUpgradeable } from "../base/AccessControlExtUpgradeable.sol";
+import { AccessControlExtUpgradeable } from "@cloudwalk/brlc-base/contracts/AccessControlExtUpgradeable.sol";
 
 import { CardPaymentProcessorHookableStorageLayout } from "./CardPaymentProcessorHookableStorageLayout.sol";
 
