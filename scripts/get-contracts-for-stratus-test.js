@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
-/* eslint @typescript-eslint/no-require-imports: "off" */
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
-const fs = require("fs");
-const path = require("path");
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 function main() {
   const contractsDir = path.join(__dirname, "../contracts");

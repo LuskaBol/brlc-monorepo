@@ -76,6 +76,8 @@ module.exports = tseslint.config(
       "@stylistic/semi": [`error`, `always`], // discuss with team
       "@stylistic/spaced-comment": [`warn`, `always`],
       "@stylistic/comma-dangle": [`warn`, `always-multiline`], // discuss with team
+      "no-unused-vars": `off`,
+      "@typescript-eslint/no-unused-vars": `off`,
     },
   },
 );

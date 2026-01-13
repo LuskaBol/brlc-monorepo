@@ -9,6 +9,7 @@
     "eslint:check": "eslint",
     "flatten:contract": "./scripts/flatten-contract.bash",
     "get-e2e-contracts": "./scripts/get-contracts-for-stratus-test.js",
+    "collect-deployments": "ts-node scripts/collect-deployments/index.ts",
     "test": "pnpm run -r test",
     "test:coverage": "pnpm run -r test:coverage",
     "build": "pnpm run -r build"
@@ -21,8 +22,11 @@
       "prettier --write"
     ]
   },
+  "type": "module",
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
     "@stylistic/eslint-plugin": "^5.2.3",
+    "@types/node": "^22.19.3",
     "eslint": "^9.39.2",
     "eslint-plugin-promise": "^7.2.1",
     "globals": "^17.0.0",
@@ -30,6 +34,7 @@
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.4",
     "prettier-plugin-solidity": "^2.2.1",
+    "ts-node": "^10.9.2",
     "typescript": "catalog:",
     "typescript-eslint": "^8.38.0"
   },
@@ -43,5 +48,5 @@
       "onFail": "error"
     }
   },
-  "packageManager": "pnpm@10.27.0+sha512.72d699da16b1179c14ba9e64dc71c9a40988cbdc65c264cb0e489db7de917f20dcf4d64d8723625f2969ba52d4b7e2a1170682d9ac2a5dcaeaab732b7e16f04a"
+  "packageManager": "pnpm@10.28.0+sha512.05df71d1421f21399e053fde567cea34d446fa02c76571441bfc1c7956e98e363088982d940465fd34480d4d90a0668bc12362f8aa88000a64e83d0b0e47be48"
 }

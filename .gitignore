@@ -16,3 +16,4 @@ dist
 
 # Generated files
 signatures/
+deployments-output/

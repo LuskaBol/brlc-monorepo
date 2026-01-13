@@ -4,6 +4,7 @@
     "@openzeppelin/contracts": "catalog:",
     "@openzeppelin/contracts-upgradeable": "catalog:"
   },
+  "type": "commonjs",
   "devDependencies": {
     "@cloudwalk/brlc-test-utils": "workspace:",
     "@nomicfoundation/hardhat-ethers": "catalog:hardhat2",
