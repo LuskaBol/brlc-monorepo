@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.30;
 
 import { ABDKMath64x64 } from "../libraries/ABDKMath64x64.sol";
 

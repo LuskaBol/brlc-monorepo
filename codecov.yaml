@@ -24,6 +24,10 @@ component_management:
       name: Capybara Finance
       paths:
         - "contracts/capybara-finance/**"
+    - component_id: contract-capybara-finance-v2
+      name: Capybara Finance V2
+      paths:
+        - "contracts/capybara-finance-v2/**"
     - component_id: contract-card-payment-processor
       name: Card Payment Processor
       paths:

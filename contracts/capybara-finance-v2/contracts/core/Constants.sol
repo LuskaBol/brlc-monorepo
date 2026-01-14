@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.30;
 
 /**
  * @title Constants library
@@ -49,9 +49,6 @@ abstract contract Constants {
 
     /// @dev The start value for the auto-generated sub-loan ID.
     uint256 internal constant SUB_LOAN_AUTO_ID_START = 10_000_000;
-
-    /// @dev The flag to ignore the grace period.
-    uint256 internal constant SUB_LOAN_FLAG_IGNORE_GRACE_PERIOD = (1 << 0);
 
     /// @dev The special account ID of an operation corresponding to the borrower of the sub-loan.
     uint256 internal constant ACCOUNT_ID_BORROWER = type(uint64).max;

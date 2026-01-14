@@ -8,6 +8,7 @@ async function main() {
   const response = await upgrades.prepareUpgrade(PROXY_ADDRESS, factory, {
     unsafeAllowRenames: false,
     unsafeSkipStorageCheck: false,
+    unsafeAllow: ["delegatecall"],
   });
 
   console.log("Upgrade prepared:", response);

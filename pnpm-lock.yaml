@@ -299,6 +299,9 @@ importers:
 
   contracts/capybara-finance-v2:
     dependencies:
+      '@cloudwalk/brlc-base':
+        specifier: 'workspace:'
+        version: link:../base
       '@openzeppelin/contracts':
         specifier: 'catalog:'
         version: 5.5.0

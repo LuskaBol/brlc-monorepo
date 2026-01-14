@@ -2,7 +2,8 @@
   "name": "@cloudwalk/brlc-capybara-finance-v2",
   "dependencies": {
     "@openzeppelin/contracts": "catalog:",
-    "@openzeppelin/contracts-upgradeable": "catalog:"
+    "@openzeppelin/contracts-upgradeable": "catalog:",
+    "@cloudwalk/brlc-base": "workspace:"
   },
   "type": "commonjs",
   "devDependencies": {
@@ -22,10 +23,11 @@
     }
   },
   "scripts": {
+    "ts:check": "tsc --noEmit",
     "build": "hardhat compile",
     "test": "hardhat test",
     "test:coverage": "hardhat coverage",
-    "test:stratus-disabled": "hardhat test --network stratus",
+    "test:stratus": "hardhat test --network stratus",
     "contracts:size": "hardhat size-contracts"
   }
 }

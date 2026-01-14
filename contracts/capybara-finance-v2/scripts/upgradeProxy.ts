@@ -8,6 +8,7 @@ async function main() {
   await upgrades.upgradeProxy(PROXY_ADDRESS, factory, {
     unsafeAllowRenames: false,
     unsafeSkipStorageCheck: false,
+    unsafeAllow: ["delegatecall"],
   });
 
   console.log("Proxy upgraded");

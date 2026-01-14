@@ -10,8 +10,9 @@ artifacts
 coverage
 coverage.json
 
-
 # Environment variables
 .env
 
+# Temporary files
+tmp
 */.openzeppelin/unknown-1337.json

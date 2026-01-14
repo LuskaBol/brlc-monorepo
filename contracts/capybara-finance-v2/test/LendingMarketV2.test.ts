@@ -1,19 +1,19 @@
-import { ethers, upgrades } from "hardhat";
+import { ethers, network, upgrades } from "hardhat";
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import {
   checkContractUupsUpgrading,
   checkEquality,
-  maxUintForBits,
-  resultToObject,
-  setUpFixture,
   checkTokenPath,
   getAddress,
   getBlockTimestamp,
   getNumberOfEvents,
   getTxTimestamp,
   increaseBlockTimestampTo,
+  maxUintForBits,
   proveTx,
+  resultToObject,
+  setUpFixture,
 } from "@cloudwalk/brlc-test-utils";
 import * as Contracts from "../typechain-types";
 import { DeployProxyOptions } from "@openzeppelin/hardhat-upgrades/dist/utils";
@@ -32,11 +32,6 @@ enum SubLoanStatus {
   Revoked = 3,
 }
 
-enum GracePeriodStatus {
-  None = 0,
-  Active = 1,
-}
-
 enum OperationStatus {
   Nonexistent = 0,
   Pending = 1,
@@ -53,11 +48,18 @@ enum OperationKind {
   Revocation = 3,
   Freezing = 4,
   Unfreezing = 5,
-  RemuneratoryRateSetting = 6,
-  MoratoryRateSetting = 7,
-  LateFeeRateSetting = 8,
-  GraceDiscountRateSetting = 9,
-  DurationSetting = 10,
+  PrimaryRateSetting = 6,
+  SecondaryRateSetting = 7,
+  MoratoryRateSetting = 8,
+  LateFeeRateSetting = 9,
+  ClawbackFeeRateSetting = 10,
+  DurationSetting = 11,
+  PrincipalDiscount = 12,
+  PrimaryInterestDiscount = 13,
+  SecondaryInterestDiscount = 14,
+  MoratoryInterestDiscount = 15,
+  LateFeeDiscount = 16,
+  ClawbackFeeDiscount = 17,
 }
 
 interface Fixture {
@@ -79,24 +81,27 @@ interface SubLoanTakingRequest {
   borrowedAmount: bigint;
   addonAmount: bigint;
   duration: number;
-  remuneratoryRate: number;
+  primaryRate: number;
+  secondaryRate: number;
   moratoryRate: number;
   lateFeeRate: number;
-  graceDiscountRate: number;
+  clawbackFeeRate: number;
 }
 
 interface SubLoanInception {
+  borrower: string;
+  programId: number;
+  startTimestamp: number;
+  initialDuration: number;
+
   borrowedAmount: bigint;
   addonAmount: bigint;
-  initialRemuneratoryRate: number;
+  initialPrimaryRate: number;
+  initialSecondaryRate: number;
   initialMoratoryRate: number;
   initialLateFeeRate: number;
-  initialGraceDiscountRate: number;
 
-  initialDuration: number;
-  startTimestamp: number;
-  programId: number;
-  borrower: string;
+  initialClawbackFeeRate: number;
 
   [key: string]: bigint | number | string; // Index signature
 }
@@ -116,29 +121,39 @@ interface SubLoanMetadata {
 
 interface SubLoanState {
   status: SubLoanStatus;
-  gracePeriodStatus: GracePeriodStatus;
   duration: number;
   freezeTimestamp: number;
   trackedTimestamp: number;
-  remuneratoryRate: number;
+
+  primaryRate: number;
+  secondaryRate: number;
   moratoryRate: number;
   lateFeeRate: number;
-  graceDiscountRate: number;
+  clawbackFeeRate: number;
 
   trackedPrincipal: bigint;
-  trackedRemuneratoryInterest: bigint;
-  trackedMoratoryInterest: bigint;
-  trackedLateFee: bigint;
-
   repaidPrincipal: bigint;
-  repaidRemuneratoryInterest: bigint;
-  repaidMoratoryInterest: bigint;
-  repaidLateFee: bigint;
-
   discountPrincipal: bigint;
-  discountRemuneratoryInterest: bigint;
+
+  trackedPrimaryInterest: bigint;
+  repaidPrimaryInterest: bigint;
+  discountPrimaryInterest: bigint;
+
+  trackedSecondaryInterest: bigint;
+  repaidSecondaryInterest: bigint;
+  discountSecondaryInterest: bigint;
+
+  trackedMoratoryInterest: bigint;
+  repaidMoratoryInterest: bigint;
   discountMoratoryInterest: bigint;
+
+  trackedLateFee: bigint;
+  repaidLateFee: bigint;
   discountLateFee: bigint;
+
+  trackedClawbackFee: bigint;
+  repaidClawbackFee: bigint;
+  discountClawbackFee: bigint;
 
   [key: string]: bigint | number; // Index signature
 }
@@ -159,6 +174,7 @@ interface Loan {
 
 interface SubLoanPreview {
   day: number;
+  daysSinceStart: number;
   id: bigint;
   firstSubLoanId: bigint;
   subLoanCount: number;
@@ -167,33 +183,49 @@ interface SubLoanPreview {
   recentOperationId: number;
   latestOperationId: number;
   status: SubLoanStatus;
-  gracePeriodStatus: GracePeriodStatus;
+
   programId: number;
   borrower: string;
   borrowedAmount: bigint;
   addonAmount: bigint;
+
   startTimestamp: number;
   freezeTimestamp: number;
   trackedTimestamp: number;
   pendingTimestamp: number;
   duration: number;
-  remuneratoryRate: number;
+
+  primaryRate: number;
+  secondaryRate: number;
   moratoryRate: number;
   lateFeeRate: number;
-  graceDiscountRate: number;
+  clawbackFeeRate: number;
+
   trackedPrincipal: bigint;
-  trackedRemuneratoryInterest: bigint;
-  trackedMoratoryInterest: bigint;
-  trackedLateFee: bigint;
-  outstandingBalance: bigint;
   repaidPrincipal: bigint;
-  repaidRemuneratoryInterest: bigint;
-  repaidMoratoryInterest: bigint;
-  repaidLateFee: bigint;
   discountPrincipal: bigint;
-  discountRemuneratoryInterest: bigint;
+
+  trackedPrimaryInterest: bigint;
+  repaidPrimaryInterest: bigint;
+  discountPrimaryInterest: bigint;
+
+  trackedSecondaryInterest: bigint;
+  repaidSecondaryInterest: bigint;
+  discountSecondaryInterest: bigint;
+
+  trackedMoratoryInterest: bigint;
+  repaidMoratoryInterest: bigint;
   discountMoratoryInterest: bigint;
+
+  trackedLateFee: bigint;
+  repaidLateFee: bigint;
   discountLateFee: bigint;
+
+  trackedClawbackFee: bigint;
+  repaidClawbackFee: bigint;
+  discountClawbackFee: bigint;
+
+  outstandingBalance: bigint;
 
   [key: string]: bigint | number | string;
 }
@@ -203,25 +235,35 @@ interface LoanPreview {
   firstSubLoanId: bigint;
   subLoanCount: number;
   ongoingSubLoanCount: number;
+  overdueSubLoanCount: number;
   repaidSubLoanCount: number;
   revokedSubLoanCount: number;
   programId: number;
   borrower: string;
   totalBorrowedAmount: bigint;
   totalAddonAmount: bigint;
+
   totalTrackedPrincipal: bigint;
-  totalTrackedRemuneratoryInterest: bigint;
-  totalTrackedMoratoryInterest: bigint;
-  totalTrackedLateFee: bigint;
-  totalOutstandingBalance: bigint;
   totalRepaidPrincipal: bigint;
-  totalRepaidRemuneratoryInterest: bigint;
-  totalRepaidMoratoryInterest: bigint;
-  totalRepaidLateFee: bigint;
   totalDiscountPrincipal: bigint;
-  totalDiscountRemuneratoryInterest: bigint;
+
+  totalTrackedPrimaryInterest: bigint;
+  totalRepaidPrimaryInterest: bigint;
+  totalDiscountPrimaryInterest: bigint;
+
+  totalTrackedSecondaryInterest: bigint;
+  totalRepaidSecondaryInterest: bigint;
+  totalDiscountSecondaryInterest: bigint;
+
+  totalTrackedMoratoryInterest: bigint;
+  totalRepaidMoratoryInterest: bigint;
   totalDiscountMoratoryInterest: bigint;
+
+  totalTrackedLateFee: bigint;
+  totalRepaidLateFee: bigint;
   totalDiscountLateFee: bigint;
+
+  totalOutstandingBalance: bigint;
 
   [key: string]: bigint | number | string;
 }
@@ -276,19 +318,21 @@ const ACCURACY_FACTOR = 10_000n;
 const SUB_LOAN_COUNT_MAX = 180;
 const OPERATION_COUNT_MAX = 10_000;
 const DAY_BOUNDARY_OFFSET = -3 * 3600;
+const DAY_IN_SECONDS = 86400;
 const SUB_LOAN_AUTO_ID_START = 10_000_000n;
 const TOKEN_DECIMALS = 6n;
 const INITIAL_BALANCE = 1_000_000n * 10n ** TOKEN_DECIMALS;
-const REMUNERATORY_RATE = INTEREST_RATE_FACTOR / 100; // 1%
-const MORATORY_RATE = INTEREST_RATE_FACTOR / 50; // 2%
-const LATE_FEE_RATE = INTEREST_RATE_FACTOR / 20; // 5%
-const GRACE_DISCOUNT_RATE = INTEREST_RATE_FACTOR / 2; // 50%
-const MASK_UINT8 = maxUintForBits(8);
-const MASK_UINT16 = maxUintForBits(16);
-const MASK_UINT32 = maxUintForBits(32);
-const MASK_UINT64 = maxUintForBits(64);
+const UP_TO_DUE_REMUNERATORY_RATE = (INTEREST_RATE_FACTOR / 1000); // 0.1%
+const POST_DUE_REMUNERATORY_RATE = (INTEREST_RATE_FACTOR / 1000) * 2; // 0.2%
+const MORATORY_RATE = (INTEREST_RATE_FACTOR / 1000) * 3; // 0.3%
+const LATE_FEE_RATE = (INTEREST_RATE_FACTOR / 1000) * 4; // 0.4%
+const CLAWBACK_FEE_RATE = (INTEREST_RATE_FACTOR / 1000) * 5; // 0.5%
+const MAX_UINT8 = maxUintForBits(8);
+const MAX_UINT16 = maxUintForBits(16);
+const MAX_UINT16_NUMBER = Number(MAX_UINT16);
+const MAX_UINT32 = maxUintForBits(32);
+const MAX_UINT64 = maxUintForBits(64);
 const TIMESTAMP_SPECIAL_VALUE_TRACKED = 1n;
-const VIEW_FLAGS_DEFAULT = 0n;
 // const ACCOUNT_ID_BORROWER = maxUintForBits(16);
 
 const MARKET_DEPLOYMENT_OPTIONS: DeployProxyOptions = { kind: "uups", unsafeAllow: ["delegatecall"] };
@@ -333,6 +377,7 @@ const ERROR_NAME_LIQUIDITY_POOL_ADDRESS_INVALID = "LendingMarketV2_LiquidityPool
 const ERROR_NAME_LIQUIDITY_POOL_ADDRESS_ZERO = "LendingMarketV2_LiquidityPoolAddressZero";
 const ERROR_NAME_LOAN_BORROWED_AMOUNT_INVALID = "LendingMarketV2_LoanBorrowedAmountInvalid";
 const ERROR_NAME_LOAN_DURATIONS_INVALID = "LendingMarketV2_LoanDurationsInvalid";
+const ERROR_NAME_LOAN_START_TIMESTAMP_INVALID = "LendingMarketV2_LoanStartTimestampInvalid";
 const ERROR_NAME_OPERATION_APPLYING_TIMESTAMP_TOO_EARLY = "LendingMarketV2_OperationApplyingTimestampTooEarly";
 const ERROR_NAME_OPERATION_DISMISSED_ALREADY = "LendingMarketV2_OperationDismissedAlready";
 const ERROR_NAME_OPERATION_KIND_INVALID = "LendingMarketV2_OperationKindInvalid";
@@ -349,8 +394,7 @@ const ERROR_NAME_SUB_LOAN_DURATION_EXCESS = "LendingMarketV2_SubLoanDurationExce
 const ERROR_NAME_SUB_LOAN_EXISTENT_ALREADY = "LendingMarketV2_SubLoanExistentAlready";
 const ERROR_NAME_SUB_LOAN_NONEXISTENT = "LendingMarketV2_SubLoanNonexistent";
 const ERROR_NAME_SUB_LOAN_REVOKED = "LendingMarketV2_SubLoanRevoked";
-const ERROR_NAME_SUB_LOAN_RATE_VALUE_INVALID = "LendingMarketV2_SubLoanRateValueInvalid";
-const ERROR_NAME_SUB_LOAN_START_TIMESTAMP_INVALID = "LendingMarketV2_SubLoanStartTimestampInvalid";
+const ERROR_NAME_SUB_LOAN_RATE_VALUE_EXCESS = "LendingMarketV2_SubLoanRateValueExcess";
 const ERROR_NAME_UNDERLYING_TOKEN_ADDRESS_ZERO = "LendingMarketV2_UnderlyingTokenAddressZero";
 
 // Errors of the mock contracts
@@ -401,7 +445,7 @@ async function deployLiquidityPoolMock(): Promise<Contracts.LiquidityPoolMock> {
 }
 
 async function deployContracts(): Promise<Fixture> {
-  const tokenMockDeployment = (await tokenMockFactory.deploy());
+  const tokenMockDeployment = await tokenMockFactory.deploy();
   await tokenMockDeployment.waitForDeployment();
   const tokenMock = tokenMockDeployment.connect(deployer);
 
@@ -463,63 +507,93 @@ async function deployAndConfigureContractsForLoanTaking(): Promise<Fixture> {
   return fixture;
 }
 
-function packAmountParts(part1: bigint, part2: bigint, part3: bigint, part4: bigint): bigint {
-  return (
-    (part1 & MASK_UINT64) +
-    ((part2 & MASK_UINT64) << 64n) +
-    ((part3 & MASK_UINT64) << 128n) +
-    ((part4 & MASK_UINT64) << 192n)
-  );
+function packAmountParts(onePartBitShift: bigint, ...parts: bigint[]): bigint {
+  return parts.reduce((acc, part, index) => acc + ((part & MAX_UINT64) << (onePartBitShift * BigInt(index))), 0n);
 }
 
 function packRates(subLoan: SubLoan): bigint {
   return packAmountParts(
-    BigInt(subLoan.state.remuneratoryRate),
+    32n,
+    BigInt(subLoan.state.primaryRate),
+    BigInt(subLoan.state.secondaryRate),
     BigInt(subLoan.state.moratoryRate),
     BigInt(subLoan.state.lateFeeRate),
-    BigInt(subLoan.state.graceDiscountRate),
+    BigInt(subLoan.state.clawbackFeeRate),
   );
 }
 
 function packSubLoanParameters(subLoan: SubLoan): bigint {
+  let daysSinceStart = dayIndex(subLoan.state.trackedTimestamp) - dayIndex(subLoan.inception.startTimestamp);
+  if (daysSinceStart > MAX_UINT16_NUMBER) {
+    daysSinceStart = MAX_UINT16_NUMBER;
+  }
   return (
-    ((BigInt(subLoan.state.status) & MASK_UINT8) << 0n) +
-    ((0n & MASK_UINT8) << 8n) +
-    ((BigInt(subLoan.state.duration) & MASK_UINT16) << 16n) +
-    ((BigInt(subLoan.state.remuneratoryRate) & MASK_UINT32) << 32n) +
-    ((BigInt(subLoan.state.moratoryRate) & MASK_UINT32) << 64n) +
-    ((BigInt(subLoan.state.lateFeeRate) & MASK_UINT32) << 96n) +
-    ((BigInt(subLoan.state.graceDiscountRate) & MASK_UINT32) << 128n) +
-    ((BigInt(subLoan.state.trackedTimestamp) & MASK_UINT32) << 160n) +
-    ((BigInt(subLoan.state.freezeTimestamp) & MASK_UINT32) << 192n) +
-    ((BigInt(subLoan.metadata.pendingTimestamp ?? 0) & MASK_UINT32) << 224n)
+    ((BigInt(subLoan.state.status) & MAX_UINT8) << 0n) +
+    ((0n & MAX_UINT8) << 8n) +
+    ((BigInt(subLoan.state.duration) & MAX_UINT16) << 16n) +
+    ((BigInt(subLoan.inception.startTimestamp) & MAX_UINT32) << 32n) +
+    ((BigInt(subLoan.state.trackedTimestamp) & MAX_UINT32) << 64n) +
+    ((BigInt(subLoan.state.freezeTimestamp) & MAX_UINT32) << 96n) +
+    ((BigInt(subLoan.metadata.pendingTimestamp ?? 0) & MAX_UINT32) << 128n) +
+    ((BigInt(subLoan.metadata.operationCount) & MAX_UINT16) << 160n) +
+    ((BigInt(subLoan.metadata.earliestOperationId) & MAX_UINT16) << 176n) +
+    ((BigInt(subLoan.metadata.recentOperationId) & MAX_UINT16) << 192n) +
+    ((BigInt(subLoan.metadata.latestOperationId) & MAX_UINT16) << 208n) +
+    ((BigInt(daysSinceStart) & MAX_UINT16) << 224n)
   );
 }
 
-function packSubLoanRepaidParts(subLoan: SubLoan): bigint {
+function packSubLoanPrincipalParts(subLoan: SubLoan): bigint {
   return packAmountParts(
+    64n,
+    subLoan.state.trackedPrincipal,
     subLoan.state.repaidPrincipal,
-    subLoan.state.repaidRemuneratoryInterest,
-    subLoan.state.repaidMoratoryInterest,
-    subLoan.state.repaidLateFee,
+    subLoan.state.discountPrincipal,
   );
 }
 
-function packSubLoanDiscountParts(subLoan: SubLoan): bigint {
+function packSubLoanPrimaryInterestParts(subLoan: SubLoan): bigint {
   return packAmountParts(
-    subLoan.state.discountPrincipal,
-    subLoan.state.discountRemuneratoryInterest,
+    64n,
+    subLoan.state.trackedPrimaryInterest,
+    subLoan.state.repaidPrimaryInterest,
+    subLoan.state.discountPrimaryInterest,
+  );
+}
+
+function packSubLoanSecondaryInterestParts(subLoan: SubLoan): bigint {
+  return packAmountParts(
+    64n,
+    subLoan.state.trackedSecondaryInterest,
+    subLoan.state.repaidSecondaryInterest,
+    subLoan.state.discountSecondaryInterest,
+  );
+}
+
+function packSubLoanMoratoryInterestParts(subLoan: SubLoan): bigint {
+  return packAmountParts(
+    64n,
+    subLoan.state.trackedMoratoryInterest,
+    subLoan.state.repaidMoratoryInterest,
     subLoan.state.discountMoratoryInterest,
+  );
+}
+
+function packSubLoanLateFeeParts(subLoan: SubLoan): bigint {
+  return packAmountParts(
+    64n,
+    subLoan.state.trackedLateFee,
+    subLoan.state.repaidLateFee,
     subLoan.state.discountLateFee,
   );
 }
 
-function packSubLoanTrackedParts(subLoan: SubLoan): bigint {
+function packSubLoanClawbackFeeParts(subLoan: SubLoan): bigint {
   return packAmountParts(
-    subLoan.state.trackedPrincipal,
-    subLoan.state.trackedRemuneratoryInterest,
-    subLoan.state.trackedMoratoryInterest,
-    subLoan.state.trackedLateFee,
+    64n,
+    subLoan.state.trackedClawbackFee,
+    subLoan.state.repaidClawbackFee,
+    subLoan.state.discountClawbackFee,
   );
 }
 
@@ -539,10 +613,11 @@ function defineInitialSubLoan(
   const inception: SubLoanInception = {
     borrowedAmount: subLoanTakingRequest.borrowedAmount,
     addonAmount: subLoanTakingRequest.addonAmount,
-    initialRemuneratoryRate: subLoanTakingRequest.remuneratoryRate,
+    initialPrimaryRate: subLoanTakingRequest.primaryRate,
+    initialSecondaryRate: subLoanTakingRequest.secondaryRate,
     initialMoratoryRate: subLoanTakingRequest.moratoryRate,
     initialLateFeeRate: subLoanTakingRequest.lateFeeRate,
-    initialGraceDiscountRate: subLoanTakingRequest.graceDiscountRate,
+    initialClawbackFeeRate: subLoanTakingRequest.clawbackFeeRate,
 
     initialDuration: subLoanTakingRequest.duration,
     startTimestamp: startTimestamp,
@@ -561,29 +636,38 @@ function defineInitialSubLoan(
   };
   const state: SubLoanState = {
     status: SubLoanStatus.Ongoing,
-    gracePeriodStatus: subLoanTakingRequest.graceDiscountRate > 0 ? GracePeriodStatus.Active : GracePeriodStatus.None,
     duration: subLoanTakingRequest.duration,
     freezeTimestamp: 0,
     trackedTimestamp: startTimestamp,
-    remuneratoryRate: inception.initialRemuneratoryRate,
+    primaryRate: inception.initialPrimaryRate,
+    secondaryRate: inception.initialSecondaryRate,
     moratoryRate: inception.initialMoratoryRate,
     lateFeeRate: inception.initialLateFeeRate,
-    graceDiscountRate: inception.initialGraceDiscountRate,
+    clawbackFeeRate: inception.initialClawbackFeeRate,
 
     trackedPrincipal: inception.borrowedAmount + inception.addonAmount,
-    trackedRemuneratoryInterest: 0n,
-    trackedMoratoryInterest: 0n,
-    trackedLateFee: 0n,
-
     repaidPrincipal: 0n,
-    repaidRemuneratoryInterest: 0n,
-    repaidMoratoryInterest: 0n,
-    repaidLateFee: 0n,
-
     discountPrincipal: 0n,
-    discountRemuneratoryInterest: 0n,
+
+    trackedPrimaryInterest: 0n,
+    repaidPrimaryInterest: 0n,
+    discountPrimaryInterest: 0n,
+
+    trackedSecondaryInterest: 0n,
+    repaidSecondaryInterest: 0n,
+    discountSecondaryInterest: 0n,
+
+    trackedMoratoryInterest: 0n,
+    repaidMoratoryInterest: 0n,
     discountMoratoryInterest: 0n,
+
+    trackedLateFee: 0n,
+    repaidLateFee: 0n,
     discountLateFee: 0n,
+
+    trackedClawbackFee: 0n,
+    repaidClawbackFee: 0n,
+    discountClawbackFee: 0n,
   };
 
   return { id, indexInLoan: subLoanIndex, inception, metadata, state };
@@ -616,20 +700,23 @@ function defineInitialLoan(
 }
 
 function calculateOutstandingBalance(subLoan: SubLoan): bigint {
-  return (
-    roundToAccuracyFactor(subLoan.state.trackedPrincipal) +
-    roundToAccuracyFactor(subLoan.state.trackedRemuneratoryInterest) +
-    roundToAccuracyFactor(subLoan.state.trackedMoratoryInterest) +
-    roundToAccuracyFactor(subLoan.state.trackedLateFee)
+  return roundFinancially(
+    subLoan.state.trackedPrincipal +
+    subLoan.state.trackedPrimaryInterest +
+    subLoan.state.trackedSecondaryInterest +
+    subLoan.state.trackedMoratoryInterest +
+    subLoan.state.trackedLateFee,
   );
 }
 
 function defineExpectedSubLoanPreview(subLoan: SubLoan): SubLoanPreview {
   const firstSubLoanId = subLoan.id - BigInt(subLoan.metadata.subLoanIndex);
-  const outstandingBalance = calculateOutstandingBalance(subLoan);
+  const day = dayIndex(subLoan.state.trackedTimestamp);
+  const startDay = dayIndex(subLoan.inception.startTimestamp);
 
   return {
-    day: dayIndex(subLoan.state.trackedTimestamp),
+    day,
+    daysSinceStart: day >= startDay ? day - startDay : 0,
     id: subLoan.id,
     firstSubLoanId,
     subLoanCount: subLoan.metadata.subLoanCount,
@@ -638,33 +725,49 @@ function defineExpectedSubLoanPreview(subLoan: SubLoan): SubLoanPreview {
     recentOperationId: subLoan.metadata.recentOperationId,
     latestOperationId: subLoan.metadata.latestOperationId,
     status: subLoan.state.status,
-    gracePeriodStatus: subLoan.state.gracePeriodStatus,
+
     programId: subLoan.inception.programId,
     borrower: subLoan.inception.borrower,
     borrowedAmount: subLoan.inception.borrowedAmount,
     addonAmount: subLoan.inception.addonAmount,
+
     startTimestamp: subLoan.inception.startTimestamp,
     freezeTimestamp: subLoan.state.freezeTimestamp,
     trackedTimestamp: subLoan.state.trackedTimestamp,
     pendingTimestamp: subLoan.metadata.pendingTimestamp,
     duration: subLoan.state.duration,
-    remuneratoryRate: subLoan.state.remuneratoryRate,
+
+    primaryRate: subLoan.state.primaryRate,
+    secondaryRate: subLoan.state.secondaryRate,
     moratoryRate: subLoan.state.moratoryRate,
     lateFeeRate: subLoan.state.lateFeeRate,
-    graceDiscountRate: subLoan.state.graceDiscountRate,
+    clawbackFeeRate: subLoan.state.clawbackFeeRate,
+
     trackedPrincipal: subLoan.state.trackedPrincipal,
-    trackedRemuneratoryInterest: subLoan.state.trackedRemuneratoryInterest,
-    trackedMoratoryInterest: subLoan.state.trackedMoratoryInterest,
-    trackedLateFee: subLoan.state.trackedLateFee,
-    outstandingBalance,
     repaidPrincipal: subLoan.state.repaidPrincipal,
-    repaidRemuneratoryInterest: subLoan.state.repaidRemuneratoryInterest,
-    repaidMoratoryInterest: subLoan.state.repaidMoratoryInterest,
-    repaidLateFee: subLoan.state.repaidLateFee,
     discountPrincipal: subLoan.state.discountPrincipal,
-    discountRemuneratoryInterest: subLoan.state.discountRemuneratoryInterest,
+
+    trackedPrimaryInterest: subLoan.state.trackedPrimaryInterest,
+    repaidPrimaryInterest: subLoan.state.repaidPrimaryInterest,
+    discountPrimaryInterest: subLoan.state.discountPrimaryInterest,
+
+    trackedSecondaryInterest: subLoan.state.trackedSecondaryInterest,
+    repaidSecondaryInterest: subLoan.state.repaidSecondaryInterest,
+    discountSecondaryInterest: subLoan.state.discountSecondaryInterest,
+
+    trackedMoratoryInterest: subLoan.state.trackedMoratoryInterest,
+    repaidMoratoryInterest: subLoan.state.repaidMoratoryInterest,
     discountMoratoryInterest: subLoan.state.discountMoratoryInterest,
+
+    trackedLateFee: subLoan.state.trackedLateFee,
+    repaidLateFee: subLoan.state.repaidLateFee,
     discountLateFee: subLoan.state.discountLateFee,
+
+    trackedClawbackFee: subLoan.state.trackedClawbackFee,
+    repaidClawbackFee: subLoan.state.repaidClawbackFee,
+    discountClawbackFee: subLoan.state.discountClawbackFee,
+
+    outstandingBalance: calculateOutstandingBalance(subLoan),
   };
 }
 
@@ -672,31 +775,44 @@ function defineExpectedLoanPreview(loan: Loan): LoanPreview {
   const firstSubLoan = loan.subLoans[0];
   const firstSubLoanId = firstSubLoan.id - BigInt(firstSubLoan.metadata.subLoanIndex);
   const subLoanCount = firstSubLoan.metadata.subLoanCount;
-  const subLoanPreviews = loan.subLoans.map(defineExpectedSubLoanPreview);
 
   let ongoingSubLoanCount = 0;
+  let overdueSubLoanCount = 0;
   let repaidSubLoanCount = 0;
   let revokedSubLoanCount = 0;
 
   let totalBorrowedAmount = 0n;
   let totalAddonAmount = 0n;
+
   let totalTrackedPrincipal = 0n;
-  let totalTrackedRemuneratoryInterest = 0n;
-  let totalTrackedMoratoryInterest = 0n;
-  let totalTrackedLateFee = 0n;
-  let totalOutstandingBalance = 0n;
   let totalRepaidPrincipal = 0n;
-  let totalRepaidRemuneratoryInterest = 0n;
-  let totalRepaidMoratoryInterest = 0n;
-  let totalRepaidLateFee = 0n;
   let totalDiscountPrincipal = 0n;
-  let totalDiscountRemuneratoryInterest = 0n;
+
+  let totalTrackedPrimaryInterest = 0n;
+  let totalRepaidPrimaryInterest = 0n;
+  let totalDiscountPrimaryInterest = 0n;
+
+  let totalTrackedSecondaryInterest = 0n;
+  let totalRepaidSecondaryInterest = 0n;
+  let totalDiscountSecondaryInterest = 0n;
+
+  let totalTrackedMoratoryInterest = 0n;
+  let totalRepaidMoratoryInterest = 0n;
   let totalDiscountMoratoryInterest = 0n;
+
+  let totalTrackedLateFee = 0n;
+  let totalRepaidLateFee = 0n;
   let totalDiscountLateFee = 0n;
 
-  for (const preview of subLoanPreviews) {
+  let totalOutstandingBalance = 0n;
+
+  for (const subLoan of loan.subLoans) {
+    const preview = defineExpectedSubLoanPreview(subLoan);
     if (preview.status === SubLoanStatus.Ongoing) {
       ongoingSubLoanCount += 1;
+      if (isOverdue(subLoan, subLoan.state.trackedTimestamp)) {
+        overdueSubLoanCount += 1;
+      }
     } else if (preview.status === SubLoanStatus.Repaid) {
       repaidSubLoanCount += 1;
     } else if (preview.status === SubLoanStatus.Revoked) {
@@ -705,47 +821,66 @@ function defineExpectedLoanPreview(loan: Loan): LoanPreview {
 
     totalBorrowedAmount += preview.borrowedAmount;
     totalAddonAmount += preview.addonAmount;
+
     totalTrackedPrincipal += preview.trackedPrincipal;
-    totalTrackedRemuneratoryInterest += preview.trackedRemuneratoryInterest;
-    totalTrackedMoratoryInterest += preview.trackedMoratoryInterest;
-    totalTrackedLateFee += preview.trackedLateFee;
-    totalOutstandingBalance += preview.outstandingBalance;
     totalRepaidPrincipal += preview.repaidPrincipal;
-    totalRepaidRemuneratoryInterest += preview.repaidRemuneratoryInterest;
-    totalRepaidMoratoryInterest += preview.repaidMoratoryInterest;
-    totalRepaidLateFee += preview.repaidLateFee;
     totalDiscountPrincipal += preview.discountPrincipal;
-    totalDiscountRemuneratoryInterest += preview.discountRemuneratoryInterest;
+
+    totalTrackedPrimaryInterest += preview.trackedPrimaryInterest;
+    totalRepaidPrimaryInterest += preview.repaidPrimaryInterest;
+    totalDiscountPrimaryInterest += preview.discountPrimaryInterest;
+
+    totalTrackedSecondaryInterest += preview.trackedSecondaryInterest;
+    totalRepaidSecondaryInterest += preview.repaidSecondaryInterest;
+    totalDiscountSecondaryInterest += preview.discountSecondaryInterest;
+
+    totalTrackedMoratoryInterest += preview.trackedMoratoryInterest;
+    totalRepaidMoratoryInterest += preview.repaidMoratoryInterest;
     totalDiscountMoratoryInterest += preview.discountMoratoryInterest;
+
+    totalTrackedLateFee += preview.trackedLateFee;
+    totalRepaidLateFee += preview.repaidLateFee;
     totalDiscountLateFee += preview.discountLateFee;
+
+    totalOutstandingBalance += preview.outstandingBalance;
   }
 
-  const lastPreview = subLoanPreviews[subLoanPreviews.length - 1];
+  const lastSubLoan = loan.subLoans[loan.subLoans.length - 1];
 
   return {
-    day: lastPreview.day,
+    day: dayIndex(lastSubLoan.state.trackedTimestamp),
     firstSubLoanId,
     subLoanCount,
     ongoingSubLoanCount,
+    overdueSubLoanCount,
     repaidSubLoanCount,
     revokedSubLoanCount,
-    programId: lastPreview.programId,
-    borrower: lastPreview.borrower,
+    programId: lastSubLoan.inception.programId,
+    borrower: lastSubLoan.inception.borrower,
     totalBorrowedAmount,
     totalAddonAmount,
+
     totalTrackedPrincipal,
-    totalTrackedRemuneratoryInterest,
-    totalTrackedMoratoryInterest,
-    totalTrackedLateFee,
-    totalOutstandingBalance,
     totalRepaidPrincipal,
-    totalRepaidRemuneratoryInterest,
-    totalRepaidMoratoryInterest,
-    totalRepaidLateFee,
     totalDiscountPrincipal,
-    totalDiscountRemuneratoryInterest,
+
+    totalTrackedPrimaryInterest,
+    totalRepaidPrimaryInterest,
+    totalDiscountPrimaryInterest,
+
+    totalTrackedSecondaryInterest,
+    totalRepaidSecondaryInterest,
+    totalDiscountSecondaryInterest,
+
+    totalTrackedMoratoryInterest,
+    totalRepaidMoratoryInterest,
     totalDiscountMoratoryInterest,
+
+    totalTrackedLateFee,
+    totalRepaidLateFee,
     totalDiscountLateFee,
+
+    totalOutstandingBalance,
   };
 }
 
@@ -757,10 +892,25 @@ async function checkSubLoanInContract(
   const inception = await market.getSubLoanInception(subLoanId);
   const metadata = await market.getSubLoanMetadata(subLoanId);
   const state = await market.getSubLoanState(subLoanId);
-  const preview = await market.getSubLoanPreview(subLoanId, TIMESTAMP_SPECIAL_VALUE_TRACKED, VIEW_FLAGS_DEFAULT);
-  checkEquality(resultToObject(inception), expectedSubLoan.inception, expectedSubLoan.indexInLoan);
-  checkEquality(resultToObject(metadata), expectedSubLoan.metadata, expectedSubLoan.indexInLoan);
-  checkEquality(resultToObject(state), expectedSubLoan.state, expectedSubLoan.indexInLoan);
+  const preview = await market.getSubLoanPreview(
+    subLoanId,
+    TIMESTAMP_SPECIAL_VALUE_TRACKED,
+  );
+  checkEquality(
+    resultToObject(inception),
+    expectedSubLoan.inception,
+    expectedSubLoan.indexInLoan,
+  );
+  checkEquality(
+    resultToObject(metadata),
+    expectedSubLoan.metadata,
+    expectedSubLoan.indexInLoan,
+  );
+  checkEquality(
+    resultToObject(state),
+    expectedSubLoan.state,
+    expectedSubLoan.indexInLoan,
+  );
   checkEquality(
     resultToObject(preview),
     defineExpectedSubLoanPreview(expectedSubLoan),
@@ -768,15 +918,24 @@ async function checkSubLoanInContract(
   );
 }
 
-async function checkLoanInContract(market: Contracts.LendingMarketV2Testable, expectedLoan: Loan) {
+async function checkLoanInContract(
+  market: Contracts.LendingMarketV2Testable,
+  expectedLoan: Loan,
+) {
   const subLoanCount = expectedLoan.subLoans.length;
   for (let i = 0; i < subLoanCount; ++i) {
     await checkSubLoanInContract(market, expectedLoan.subLoans[i]);
   }
 
   const firstSubLoan = expectedLoan.subLoans[0];
-  const loanPreview = await market.getLoanPreview(firstSubLoan.id, TIMESTAMP_SPECIAL_VALUE_TRACKED, VIEW_FLAGS_DEFAULT);
-  checkEquality(resultToObject(loanPreview), defineExpectedLoanPreview(expectedLoan));
+  const loanPreview = await market.getLoanPreview(
+    firstSubLoan.id,
+    TIMESTAMP_SPECIAL_VALUE_TRACKED,
+  );
+  checkEquality(
+    resultToObject(loanPreview),
+    defineExpectedLoanPreview(expectedLoan),
+  );
 }
 
 function applySubLoanRevocation(subLoan: SubLoan, txTimestamp: number) {
@@ -788,7 +947,8 @@ function applySubLoanRevocation(subLoan: SubLoan, txTimestamp: number) {
 
   subLoan.state.status = SubLoanStatus.Revoked;
   subLoan.state.trackedPrincipal = 0n;
-  subLoan.state.trackedRemuneratoryInterest = 0n;
+  subLoan.state.trackedPrimaryInterest = 0n;
+  subLoan.state.trackedSecondaryInterest = 0n;
   subLoan.state.trackedMoratoryInterest = 0n;
   subLoan.state.trackedLateFee = 0n;
   subLoan.state.trackedTimestamp = txTimestamp;
@@ -809,20 +969,20 @@ function createTypicalLoanTakingRequest(fixture: Fixture): LoanTakingRequest {
   };
 }
 
-function createTypicalSubLoanTakingRequests(subLoanCount: number): SubLoanTakingRequest[] {
-  const onePercentRate = INTEREST_RATE_FACTOR / 100;
-  return Array.from(
-    { length: subLoanCount },
-    (_, i) => ({
-      borrowedAmount: 1000n * BigInt(i + 1) * 10n ** TOKEN_DECIMALS,
-      addonAmount: 100n * BigInt(i + 1) * 10n ** TOKEN_DECIMALS,
-      duration: 30 * (i + 1),
-      remuneratoryRate: REMUNERATORY_RATE + onePercentRate * (i + 1),
-      moratoryRate: MORATORY_RATE + onePercentRate * (i + 1),
-      lateFeeRate: LATE_FEE_RATE + onePercentRate * (i + 1),
-      graceDiscountRate: GRACE_DISCOUNT_RATE + onePercentRate * (i + 1),
-    }),
-  );
+function createTypicalSubLoanTakingRequests(
+  subLoanCount: number,
+): SubLoanTakingRequest[] {
+  const oneTenthPercentRate = INTEREST_RATE_FACTOR / 1000;
+  return Array.from({ length: subLoanCount }, (_, i) => ({
+    borrowedAmount: 1000n * BigInt(i + 1) * 10n ** TOKEN_DECIMALS,
+    addonAmount: 100n * BigInt(i + 1) * 10n ** TOKEN_DECIMALS,
+    duration: 30 * (i + 1),
+    primaryRate: UP_TO_DUE_REMUNERATORY_RATE + oneTenthPercentRate * (i + 1),
+    secondaryRate: POST_DUE_REMUNERATORY_RATE + oneTenthPercentRate * (i + 1),
+    moratoryRate: MORATORY_RATE + oneTenthPercentRate * (i + 1),
+    lateFeeRate: LATE_FEE_RATE + oneTenthPercentRate * (i + 1),
+    clawbackFeeRate: CLAWBACK_FEE_RATE + oneTenthPercentRate * (i + 1),
+  }));
 }
 
 async function takeTypicalLoan(
@@ -896,21 +1056,40 @@ function dayIndex(timestamp: number): number {
   return Math.floor((timestamp - 3 * 3600) / 86400);
 }
 
-function accrueRemuneratoryInterest(subLoan: SubLoan, timestamp: number) {
-  const oldTrackedBalance = subLoan.state.trackedPrincipal + subLoan.state.trackedRemuneratoryInterest;
-  let interestRate = subLoan.state.remuneratoryRate;
-  if (subLoan.state.gracePeriodStatus === GracePeriodStatus.Active) {
-    interestRate = interestRate * (INTEREST_RATE_FACTOR - subLoan.state.graceDiscountRate) / INTEREST_RATE_FACTOR;
-  }
-  const days = dayIndex(timestamp) - dayIndex(subLoan.state.trackedTimestamp);
-  const newTrackedBalance = BigInt(
-    Math.round(Number(oldTrackedBalance) * ((1 + interestRate / INTEREST_RATE_FACTOR) ** days)),
-  );
-  subLoan.state.trackedRemuneratoryInterest += newTrackedBalance - oldTrackedBalance;
+function isOverdue(subLoan: SubLoan, timestamp: number): boolean {
+  const dueDay = dayIndex(subLoan.inception.startTimestamp) + subLoan.state.duration;
+  return dayIndex(timestamp) > dueDay;
 }
 
-function roundToAccuracyFactor(amount: bigint) {
-  return ((amount + ACCURACY_FACTOR / 2n) / ACCURACY_FACTOR) * ACCURACY_FACTOR;
+function calculateCompoundInterest(baseAmount: bigint, interestRate: number, days: number): bigint {
+  const newBaseAmount = BigInt(
+    Math.round(
+      Number(baseAmount) * ((1 + interestRate / INTEREST_RATE_FACTOR) ** days),
+    ),
+  );
+  return newBaseAmount - baseAmount;
+}
+
+function calculateSimpleInterest(baseAmount: bigint, interestRate: number, days: number): bigint {
+  return BigInt(
+    Math.round(
+      (Number(baseAmount) * interestRate * days) / INTEREST_RATE_FACTOR,
+    ),
+  );
+}
+
+function accruePrimaryInterest(subLoan: SubLoan, timestamp: number) {
+  const trackedBalance = subLoan.state.trackedPrincipal + subLoan.state.trackedPrimaryInterest;
+  const days = dayIndex(timestamp) - dayIndex(subLoan.state.trackedTimestamp);
+  subLoan.state.trackedPrimaryInterest += calculateCompoundInterest(trackedBalance, subLoan.state.primaryRate, days);
+}
+
+function roundFinancially(amount: bigint) {
+  const roundedValue = ((amount + ACCURACY_FACTOR / 2n) / ACCURACY_FACTOR) * ACCURACY_FACTOR;
+  if (roundedValue === 0n && amount !== 0n) {
+    return ACCURACY_FACTOR;
+  }
+  return roundedValue;
 }
 
 function registerSingleOperationInMetadata(subLoan: SubLoan, operationId: number) {
@@ -923,26 +1102,27 @@ function registerSingleOperationInMetadata(subLoan: SubLoan, operationId: number
 }
 
 function applySubLoanRepayment(subLoan: SubLoan, timestamp: number, amount: bigint, operationId: number) {
-  accrueRemuneratoryInterest(subLoan, timestamp);
-  const roundedRemuneratoryInterest = roundToAccuracyFactor(subLoan.state.trackedRemuneratoryInterest);
-  if (roundedRemuneratoryInterest > amount) {
-    subLoan.state.trackedRemuneratoryInterest -= amount;
-    subLoan.state.repaidRemuneratoryInterest += amount;
+  if (isOverdue(subLoan, timestamp)) {
+    throw new Error("Not implemented: Repayment of overdue sub-loans");
+  }
+  accruePrimaryInterest(subLoan, timestamp);
+
+  if (subLoan.state.trackedPrimaryInterest > amount) {
+    subLoan.state.repaidPrimaryInterest += amount;
+    subLoan.state.trackedPrimaryInterest -= amount;
     amount = 0n;
   } else {
-    subLoan.state.trackedRemuneratoryInterest = 0n;
-    subLoan.state.repaidRemuneratoryInterest += roundedRemuneratoryInterest;
-    amount -= roundedRemuneratoryInterest;
+    amount -= subLoan.state.trackedPrimaryInterest;
+    subLoan.state.repaidPrimaryInterest += subLoan.state.trackedPrimaryInterest;
+    subLoan.state.trackedPrimaryInterest = 0n;
   }
 
   if (subLoan.state.trackedPrincipal >= amount) {
-    subLoan.state.trackedPrincipal -= amount;
     subLoan.state.repaidPrincipal += amount;
+    subLoan.state.trackedPrincipal -= amount;
   } else {
-    throw new Error(
-      `The remaining repayment amount is greater than the tracked principal of the sub-loan.` +
-      `Sub-loan ID: ${subLoan.id}. Amount: ${amount}. Tracked principal: ${subLoan.state.trackedPrincipal}`,
-    );
+    subLoan.state.repaidPrincipal += subLoan.state.trackedPrincipal;
+    subLoan.state.trackedPrincipal = 0n;
   }
 
   subLoan.state.trackedTimestamp = timestamp;
@@ -951,26 +1131,28 @@ function applySubLoanRepayment(subLoan: SubLoan, timestamp: number, amount: bigi
 }
 
 function applySubLoanDiscount(subLoan: SubLoan, timestamp: number, amount: bigint, operationId: number) {
-  accrueRemuneratoryInterest(subLoan, timestamp);
-  const roundedRemuneratoryInterest = roundToAccuracyFactor(subLoan.state.trackedRemuneratoryInterest);
-  if (roundedRemuneratoryInterest > amount) {
-    subLoan.state.trackedRemuneratoryInterest -= amount;
-    subLoan.state.discountRemuneratoryInterest += amount;
+  if (isOverdue(subLoan, timestamp)) {
+    throw new Error("Not implemented: Discount of overdue sub-loans");
+  }
+
+  accruePrimaryInterest(subLoan, timestamp);
+
+  if (subLoan.state.trackedPrimaryInterest >= amount) {
+    subLoan.state.discountPrimaryInterest += amount;
+    subLoan.state.trackedPrimaryInterest -= amount;
     amount = 0n;
   } else {
-    subLoan.state.trackedRemuneratoryInterest = 0n;
-    subLoan.state.discountRemuneratoryInterest += roundedRemuneratoryInterest;
-    amount -= roundedRemuneratoryInterest;
+    amount -= subLoan.state.trackedPrimaryInterest;
+    subLoan.state.discountPrimaryInterest += subLoan.state.trackedPrimaryInterest;
+    subLoan.state.trackedPrimaryInterest = 0n;
   }
 
   if (subLoan.state.trackedPrincipal >= amount) {
     subLoan.state.trackedPrincipal -= amount;
     subLoan.state.discountPrincipal += amount;
   } else {
-    throw new Error(
-      `The remaining discount amount is greater than the tracked principal of the sub-loan.` +
-      `Sub-loan ID: ${subLoan.id}. Amount: ${amount}. Tracked principal: ${subLoan.state.trackedPrincipal}`,
-    );
+    subLoan.state.discountPrincipal += subLoan.state.trackedPrincipal;
+    subLoan.state.trackedPrincipal = 0n;
   }
 
   subLoan.state.trackedTimestamp = timestamp;
@@ -979,7 +1161,7 @@ function applySubLoanDiscount(subLoan: SubLoan, timestamp: number, amount: bigin
 }
 
 function applySubLoanDurationSetting(subLoan: SubLoan, timestamp: number, value: bigint, operationId: number) {
-  accrueRemuneratoryInterest(subLoan, timestamp);
+  accruePrimaryInterest(subLoan, timestamp);
 
   subLoan.state.duration = Number(value);
   subLoan.state.trackedTimestamp = timestamp;
@@ -988,7 +1170,7 @@ function applySubLoanDurationSetting(subLoan: SubLoan, timestamp: number, value:
 }
 
 function applySubLoanFreezing(subLoan: SubLoan, timestamp: number, operationId: number) {
-  accrueRemuneratoryInterest(subLoan, timestamp);
+  accruePrimaryInterest(subLoan, timestamp);
 
   subLoan.state.freezeTimestamp = timestamp;
   subLoan.state.trackedTimestamp = timestamp;
@@ -996,15 +1178,29 @@ function applySubLoanFreezing(subLoan: SubLoan, timestamp: number, operationId: 
   registerSingleOperationInMetadata(subLoan, operationId);
 }
 
-function applySubLoanRemuneratoryRateSetting(
+function applySubLoanPrimaryRateSetting(
   subLoan: SubLoan,
   timestamp: number,
   value: bigint,
   operationId: number,
 ) {
-  accrueRemuneratoryInterest(subLoan, timestamp);
+  accruePrimaryInterest(subLoan, timestamp);
 
-  subLoan.state.remuneratoryRate = Number(value);
+  subLoan.state.primaryRate = Number(value);
+  subLoan.state.trackedTimestamp = timestamp;
+
+  registerSingleOperationInMetadata(subLoan, operationId);
+}
+
+function applySubLoanSecondaryRateSetting(
+  subLoan: SubLoan,
+  timestamp: number,
+  value: bigint,
+  operationId: number,
+) {
+  accruePrimaryInterest(subLoan, timestamp);
+
+  subLoan.state.secondaryRate = Number(value);
   subLoan.state.trackedTimestamp = timestamp;
 
   registerSingleOperationInMetadata(subLoan, operationId);
@@ -1016,7 +1212,7 @@ function applySubLoanMoratoryRateSetting(
   value: bigint,
   operationId: number,
 ) {
-  accrueRemuneratoryInterest(subLoan, timestamp);
+  accruePrimaryInterest(subLoan, timestamp);
 
   subLoan.state.moratoryRate = Number(value);
   subLoan.state.trackedTimestamp = timestamp;
@@ -1030,7 +1226,7 @@ function applySubLoanLateFeeRateSetting(
   value: bigint,
   operationId: number,
 ) {
-  accrueRemuneratoryInterest(subLoan, timestamp);
+  accruePrimaryInterest(subLoan, timestamp);
 
   subLoan.state.lateFeeRate = Number(value);
   subLoan.state.trackedTimestamp = timestamp;
@@ -1038,15 +1234,15 @@ function applySubLoanLateFeeRateSetting(
   registerSingleOperationInMetadata(subLoan, operationId);
 }
 
-function applySubLoanGraceDiscountRateSetting(
+function applySubLoanClawbackFeeRateSetting(
   subLoan: SubLoan,
   timestamp: number,
   value: bigint,
   operationId: number,
 ) {
-  accrueRemuneratoryInterest(subLoan, timestamp);
+  accruePrimaryInterest(subLoan, timestamp);
 
-  subLoan.state.graceDiscountRate = Number(value);
+  subLoan.state.clawbackFeeRate = Number(value);
   subLoan.state.trackedTimestamp = timestamp;
 
   registerSingleOperationInMetadata(subLoan, operationId);
@@ -1054,13 +1250,15 @@ function applySubLoanGraceDiscountRateSetting(
 
 function voidSubLoanSingleRepaymentOperation(subLoan: SubLoan) {
   subLoan.state.repaidPrincipal = 0n;
-  subLoan.state.repaidRemuneratoryInterest = 0n;
+  subLoan.state.repaidPrimaryInterest = 0n;
+  subLoan.state.repaidSecondaryInterest = 0n;
   subLoan.state.repaidMoratoryInterest = 0n;
   subLoan.state.repaidLateFee = 0n;
 
   subLoan.state.trackedTimestamp = subLoan.inception.startTimestamp;
   subLoan.state.trackedPrincipal = subLoan.inception.borrowedAmount + subLoan.inception.addonAmount;
-  subLoan.state.trackedRemuneratoryInterest = 0n;
+  subLoan.state.trackedPrimaryInterest = 0n;
+  subLoan.state.trackedSecondaryInterest = 0n;
   subLoan.state.trackedMoratoryInterest = 0n;
   subLoan.state.trackedLateFee = 0n;
 
@@ -1636,15 +1834,17 @@ describe("Contract 'LendingMarket'", () => {
         );
       });
 
-      it("the grace discount rate is zero for the second sub-loan in a loan with 3 sub-loans", async () => {
-        subLoanTakingRequests[1].graceDiscountRate = 0;
+      // TODO: Add more tests for zero rates
+
+      it("the clawback fee rate is zero for the second sub-loan in a loan with 3 sub-loans", async () => {
+        subLoanTakingRequests[1].clawbackFeeRate = 0;
         const tx = market.connect(admin).takeLoan(loanTakingRequest, subLoanTakingRequests);
         await checkNewlyTakenLoan(tx, loanTakingRequest, subLoanTakingRequests);
       });
 
-      it("the grace discount rate is zero for all sub-loans in a loan with 3 sub-loans", async () => {
+      it("the clawback fee rate is zero for all sub-loans in a loan with 3 sub-loans", async () => {
         for (const subLoanTakingRequest of subLoanTakingRequests) {
-          subLoanTakingRequest.graceDiscountRate = 0;
+          subLoanTakingRequest.clawbackFeeRate = 0;
         }
         const tx = market.connect(admin).takeLoan(loanTakingRequest, subLoanTakingRequests);
         await checkNewlyTakenLoan(tx, loanTakingRequest, subLoanTakingRequests);
@@ -1669,6 +1869,10 @@ describe("Contract 'LendingMarket'", () => {
       });
 
       it("the block timestamp is greater than the maximum allowed value", async () => {
+        // Skip this test if the network is not Hardhat
+        if (network.name !== "hardhat") {
+          return;
+        }
         await increaseBlockTimestampTo(Number(maxUintForBits(32)) + 1);
 
         await expect(market.connect(admin).takeLoan(loanTakingRequest, subLoanTakingRequests))
@@ -1691,14 +1895,14 @@ describe("Contract 'LendingMarket'", () => {
         loanTakingRequest.startTimestamp = latestBlockTimestamp + 10000;
 
         await expect(market.connect(admin).takeLoan(loanTakingRequest, subLoanTakingRequests))
-          .to.be.revertedWithCustomError(market, ERROR_NAME_SUB_LOAN_START_TIMESTAMP_INVALID);
+          .to.be.revertedWithCustomError(market, ERROR_NAME_LOAN_START_TIMESTAMP_INVALID);
       });
 
       it("the start timestamp is 1 (reserved special value)", async () => {
         loanTakingRequest.startTimestamp = 1;
 
         await expect(market.connect(admin).takeLoan(loanTakingRequest, subLoanTakingRequests))
-          .to.be.revertedWithCustomError(market, ERROR_NAME_SUB_LOAN_START_TIMESTAMP_INVALID);
+          .to.be.revertedWithCustomError(market, ERROR_NAME_LOAN_START_TIMESTAMP_INVALID);
       });
 
       it("the total borrowed amount is zero", async () => {
@@ -1722,28 +1926,34 @@ describe("Contract 'LendingMarket'", () => {
           .to.be.revertedWithCustomError(market, ERROR_NAME_SUB_LOAN_DURATION_EXCESS);
       });
 
-      it("one of the sub-loans has the remuneratoryRate greater than the maximum allowed value", async () => {
-        subLoanTakingRequests[1].remuneratoryRate = INTEREST_RATE_FACTOR + 1;
+      it("one of the sub-loans has the primary rate greater than the max allowed value", async () => {
+        subLoanTakingRequests[1].primaryRate = INTEREST_RATE_FACTOR + 1;
         await expect(market.connect(admin).takeLoan(loanTakingRequest, subLoanTakingRequests))
-          .to.be.revertedWithCustomError(market, ERROR_NAME_SUB_LOAN_RATE_VALUE_INVALID);
+          .to.be.revertedWithCustomError(market, ERROR_NAME_SUB_LOAN_RATE_VALUE_EXCESS);
       });
 
-      it("one of the sub-loans has the moratoryRate greater than the maximum allowed value", async () => {
+      it("one of the sub-loans has the secondary rate greater than the max allowed value", async () => {
+        subLoanTakingRequests[1].secondaryRate = INTEREST_RATE_FACTOR + 1;
+        await expect(market.connect(admin).takeLoan(loanTakingRequest, subLoanTakingRequests))
+          .to.be.revertedWithCustomError(market, ERROR_NAME_SUB_LOAN_RATE_VALUE_EXCESS);
+      });
+
+      it("one of the sub-loans has the moratory rate greater than the maximum allowed value", async () => {
         subLoanTakingRequests[1].moratoryRate = INTEREST_RATE_FACTOR + 1;
         await expect(market.connect(admin).takeLoan(loanTakingRequest, subLoanTakingRequests))
-          .to.be.revertedWithCustomError(market, ERROR_NAME_SUB_LOAN_RATE_VALUE_INVALID);
+          .to.be.revertedWithCustomError(market, ERROR_NAME_SUB_LOAN_RATE_VALUE_EXCESS);
       });
 
-      it("one of the sub-loans has the lateFeeRate greater than the maximum allowed value", async () => {
+      it("one of the sub-loans has the late fee rate greater than the maximum allowed value", async () => {
         subLoanTakingRequests[1].lateFeeRate = INTEREST_RATE_FACTOR + 1;
         await expect(market.connect(admin).takeLoan(loanTakingRequest, subLoanTakingRequests))
-          .to.be.revertedWithCustomError(market, ERROR_NAME_SUB_LOAN_RATE_VALUE_INVALID);
+          .to.be.revertedWithCustomError(market, ERROR_NAME_SUB_LOAN_RATE_VALUE_EXCESS);
       });
 
-      it("one of the sub-loans has the graceDiscountRate greater than the maximum allowed value", async () => {
-        subLoanTakingRequests[1].graceDiscountRate = INTEREST_RATE_FACTOR + 1;
+      it("one of the sub-loans has the clawback fee rate greater than the maximum allowed value", async () => {
+        subLoanTakingRequests[1].clawbackFeeRate = INTEREST_RATE_FACTOR + 1;
         await expect(market.connect(admin).takeLoan(loanTakingRequest, subLoanTakingRequests))
-          .to.be.revertedWithCustomError(market, ERROR_NAME_SUB_LOAN_RATE_VALUE_INVALID);
+          .to.be.revertedWithCustomError(market, ERROR_NAME_SUB_LOAN_RATE_VALUE_EXCESS);
       });
 
       it("the sub-loan durations are not in ascending order", async () => {
@@ -1862,10 +2072,13 @@ describe("Contract 'LendingMarket'", () => {
               subLoan.id,
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
-              toBytes32(packSubLoanRepaidParts(subLoan)),
-              toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)), // storedPackedTrackedParts
-              toBytes32(packSubLoanTrackedParts(subLoan)), // currentPackedTrackedParts
+              toBytes32(packRates(subLoan)),
+              toBytes32(packSubLoanPrincipalParts(subLoan)),
+              toBytes32(packSubLoanPrimaryInterestParts(subLoan)),
+              toBytes32(packSubLoanSecondaryInterestParts(subLoan)),
+              toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanLateFeeParts(subLoan)),
+              toBytes32(packSubLoanClawbackFeeParts(subLoan)),
             );
         }
 
@@ -1979,6 +2192,11 @@ describe("Contract 'LendingMarket'", () => {
       });
 
       it("the block timestamp is greater than the maximum allowed value", async () => {
+        // Skip this test if the network is not Hardhat
+        if (network.name !== "hardhat") {
+          return;
+        }
+
         await increaseBlockTimestampTo(Number(maxUintForBits(32)) + 1);
 
         await expect(market.connect(admin).revokeLoan(firstSubLoanId))
@@ -2113,10 +2331,13 @@ describe("Contract 'LendingMarket'", () => {
               subLoan.id,
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
-              toBytes32(packSubLoanRepaidParts(subLoan)),
-              toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)), // storedPackedTrackedParts
-              toBytes32(packSubLoanTrackedParts(subLoan)), // currentPackedTrackedParts
+              toBytes32(packRates(subLoan)),
+              toBytes32(packSubLoanPrincipalParts(subLoan)),
+              toBytes32(packSubLoanPrimaryInterestParts(subLoan)),
+              toBytes32(packSubLoanSecondaryInterestParts(subLoan)),
+              toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanLateFeeParts(subLoan)),
+              toBytes32(packSubLoanClawbackFeeParts(subLoan)),
             );
         });
 
@@ -2143,7 +2364,6 @@ describe("Contract 'LendingMarket'", () => {
       describe("A single repayment operation from the borrower in the past, and does the following:", () => {
         let operation: Operation;
         let tx: Promise<ContractTransactionResponse>;
-        let txTimestamp: number;
 
         beforeEach(async () => {
           const operationRequest = {
@@ -2153,7 +2373,7 @@ describe("Contract 'LendingMarket'", () => {
             value: (subLoan.inception.borrowedAmount / 10n),
             account: borrower.address,
           };
-          ({ tx, txTimestamp, operation } = await prepareOperation(operationRequest));
+          ({ tx, operation } = await prepareOperation(operationRequest));
         });
 
         it("registers the expected operation", async () => {
@@ -2202,10 +2422,6 @@ describe("Contract 'LendingMarket'", () => {
             operation.value,
             operation.id,
           );
-          const storedPackedTrackedParts = packSubLoanTrackedParts(subLoan);
-
-          // Calculate the expected state at the transaction timestamp
-          accrueRemuneratoryInterest(subLoan, txTimestamp);
 
           await expect(tx)
             .to.emit(market, EVENT_NAME_SUB_LOAN_UPDATED)
@@ -2213,10 +2429,13 @@ describe("Contract 'LendingMarket'", () => {
               subLoan.id,
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
-              toBytes32(packSubLoanRepaidParts(subLoan)),
-              toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(storedPackedTrackedParts),
-              toBytes32(packSubLoanTrackedParts(subLoan)), // currentPackedTrackedParts
+              toBytes32(packRates(subLoan)),
+              toBytes32(packSubLoanPrincipalParts(subLoan)),
+              toBytes32(packSubLoanPrimaryInterestParts(subLoan)),
+              toBytes32(packSubLoanSecondaryInterestParts(subLoan)),
+              toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanLateFeeParts(subLoan)),
+              toBytes32(packSubLoanClawbackFeeParts(subLoan)),
             );
         });
 
@@ -2295,10 +2514,13 @@ describe("Contract 'LendingMarket'", () => {
               subLoan.id,
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
-              toBytes32(packSubLoanRepaidParts(subLoan)),
-              toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)), // storedPackedTrackedParts
-              toBytes32(packSubLoanTrackedParts(subLoan)), // currentPackedTrackedParts
+              toBytes32(packRates(subLoan)),
+              toBytes32(packSubLoanPrincipalParts(subLoan)),
+              toBytes32(packSubLoanPrimaryInterestParts(subLoan)),
+              toBytes32(packSubLoanSecondaryInterestParts(subLoan)),
+              toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanLateFeeParts(subLoan)),
+              toBytes32(packSubLoanClawbackFeeParts(subLoan)),
             );
         });
 
@@ -2368,10 +2590,13 @@ describe("Contract 'LendingMarket'", () => {
               subLoan.id,
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
-              toBytes32(packSubLoanRepaidParts(subLoan)),
-              toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)), // storedPackedTrackedParts
-              toBytes32(packSubLoanTrackedParts(subLoan)), // currentPackedTrackedParts
+              toBytes32(packRates(subLoan)),
+              toBytes32(packSubLoanPrincipalParts(subLoan)),
+              toBytes32(packSubLoanPrimaryInterestParts(subLoan)),
+              toBytes32(packSubLoanSecondaryInterestParts(subLoan)),
+              toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanLateFeeParts(subLoan)),
+              toBytes32(packSubLoanClawbackFeeParts(subLoan)),
             );
         });
 
@@ -2454,7 +2679,7 @@ describe("Contract 'LendingMarket'", () => {
         });
       });
 
-      describe("A single remuneratory rate setting operation at the current block, and does the following:", () => {
+      describe("A single primary rate setting op at the current block, and does the following:", () => {
         let operation: Operation;
         let tx: Promise<ContractTransactionResponse>;
         let txTimestamp: number;
@@ -2462,9 +2687,9 @@ describe("Contract 'LendingMarket'", () => {
         beforeEach(async () => {
           const operationRequest: OperationRequest = {
             subLoanId: subLoan.id,
-            kind: OperationKind.RemuneratoryRateSetting,
+            kind: OperationKind.PrimaryRateSetting,
             timestamp: 0,
-            value: BigInt(subLoan.state.remuneratoryRate + INTEREST_RATE_FACTOR / 100),
+            value: BigInt(subLoan.state.primaryRate + INTEREST_RATE_FACTOR / 100),
             account: ADDRESS_ZERO,
           };
           ({ tx, txTimestamp, operation } = await prepareOperation(operationRequest));
@@ -2479,7 +2704,7 @@ describe("Contract 'LendingMarket'", () => {
         });
 
         it("changes the sub-loan as expected", async () => {
-          applySubLoanRemuneratoryRateSetting(subLoan, txTimestamp, operation.value, operation.id);
+          applySubLoanPrimaryRateSetting(subLoan, txTimestamp, operation.value, operation.id);
           await checkSubLoanInContract(market, subLoan);
         });
 
@@ -2498,7 +2723,7 @@ describe("Contract 'LendingMarket'", () => {
             );
 
           const updateIndex = subLoan.metadata.updateIndex;
-          applySubLoanRemuneratoryRateSetting(subLoan, txTimestamp, operation.value, operation.id);
+          applySubLoanPrimaryRateSetting(subLoan, txTimestamp, operation.value, operation.id);
 
           await expect(tx)
             .to.emit(market, EVENT_NAME_SUB_LOAN_UPDATED)
@@ -2506,10 +2731,13 @@ describe("Contract 'LendingMarket'", () => {
               subLoan.id,
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
-              toBytes32(packSubLoanRepaidParts(subLoan)),
-              toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)), // storedPackedTrackedParts
-              toBytes32(packSubLoanTrackedParts(subLoan)), // currentPackedTrackedParts
+              toBytes32(packRates(subLoan)),
+              toBytes32(packSubLoanPrincipalParts(subLoan)),
+              toBytes32(packSubLoanPrimaryInterestParts(subLoan)),
+              toBytes32(packSubLoanSecondaryInterestParts(subLoan)),
+              toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanLateFeeParts(subLoan)),
+              toBytes32(packSubLoanClawbackFeeParts(subLoan)),
             );
         });
 
@@ -2527,7 +2755,7 @@ describe("Contract 'LendingMarket'", () => {
         });
       });
 
-      describe("A single remuneratory rate setting operation in the future, and does the following:", () => {
+      describe("A single primary rate setting operation in the future, and does the following:", () => {
         let operation: Operation;
         let tx: Promise<ContractTransactionResponse>;
 
@@ -2535,9 +2763,150 @@ describe("Contract 'LendingMarket'", () => {
           const currentBlockTimestamp = await getBlockTimestamp("latest");
           const operationRequest: OperationRequest = {
             subLoanId: subLoan.id,
-            kind: OperationKind.RemuneratoryRateSetting,
+            kind: OperationKind.PrimaryRateSetting,
             timestamp: currentBlockTimestamp + 24 * 3600, // Tomorrow
-            value: BigInt(subLoan.state.remuneratoryRate + INTEREST_RATE_FACTOR / 100),
+            value: BigInt(subLoan.state.primaryRate + INTEREST_RATE_FACTOR / 100),
+            account: ADDRESS_ZERO,
+          };
+          ({ tx, operation } = await prepareOperation(operationRequest));
+        });
+
+        it("registers the expected operation", async () => {
+          const actualOperationIds = await market.getSubLoanOperationIds(operation.subLoanId);
+          expect(actualOperationIds).to.deep.equal([operation.id]);
+
+          const actualOperationView = await market.getSubLoanOperation(operation.subLoanId, operation.id);
+          checkEquality(resultToObject(actualOperationView), getOperationView(operation));
+        });
+
+        it("changes the sub-loan as expected", async () => {
+          subLoan.metadata.pendingTimestamp = operation.timestamp;
+          subLoan.metadata.operationCount += 1;
+          subLoan.metadata.earliestOperationId = operation.id;
+          subLoan.metadata.latestOperationId = operation.id;
+
+          await checkSubLoanInContract(market, subLoan);
+        });
+
+        it("emits the expected events", async () => {
+          expect(await getNumberOfEvents(tx, market, EVENT_NAME_OPERATION_PENDED)).to.equal(1);
+
+          await expect(tx)
+            .to.emit(market, EVENT_NAME_OPERATION_PENDED)
+            .withArgs(
+              operation.subLoanId,
+              operation.id,
+              operation.kind,
+              operation.timestamp,
+              operation.value,
+              operation.account,
+            );
+
+          await expect(tx).not.to.emit(market, EVENT_NAME_OPERATION_APPLIED);
+          await expect(tx).not.to.emit(market, EVENT_NAME_SUB_LOAN_UPDATED);
+        });
+
+        it("does not transfers tokens", async () => {
+          await expect(tx).to.changeTokenBalances(
+            tokenMock,
+            [market, liquidityPoolMock, borrower, repayer, addonTreasury],
+            [0, 0, 0, 0, 0],
+          );
+        });
+
+        it("does not call the liquidity pool functions", async () => {
+          await expect(tx).not.to.emit(liquidityPoolMock, EVENT_NAME_MOCK_LIQUIDITY_IN);
+          await expect(tx).not.to.emit(liquidityPoolMock, EVENT_NAME_MOCK_LIQUIDITY_OUT);
+        });
+      });
+
+      describe("A single secondary rate setting op at the current block, and does the following:", () => {
+        let operation: Operation;
+        let tx: Promise<ContractTransactionResponse>;
+        let txTimestamp: number;
+
+        beforeEach(async () => {
+          const operationRequest: OperationRequest = {
+            subLoanId: subLoan.id,
+            kind: OperationKind.SecondaryRateSetting,
+            timestamp: 0,
+            value: BigInt(subLoan.state.secondaryRate + INTEREST_RATE_FACTOR / 100),
+            account: ADDRESS_ZERO,
+          };
+          ({ tx, txTimestamp, operation } = await prepareOperation(operationRequest));
+        });
+
+        it("registers the expected operation", async () => {
+          const actualOperationIds = await market.getSubLoanOperationIds(operation.subLoanId);
+          expect(actualOperationIds).to.deep.equal([operation.id]);
+
+          const actualOperationView = await market.getSubLoanOperation(operation.subLoanId, operation.id);
+          checkEquality(resultToObject(actualOperationView), getOperationView(operation));
+        });
+
+        it("changes the sub-loan as expected", async () => {
+          applySubLoanSecondaryRateSetting(subLoan, txTimestamp, operation.value, operation.id);
+          await checkSubLoanInContract(market, subLoan);
+        });
+
+        it("emits the expected events", async () => {
+          expect(await getNumberOfEvents(tx, market, EVENT_NAME_OPERATION_APPLIED)).to.equal(1);
+
+          await expect(tx)
+            .to.emit(market, EVENT_NAME_OPERATION_APPLIED)
+            .withArgs(
+              operation.subLoanId,
+              operation.id,
+              operation.kind,
+              operation.timestamp,
+              operation.value,
+              operation.account,
+            );
+
+          const updateIndex = subLoan.metadata.updateIndex;
+          applySubLoanSecondaryRateSetting(subLoan, txTimestamp, operation.value, operation.id);
+
+          await expect(tx)
+            .to.emit(market, EVENT_NAME_SUB_LOAN_UPDATED)
+            .withArgs(
+              subLoan.id,
+              updateIndex,
+              toBytes32(packSubLoanParameters(subLoan)),
+              toBytes32(packRates(subLoan)),
+              toBytes32(packSubLoanPrincipalParts(subLoan)),
+              toBytes32(packSubLoanPrimaryInterestParts(subLoan)),
+              toBytes32(packSubLoanSecondaryInterestParts(subLoan)),
+              toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanLateFeeParts(subLoan)),
+              toBytes32(packSubLoanClawbackFeeParts(subLoan)),
+            );
+        });
+
+        it("does not transfer tokens", async () => {
+          await expect(tx).to.changeTokenBalances(
+            tokenMock,
+            [market, liquidityPoolMock, borrower, repayer, addonTreasury],
+            [0, 0, 0, 0, 0],
+          );
+        });
+
+        it("does not call the liquidity pool functions", async () => {
+          await expect(tx).not.to.emit(liquidityPoolMock, EVENT_NAME_MOCK_LIQUIDITY_IN);
+          await expect(tx).not.to.emit(liquidityPoolMock, EVENT_NAME_MOCK_LIQUIDITY_OUT);
+        });
+      });
+
+      describe("A single secondary rate setting operation in the future, and does the following:", () => {
+        let operation: Operation;
+        let tx: Promise<ContractTransactionResponse>;
+
+        beforeEach(async () => {
+          const currentBlockTimestamp = await getBlockTimestamp("latest");
+          const operationRequest: OperationRequest = {
+            subLoanId: subLoan.id,
+            kind: OperationKind.SecondaryRateSetting,
+            timestamp: currentBlockTimestamp + 24 * 3600, // Tomorrow
+            value: BigInt(subLoan.state.secondaryRate + INTEREST_RATE_FACTOR / 100),
             account: ADDRESS_ZERO,
           };
           ({ tx, operation } = await prepareOperation(operationRequest));
@@ -2644,10 +3013,13 @@ describe("Contract 'LendingMarket'", () => {
               subLoan.id,
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
-              toBytes32(packSubLoanRepaidParts(subLoan)),
-              toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)), // storedPackedTrackedParts
-              toBytes32(packSubLoanTrackedParts(subLoan)), // currentPackedTrackedParts
+              toBytes32(packRates(subLoan)),
+              toBytes32(packSubLoanPrincipalParts(subLoan)),
+              toBytes32(packSubLoanPrimaryInterestParts(subLoan)),
+              toBytes32(packSubLoanSecondaryInterestParts(subLoan)),
+              toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanLateFeeParts(subLoan)),
+              toBytes32(packSubLoanClawbackFeeParts(subLoan)),
             );
         });
 
@@ -2782,10 +3154,13 @@ describe("Contract 'LendingMarket'", () => {
               subLoan.id,
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
-              toBytes32(packSubLoanRepaidParts(subLoan)),
-              toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)), // storedPackedTrackedParts
-              toBytes32(packSubLoanTrackedParts(subLoan)), // currentPackedTrackedParts
+              toBytes32(packRates(subLoan)),
+              toBytes32(packSubLoanPrincipalParts(subLoan)),
+              toBytes32(packSubLoanPrimaryInterestParts(subLoan)),
+              toBytes32(packSubLoanSecondaryInterestParts(subLoan)),
+              toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanLateFeeParts(subLoan)),
+              toBytes32(packSubLoanClawbackFeeParts(subLoan)),
             );
         });
 
@@ -2868,7 +3243,7 @@ describe("Contract 'LendingMarket'", () => {
         });
       });
 
-      describe("A single grace discount rate setting operation at the current block, and does the following:", () => {
+      describe("A single clawback fee rate setting operation at the current block, and does the following:", () => {
         let operation: Operation;
         let tx: Promise<ContractTransactionResponse>;
         let txTimestamp: number;
@@ -2876,9 +3251,9 @@ describe("Contract 'LendingMarket'", () => {
         beforeEach(async () => {
           const operationRequest: OperationRequest = {
             subLoanId: subLoan.id,
-            kind: OperationKind.GraceDiscountRateSetting,
+            kind: OperationKind.ClawbackFeeRateSetting,
             timestamp: 0,
-            value: BigInt(subLoan.state.graceDiscountRate + INTEREST_RATE_FACTOR / 100),
+            value: BigInt(subLoan.state.clawbackFeeRate + INTEREST_RATE_FACTOR / 100),
             account: ADDRESS_ZERO,
           };
           ({ tx, txTimestamp, operation } = await prepareOperation(operationRequest));
@@ -2893,7 +3268,7 @@ describe("Contract 'LendingMarket'", () => {
         });
 
         it("changes the sub-loan as expected", async () => {
-          applySubLoanGraceDiscountRateSetting(subLoan, txTimestamp, operation.value, operation.id);
+          applySubLoanClawbackFeeRateSetting(subLoan, txTimestamp, operation.value, operation.id);
           await checkSubLoanInContract(market, subLoan);
         });
 
@@ -2912,7 +3287,7 @@ describe("Contract 'LendingMarket'", () => {
             );
 
           const updateIndex = subLoan.metadata.updateIndex;
-          applySubLoanGraceDiscountRateSetting(subLoan, txTimestamp, operation.value, operation.id);
+          applySubLoanClawbackFeeRateSetting(subLoan, txTimestamp, operation.value, operation.id);
 
           await expect(tx)
             .to.emit(market, EVENT_NAME_SUB_LOAN_UPDATED)
@@ -2920,10 +3295,13 @@ describe("Contract 'LendingMarket'", () => {
               subLoan.id,
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
-              toBytes32(packSubLoanRepaidParts(subLoan)),
-              toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)), // storedPackedTrackedParts
-              toBytes32(packSubLoanTrackedParts(subLoan)), // currentPackedTrackedParts
+              toBytes32(packRates(subLoan)),
+              toBytes32(packSubLoanPrincipalParts(subLoan)),
+              toBytes32(packSubLoanPrimaryInterestParts(subLoan)),
+              toBytes32(packSubLoanSecondaryInterestParts(subLoan)),
+              toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanLateFeeParts(subLoan)),
+              toBytes32(packSubLoanClawbackFeeParts(subLoan)),
             );
         });
 
@@ -2941,7 +3319,7 @@ describe("Contract 'LendingMarket'", () => {
         });
       });
 
-      describe("A single grace discount rate setting operation in the future, and does the following:", () => {
+      describe("A single clawback fee rate setting operation in the future, and does the following:", () => {
         let operation: Operation;
         let tx: Promise<ContractTransactionResponse>;
 
@@ -2949,9 +3327,9 @@ describe("Contract 'LendingMarket'", () => {
           const currentBlockTimestamp = await getBlockTimestamp("latest");
           const operationRequest: OperationRequest = {
             subLoanId: subLoan.id,
-            kind: OperationKind.GraceDiscountRateSetting,
+            kind: OperationKind.ClawbackFeeRateSetting,
             timestamp: currentBlockTimestamp + 24 * 3600, // Tomorrow
-            value: BigInt(subLoan.state.graceDiscountRate + INTEREST_RATE_FACTOR / 100),
+            value: BigInt(subLoan.state.clawbackFeeRate + INTEREST_RATE_FACTOR / 100),
             account: ADDRESS_ZERO,
           };
           ({ tx, operation } = await prepareOperation(operationRequest));
@@ -3058,10 +3436,13 @@ describe("Contract 'LendingMarket'", () => {
               subLoan.id,
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
-              toBytes32(packSubLoanRepaidParts(subLoan)),
-              toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)), // storedPackedTrackedParts
-              toBytes32(packSubLoanTrackedParts(subLoan)), // currentPackedTrackedParts
+              toBytes32(packRates(subLoan)),
+              toBytes32(packSubLoanPrincipalParts(subLoan)),
+              toBytes32(packSubLoanPrimaryInterestParts(subLoan)),
+              toBytes32(packSubLoanSecondaryInterestParts(subLoan)),
+              toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanLateFeeParts(subLoan)),
+              toBytes32(packSubLoanClawbackFeeParts(subLoan)),
             );
 
           await expect(tx).not.to.emit(market, EVENT_NAME_OPERATION_PENDED);
@@ -3202,7 +3583,7 @@ describe("Contract 'LendingMarket'", () => {
           subLoan.metadata.recentOperationId = lastAppliedOperation.id;
           subLoan.metadata.latestOperationId = orderedOperations[orderedOperations.length - 1].id;
 
-          accrueRemuneratoryInterest(subLoan, txTimestamp);
+          accruePrimaryInterest(subLoan, txTimestamp);
           subLoan.state.trackedTimestamp = txTimestamp;
           subLoan.state.duration = Number(lastAppliedOperation.value);
 
@@ -3240,7 +3621,13 @@ describe("Contract 'LendingMarket'", () => {
             }
           }
 
-          accrueRemuneratoryInterest(subLoan, txTimestamp);
+          accruePrimaryInterest(subLoan, txTimestamp);
+          subLoan.metadata.pendingTimestamp = orderedOperations[orderedOperations.length - 1].timestamp;
+          subLoan.metadata.operationCount += operations.length;
+          subLoan.metadata.earliestOperationId = orderedOperations[0].id;
+          subLoan.metadata.recentOperationId = lastAppliedOperation.id;
+          subLoan.metadata.latestOperationId = orderedOperations[orderedOperations.length - 1].id;
+
           subLoan.state.trackedTimestamp = txTimestamp;
           subLoan.state.duration = Number(lastAppliedOperation.value);
           subLoan.metadata.pendingTimestamp = orderedOperations[orderedOperations.length - 1].timestamp;
@@ -3251,10 +3638,13 @@ describe("Contract 'LendingMarket'", () => {
               subLoan.id,
               subLoan.metadata.updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
-              toBytes32(packSubLoanRepaidParts(subLoan)),
-              toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(packSubLoanTrackedParts(subLoan)), // storedPackedTrackedParts
-              toBytes32(packSubLoanTrackedParts(subLoan)), // currentPackedTrackedParts
+              toBytes32(packRates(subLoan)),
+              toBytes32(packSubLoanPrincipalParts(subLoan)),
+              toBytes32(packSubLoanPrimaryInterestParts(subLoan)),
+              toBytes32(packSubLoanSecondaryInterestParts(subLoan)),
+              toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanLateFeeParts(subLoan)),
+              toBytes32(packSubLoanClawbackFeeParts(subLoan)),
             );
         });
 
@@ -3303,6 +3693,11 @@ describe("Contract 'LendingMarket'", () => {
       });
 
       it("the block timestamp is greater than the maximum allowed value", async () => {
+        // Skip this test if the network is not Hardhat
+        if (network.name !== "hardhat") {
+          return;
+        }
+
         await increaseBlockTimestampTo(Number(maxUintForBits(32)) + 1);
 
         await expect(market.connect(admin).submitOperationBatch(operationRequests))
@@ -3334,7 +3729,7 @@ describe("Contract 'LendingMarket'", () => {
 
       it("one of the operation kinds is greater than allowed", async () => {
         const operationRequest = operationRequests[operationRequests.length - 1];
-        operationRequest.kind = OperationKind.DurationSetting + 1;
+        operationRequest.kind = OperationKind.ClawbackFeeDiscount + 1;
         operationRequest.value = 0n;
         operationRequest.account = ADDRESS_ZERO;
 
@@ -3464,21 +3859,19 @@ describe("Contract 'LendingMarket'", () => {
           const updateIndex = subLoan.metadata.updateIndex;
           voidSubLoanSingleRepaymentOperation(subLoan);
 
-          const storedPackedTrackedParts = packSubLoanTrackedParts(subLoan);
-
-          // Calculate the expected state at the transaction timestamp
-          accrueRemuneratoryInterest(subLoan, txTimestamp);
-
           await expect(tx)
             .to.emit(market, EVENT_NAME_SUB_LOAN_UPDATED)
             .withArgs(
               subLoan.id,
               updateIndex,
               toBytes32(packSubLoanParameters(subLoan)),
-              toBytes32(packSubLoanRepaidParts(subLoan)),
-              toBytes32(packSubLoanDiscountParts(subLoan)),
-              toBytes32(storedPackedTrackedParts), // storedPackedTrackedParts
-              toBytes32(packSubLoanTrackedParts(subLoan)), // currentPackedTrackedParts
+              toBytes32(packRates(subLoan)),
+              toBytes32(packSubLoanPrincipalParts(subLoan)),
+              toBytes32(packSubLoanPrimaryInterestParts(subLoan)),
+              toBytes32(packSubLoanSecondaryInterestParts(subLoan)),
+              toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
+              toBytes32(packSubLoanLateFeeParts(subLoan)),
+              toBytes32(packSubLoanClawbackFeeParts(subLoan)),
             );
         });
 
@@ -3610,6 +4003,11 @@ describe("Contract 'LendingMarket'", () => {
       });
 
       it("the block timestamp is greater than the maximum allowed value", async () => {
+        // Skip this test if the network is not Hardhat
+        if (network.name !== "hardhat") {
+          return;
+        }
+
         await increaseBlockTimestampTo(Number(maxUintForBits(32)) + 1);
 
         await expect(market.connect(admin).voidOperationBatch([operationVoidingRequest]))
@@ -3712,10 +4110,81 @@ describe("Contract 'LendingMarket'", () => {
       subLoan = loan.subLoans[2];
     });
 
+    describe("Executes as expected for different timestamps after the sub-loan started", () => {
+      function defineExpectedPreview(subLoan: SubLoan, timestamp: number): SubLoanPreview {
+        const preview = defineExpectedSubLoanPreview(subLoan);
+
+        preview.day = dayIndex(timestamp);
+        preview.daysSinceStart = preview.day - dayIndex(subLoan.inception.startTimestamp);
+        preview.trackedTimestamp = timestamp;
+
+        const daysUpToDue = preview.daysSinceStart > subLoan.inception.initialDuration
+          ? subLoan.inception.initialDuration
+          : preview.daysSinceStart;
+        const daysPostDue = preview.daysSinceStart - daysUpToDue;
+
+        preview.trackedPrimaryInterest = calculateCompoundInterest(
+          preview.trackedPrincipal,
+          preview.primaryRate,
+          daysUpToDue,
+        );
+
+        if (daysPostDue > 0) {
+          const legalPrincipal = preview.trackedPrincipal + preview.trackedPrimaryInterest;
+          preview.trackedSecondaryInterest =
+            calculateCompoundInterest(legalPrincipal, preview.secondaryRate, daysPostDue);
+          preview.trackedMoratoryInterest = calculateSimpleInterest(legalPrincipal, preview.moratoryRate, daysPostDue);
+          preview.trackedLateFee = calculateSimpleInterest(legalPrincipal, preview.lateFeeRate, 1);
+          preview.trackedClawbackFee = calculateCompoundInterest(legalPrincipal, preview.clawbackFeeRate, daysUpToDue);
+        }
+
+        preview.outstandingBalance = roundFinancially(
+          preview.trackedPrincipal +
+          preview.trackedPrimaryInterest +
+          preview.trackedSecondaryInterest +
+          preview.trackedMoratoryInterest +
+          preview.trackedLateFee +
+          preview.trackedClawbackFee,
+        );
+
+        return preview;
+      }
+
+      async function checkPreview(subLoan: SubLoan, timestamp: number) {
+        const expectedPreview = defineExpectedPreview(subLoan, timestamp);
+        const actualPreview = await market.getSubLoanPreview(subLoan.id, timestamp);
+        checkEquality(
+          resultToObject(actualPreview),
+          expectedPreview,
+          subLoan.indexInLoan,
+        );
+      }
+
+      it("one day before the due date", async () => {
+        const timestamp = subLoan.inception.startTimestamp + (subLoan.inception.initialDuration - 1) * DAY_IN_SECONDS;
+        await checkPreview(subLoan, timestamp);
+      });
+
+      it("at the due date", async () => {
+        const timestamp = subLoan.inception.startTimestamp + subLoan.inception.initialDuration * DAY_IN_SECONDS;
+        await checkPreview(subLoan, timestamp);
+      });
+
+      it("one day after the due date", async () => {
+        const timestamp = subLoan.inception.startTimestamp + (subLoan.inception.initialDuration + 1) * DAY_IN_SECONDS;
+        await checkPreview(subLoan, timestamp);
+      });
+
+      it("ten day after the due date", async () => {
+        const timestamp = subLoan.inception.startTimestamp + (subLoan.inception.initialDuration + 10) * DAY_IN_SECONDS;
+        await checkPreview(subLoan, timestamp);
+      });
+    });
+
     describe("Is reverted if", () => {
       it("the requested timestamp is earlier than the sub-loan start timestamp", async () => {
         const wrongTimestamp = subLoan.inception.startTimestamp - 1;
-        await expect(market.getSubLoanPreview(subLoan.id, wrongTimestamp, VIEW_FLAGS_DEFAULT))
+        await expect(market.getSubLoanPreview(subLoan.id, wrongTimestamp))
           .to.be.revertedWithCustomError(market, ERROR_NAME_OPERATION_APPLYING_TIMESTAMP_TOO_EARLY);
       });
     });
