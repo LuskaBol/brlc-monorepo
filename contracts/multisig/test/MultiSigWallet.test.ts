@@ -3,6 +3,7 @@ import { expect } from "chai";
 import { Contract, ContractFactory } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import {
+  checkEquality,
   connect,
   getAddress,
   getTxTimestamp,
@@ -10,6 +11,14 @@ import {
   proveTx,
   setUpFixture,
 } from "@cloudwalk/brlc-test-utils";
+
+interface Version {
+  major: number;
+  minor: number;
+  patch: number;
+
+  [key: string]: number; // Indexing signature to ensure that fields are iterated over in a key-value style
+}
 
 interface Tx {
   to: string;
@@ -82,6 +91,12 @@ describe("MultiSigWallet contract", () => {
   const ERROR_NAME_TRANSACTION_NOT_EXIST = "TransactionNotExist";
   const ERROR_NAME_UNAUTHORIZED_CALLER = "UnauthorizedCaller";
   const ERROR_NAME_ZERO_OWNER_ADDRESS = "ZeroOwnerAddress";
+
+  const EXPECTED_VERSION: Version = {
+    major: 1,
+    minor: 0,
+    patch: 0,
+  };
 
   let tokenFactory: ContractFactory;
   let walletUpgradeableFactory: ContractFactory;
@@ -1275,6 +1290,14 @@ describe("MultiSigWallet contract", () => {
             .withArgs(DEFAULT_ERROR_DATA);
         });
       });
+    });
+  });
+
+  describe("Function '$__VERSION()'", () => {
+    it("Returns expected values", async () => {
+      const { wallet } = await setUpFixture(deployWallet);
+      const version = await wallet.$__VERSION();
+      checkEquality(version, EXPECTED_VERSION);
     });
   });
 });

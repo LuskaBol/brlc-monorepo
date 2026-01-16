@@ -2,6 +2,8 @@
 
 pragma solidity ^0.8.20;
 
+import { IVersionable } from "@cloudwalk/brlc-base/interfaces/IVersionable.sol";
+
 import { IMultiSigWallet } from "./IMultiSigWallet.sol";
 import { MultiSigWalletStorage } from "./MultiSigWalletStorage.sol";
 
@@ -10,7 +12,7 @@ import { MultiSigWalletStorage } from "./MultiSigWalletStorage.sol";
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev The base of the multi-signature wallet contract.
  */
-abstract contract MultiSigWalletBase is MultiSigWalletStorage, IMultiSigWallet {
+abstract contract MultiSigWalletBase is MultiSigWalletStorage, IMultiSigWallet, IVersionable {
     // ------------------ Constants ------------------------------- //
 
     /// @dev The minimum transaction expiration time.
@@ -382,6 +384,13 @@ abstract contract MultiSigWalletBase is MultiSigWalletStorage, IMultiSigWallet {
      */
     function cooldownTime() external view returns (uint120) {
         return _cooldownTime;
+    }
+
+    // ------------------ Pure functions -------------------------- //
+
+    /// @inheritdoc IVersionable
+    function $__VERSION() external pure returns (Version memory) {
+        return Version(1, 0, 0);
     }
 
     // ------------------ Internal functions ---------------------- //

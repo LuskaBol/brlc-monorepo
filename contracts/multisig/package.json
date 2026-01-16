@@ -2,7 +2,8 @@
   "name": "@cloudwalk/brlc-multisig",
   "dependencies": {
     "@openzeppelin/contracts": "4.9.6",
-    "@openzeppelin/contracts-upgradeable": "4.9.6"
+    "@openzeppelin/contracts-upgradeable": "4.9.6",
+    "@cloudwalk/brlc-base": "workspace:"
   },
   "type": "commonjs",
   "devDependencies": {

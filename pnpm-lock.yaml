@@ -472,6 +472,9 @@ importers:
 
   contracts/multisig:
     dependencies:
+      '@cloudwalk/brlc-base':
+        specifier: 'workspace:'
+        version: link:../base
       '@openzeppelin/contracts':
         specifier: 4.9.6
         version: 4.9.6

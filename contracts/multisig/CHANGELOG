@@ -1,0 +1,3 @@
+## Main Changes
+
+- Implemented `IVersionable` interface from `@cloudwalk/brlc-base` in `MultiSigWalletBase`, adding the `$__VERSION()` function that returns version `1.0.0` for both `MultiSigWallet` and `MultiSigWalletUpgradeable` contracts.

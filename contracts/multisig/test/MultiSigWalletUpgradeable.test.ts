@@ -2,7 +2,15 @@ import { ethers, upgrades } from "hardhat";
 import { expect } from "chai";
 import { Contract, ContractFactory } from "ethers";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import { connect, getAddress, proveTx, setUpFixture } from "@cloudwalk/brlc-test-utils";
+import { checkEquality, connect, getAddress, proveTx, setUpFixture } from "@cloudwalk/brlc-test-utils";
+
+interface Version {
+  major: number;
+  minor: number;
+  patch: number;
+
+  [key: string]: number; // Indexing signature to ensure that fields are iterated over in a key-value style
+}
 
 describe("Contract 'MultiSigWalletUpgradeable'", () => {
   const ADDRESS_ZERO = ethers.ZeroAddress;
@@ -16,6 +24,12 @@ describe("Contract 'MultiSigWalletUpgradeable'", () => {
   const ERROR_NAME_INVALID_REQUIRED_APPROVALS = "InvalidRequiredApprovals";
   const ERROR_NAME_UNAUTHORIZED_CALLER = "UnauthorizedCaller";
   const ERROR_NAME_ZERO_OWNER_ADDRESS = "ZeroOwnerAddress";
+
+  const EXPECTED_VERSION: Version = {
+    major: 1,
+    minor: 0,
+    patch: 0,
+  };
 
   let walletUpgradeableFactory: ContractFactory;
   let walletFactory: ContractFactory;
@@ -186,6 +200,14 @@ describe("Contract 'MultiSigWalletUpgradeable'", () => {
 
       await expect(wallet.upgradeTo(getAddress(wallet)))
         .to.be.revertedWithCustomError(wallet, ERROR_NAME_UNAUTHORIZED_CALLER);
+    });
+  });
+
+  describe("Function '$__VERSION()'", () => {
+    it("Returns expected values", async () => {
+      const { wallet } = await setUpFixture(deployWalletUpgradeable);
+      const version = await wallet.$__VERSION();
+      checkEquality(version, EXPECTED_VERSION);
     });
   });
 });
