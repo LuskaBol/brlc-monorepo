@@ -39,20 +39,21 @@ describe("Contract 'ERC20Mintable'", async () => {
   const ERROR_NAME_NOT_INITIALIZING = "NotInitializing";
 
   // Errors of the contracts under test
-  const ERROR_NAME_INAPPROPRIATE_UINT64_VALUE = "InappropriateUint64Value";
-  const ERROR_NAME_INSUFFICIENT_RESERVE_SUPPLY = "InsufficientReserveSupply";
-  const ERROR_NAME_PREMINT_INSUFFICIENT_AMOUNT = "PremintInsufficientAmount";
-  const ERROR_NAME_PREMINT_NON_EXISTENT = "PremintNonExistent";
-  const ERROR_NAME_PREMINT_RELEASE_TIME_PASSED = "PremintReleaseTimePassed";
-  const ERROR_NAME_PREMINT_RESCHEDULING_ALREADY_CONFIGURED = "PremintReschedulingAlreadyConfigured";
-  const ERROR_NAME_PREMINT_RESCHEDULING_CHAIN = "PremintReschedulingChain";
-  const ERROR_NAME_PREMINT_RESCHEDULING_TIME_PASSED = "PremintReschedulingTimePassed";
-  const ERROR_NAME_PREMINT_UNCHANGED = "PremintUnchanged";
-  const ERROR_NAME_MAX_PENDING_PREMINTS_COUNT_ALREADY_CONFIGURED = "MaxPendingPremintsCountAlreadyConfigured";
-  const ERROR_NAME_MAX_PENDING_PREMINTS_LIMIT_REACHED = "MaxPendingPremintsLimitReached";
-  const ERROR_NAME_ZERO_BURN_AMOUNT = "ZeroBurnAmount";
-  const ERROR_NAME_ZERO_MINT_AMOUNT = "ZeroMintAmount";
-  const ERROR_NAME_ZERO_PREMINT_AMOUNT = "ZeroPremintAmount";
+  const ERROR_NAME_UINT64_VALUE_EXCESS = "ERC20Mintable_Uint64ValueExcess";
+  const ERROR_NAME_RESERVE_SUPPLY_INSUFFICIENT = "ERC20Mintable_ReserveSupplyInsufficient";
+  const ERROR_NAME_PREMINT_AMOUNT_INSUFFICIENT = "ERC20Mintable_PremintAmountInsufficient";
+  const ERROR_NAME_PREMINT_NONEXISTENT = "ERC20Mintable_PremintNonexistent";
+  const ERROR_NAME_PREMINT_RELEASE_TIME_PASSED = "ERC20Mintable_PremintReleaseTimePassed";
+  const ERROR_NAME_PREMINT_RESCHEDULING_ALREADY_CONFIGURED = "ERC20Mintable_PremintReschedulingAlreadyConfigured";
+  const ERROR_NAME_PREMINT_RESCHEDULING_CHAIN = "ERC20Mintable_PremintReschedulingChain";
+  const ERROR_NAME_PREMINT_RESCHEDULING_TIME_PASSED = "ERC20Mintable_PremintReschedulingTimePassed";
+  const ERROR_NAME_PREMINT_UNCHANGED = "ERC20Mintable_PremintUnchanged";
+  const ERROR_NAME_MAX_PENDING_PREMINTS_COUNT_ALREADY_CONFIGURED =
+    "ERC20Mintable_MaxPendingPremintsCountAlreadyConfigured";
+  const ERROR_NAME_MAX_PENDING_PREMINTS_LIMIT_REACHED = "ERC20Mintable_MaxPendingPremintsLimitReached";
+  const ERROR_NAME_BURN_AMOUNT_ZERO = "ERC20Mintable_BurnAmountZero";
+  const ERROR_NAME_MINT_AMOUNT_ZERO = "ERC20Mintable_MintAmountZero";
+  const ERROR_NAME_PREMINT_AMOUNT_ZERO = "ERC20Mintable_PremintAmountZero";
 
   const OWNER_ROLE: string = ethers.id("OWNER_ROLE");
   const GRANTOR_ROLE: string = ethers.id("GRANTOR_ROLE");
@@ -225,7 +226,7 @@ describe("Contract 'ERC20Mintable'", async () => {
       it("The mint amount is zero", async () => {
         const { token } = await setUpFixture(deployAndConfigureToken);
         await expect(connect(token, minterOrdinary).mint(user.address, 0))
-          .to.be.revertedWithCustomError(token, ERROR_NAME_ZERO_MINT_AMOUNT);
+          .to.be.revertedWithCustomError(token, ERROR_NAME_MINT_AMOUNT_ZERO);
       });
     });
   });
@@ -270,7 +271,7 @@ describe("Contract 'ERC20Mintable'", async () => {
     it("Is reverted if the burn amount is zero", async () => {
       const { token } = await setUpFixture(deployAndConfigureToken);
       await expect(connect(token, burnerOrdinary).burn(0))
-        .to.be.revertedWithCustomError(token, ERROR_NAME_ZERO_BURN_AMOUNT);
+        .to.be.revertedWithCustomError(token, ERROR_NAME_BURN_AMOUNT_ZERO);
     });
 
     it("Is reverted if the burn amount exceeds the caller token balance", async () => {
@@ -333,7 +334,7 @@ describe("Contract 'ERC20Mintable'", async () => {
     it("Is reverted if the mint amount is zero", async () => {
       const { token } = await setUpFixture(deployAndConfigureToken);
       await expect(connect(token, minterReserve).mintFromReserve(user.address, 0))
-        .to.be.revertedWithCustomError(token, ERROR_NAME_ZERO_MINT_AMOUNT);
+        .to.be.revertedWithCustomError(token, ERROR_NAME_MINT_AMOUNT_ZERO);
     });
   });
 
@@ -400,7 +401,7 @@ describe("Contract 'ERC20Mintable'", async () => {
     it("Is reverted if the burn amount is zero", async () => {
       const { token } = await setUpFixture(deployAndConfigureToken);
       await expect(connect(token, burnerReserve).burnToReserve(0))
-        .to.be.revertedWithCustomError(token, ERROR_NAME_ZERO_BURN_AMOUNT);
+        .to.be.revertedWithCustomError(token, ERROR_NAME_BURN_AMOUNT_ZERO);
     });
 
     it("Is reverted if the burn amount exceeds the caller token balance", async () => {
@@ -421,7 +422,7 @@ describe("Contract 'ERC20Mintable'", async () => {
 
       // try to burn more than the reserve supply
       await expect(connect(token, burnerReserve).burnToReserve(2))
-        .to.be.revertedWithCustomError(token, ERROR_NAME_INSUFFICIENT_RESERVE_SUPPLY);
+        .to.be.revertedWithCustomError(token, ERROR_NAME_RESERVE_SUPPLY_INSUFFICIENT);
     });
   });
 
@@ -703,7 +704,7 @@ describe("Contract 'ERC20Mintable'", async () => {
         const { token } = await setUpFixture(deployAndConfigureToken);
         const overflowAmount = maxUintForBits(64) + 1n;
         await expect(connect(token, preminterAgent).premintIncrease(user.address, overflowAmount, timestamp))
-          .to.be.revertedWithCustomError(token, ERROR_NAME_INAPPROPRIATE_UINT64_VALUE)
+          .to.be.revertedWithCustomError(token, ERROR_NAME_UINT64_VALUE_EXCESS)
           .withArgs(overflowAmount);
       });
 
@@ -733,7 +734,7 @@ describe("Contract 'ERC20Mintable'", async () => {
       it("The amount of a new premint is zero", async () => {
         const { token } = await setUpFixture(deployAndConfigureToken);
         await expect(connect(token, preminterAgent).premintIncrease(user.address, 0, timestamp))
-          .to.be.revertedWithCustomError(token, ERROR_NAME_ZERO_PREMINT_AMOUNT);
+          .to.be.revertedWithCustomError(token, ERROR_NAME_PREMINT_AMOUNT_ZERO);
       });
 
       it("The max pending premints limit is reached during creation a new premint", async () => {
@@ -758,14 +759,14 @@ describe("Contract 'ERC20Mintable'", async () => {
       it("The caller tries to change a non-existing premint", async () => {
         const { token } = await setUpFixture(deployAndConfigureToken);
         await expect(connect(token, preminterAgent).premintDecrease(user.address, TOKEN_AMOUNT, timestamp))
-          .to.be.revertedWithCustomError(token, ERROR_NAME_PREMINT_NON_EXISTENT);
+          .to.be.revertedWithCustomError(token, ERROR_NAME_PREMINT_NONEXISTENT);
       });
 
       it("The caller tries to decrease the amount of a premint below the existing amount", async () => {
         const { token } = await setUpFixture(deployAndConfigureToken);
         await proveTx(connect(token, preminterAgent).premintIncrease(user.address, TOKEN_AMOUNT, timestamp));
         await expect(connect(token, preminterAgent).premintDecrease(user.address, TOKEN_AMOUNT + 1, timestamp))
-          .to.be.revertedWithCustomError(token, ERROR_NAME_PREMINT_INSUFFICIENT_AMOUNT);
+          .to.be.revertedWithCustomError(token, ERROR_NAME_PREMINT_AMOUNT_INSUFFICIENT);
       });
     });
   });
@@ -1036,7 +1037,7 @@ describe("Contract 'ERC20Mintable'", async () => {
         const originalRelease = maxUintForBits(64) + 1n;
         const targetRelease = timestamp + 1;
         await expect(connect(token, preminterRescheduler).reschedulePremintRelease(originalRelease, targetRelease))
-          .to.be.revertedWithCustomError(token, ERROR_NAME_INAPPROPRIATE_UINT64_VALUE)
+          .to.be.revertedWithCustomError(token, ERROR_NAME_UINT64_VALUE_EXCESS)
           .withArgs(originalRelease);
       });
 
@@ -1045,7 +1046,7 @@ describe("Contract 'ERC20Mintable'", async () => {
         const originalRelease = timestamp;
         const targetRelease = maxUintForBits(64) + 1n;
         await expect(connect(token, preminterRescheduler).reschedulePremintRelease(originalRelease, targetRelease))
-          .to.be.revertedWithCustomError(token, ERROR_NAME_INAPPROPRIATE_UINT64_VALUE)
+          .to.be.revertedWithCustomError(token, ERROR_NAME_UINT64_VALUE_EXCESS)
           .withArgs(targetRelease);
       });
     });

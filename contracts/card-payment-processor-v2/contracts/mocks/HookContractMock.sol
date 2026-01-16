@@ -11,7 +11,7 @@ import { IAfterPaymentMadeHook } from "../hookable/interfaces/ICardPaymentProces
  */
 contract HookContractMock is IAfterPaymentMadeHook {
     event LogAfterPaymentMade(bytes32 paymentId, PaymentHookData oldPayment, PaymentHookData newPayment);
-    error RevertFromAfterPaymentMade();
+    error HookContractMock_RevertFromAfterPaymentMade();
 
     bool private supportsAfterPaymentMade = true;
 
@@ -29,7 +29,7 @@ contract HookContractMock is IAfterPaymentMadeHook {
         PaymentHookData calldata newPayment
     ) external {
         if (paymentId == keccak256("please fail")) {
-            revert RevertFromAfterPaymentMade();
+            revert HookContractMock_RevertFromAfterPaymentMade();
         }
         emit LogAfterPaymentMade(paymentId, oldPayment, newPayment);
     }

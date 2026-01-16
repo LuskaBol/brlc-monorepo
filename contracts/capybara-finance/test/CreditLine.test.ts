@@ -210,19 +210,19 @@ const ERROR_NAME_INVALID_INITIALIZATION = "InvalidInitialization";
 const ERROR_NAME_ENFORCED_PAUSE = "EnforcedPause";
 
 // Errors of the contracts under test
-const ERROR_NAME_ARRAYS_LENGTH_MISMATCH = "ArrayLengthMismatch";
-const ERROR_NAME_BORROWER_CONFIGURATION_EXPIRED = "BorrowerConfigurationExpired";
-const ERROR_NAME_BORROWER_STATE_OVERFLOW = "BorrowerStateOverflow";
-const ERROR_NAME_CONTRACT_ADDRESS_INVALID = "ContractAddressInvalid";
-const ERROR_NAME_INVALID_AMOUNT = "InvalidAmount";
-const ERROR_NAME_INVALID_BORROWER_CONFIGURATION = "InvalidBorrowerConfiguration";
-const ERROR_NAME_INVALID_CREDIT_LINE_CONFIGURATION = "InvalidCreditLineConfiguration";
-const ERROR_NAME_IMPLEMENTATION_ADDRESS_INVALID = "ImplementationAddressInvalid";
-const ERROR_NAME_LOAN_DURATION_OUT_OF_RANGE = "LoanDurationOutOfRange";
-const ERROR_NAME_LIMIT_VIOLATION_ON_SINGLE_ACTIVE_LOAN = "LimitViolationOnSingleActiveLoan";
-const ERROR_NAME_LIMIT_VIOLATION_ON_TOTAL_ACTIVE_LOAN_AMOUNT = "LimitViolationOnTotalActiveLoanAmount";
-const ERROR_NAME_UNAUTHORIZED = "Unauthorized";
-const ERROR_NAME_ZERO_ADDRESS = "ZeroAddress";
+const ERROR_NAME_ARRAYS_LENGTH_MISMATCH = "CreditLine_ArrayLengthMismatch";
+const ERROR_NAME_BORROWER_CONFIGURATION_EXPIRED = "CreditLine_BorrowerConfigurationExpired";
+const ERROR_NAME_BORROWER_STATE_OVERFLOW = "CreditLine_BorrowerStateOverflow";
+const ERROR_NAME_CONTRACT_ADDRESS_INVALID = "CreditLine_ContractAddressInvalid";
+const ERROR_NAME_AMOUNT_INVALID = "CreditLine_AmountInvalid";
+const ERROR_NAME_BORROWER_CONFIGURATION_INVALID = "CreditLine_BorrowerConfigurationInvalid";
+const ERROR_NAME_CREDIT_LINE_CONFIGURATION_INVALID = "CreditLine_CreditLineConfigurationInvalid";
+const ERROR_NAME_IMPLEMENTATION_ADDRESS_INVALID = "CreditLine_ImplementationAddressInvalid";
+const ERROR_NAME_LOAN_DURATION_OUT_OF_RANGE = "CreditLine_LoanDurationOutOfRange";
+const ERROR_NAME_LIMIT_VIOLATION_ON_SINGLE_ACTIVE_LOAN = "CreditLine_LimitViolationOnSingleActiveLoan";
+const ERROR_NAME_LIMIT_VIOLATION_ON_TOTAL_ACTIVE_LOAN_AMOUNT = "CreditLine_LimitViolationOnTotalActiveLoanAmount";
+const ERROR_NAME_CALLER_UNAUTHORIZED = "CreditLine_CallerUnauthorized";
+const ERROR_NAME_ADDRESS_ZERO = "CreditLine_AddressZero";
 
 const OWNER_ROLE = ethers.id("OWNER_ROLE");
 const GRANTOR_ROLE = ethers.id("GRANTOR_ROLE");
@@ -542,7 +542,7 @@ describe("Contract 'CreditLine'", () => {
         wrongOwnerAddress,
         marketAddress,
         tokenAddress,
-      ])).to.be.revertedWithCustomError(creditLineFactory, ERROR_NAME_ZERO_ADDRESS);
+      ])).to.be.revertedWithCustomError(creditLineFactory, ERROR_NAME_ADDRESS_ZERO);
     });
 
     it("Is reverted if the market address is zero", async () => {
@@ -551,7 +551,7 @@ describe("Contract 'CreditLine'", () => {
         owner.address,
         wrongMarketAddress,
         tokenAddress,
-      ])).to.be.revertedWithCustomError(creditLineFactory, ERROR_NAME_ZERO_ADDRESS);
+      ])).to.be.revertedWithCustomError(creditLineFactory, ERROR_NAME_ADDRESS_ZERO);
     });
 
     it("Is reverted if the market address is not a contract address", async () => {
@@ -578,7 +578,7 @@ describe("Contract 'CreditLine'", () => {
         owner.address,
         marketAddress,
         wrongTokenAddress,
-      ])).to.be.revertedWithCustomError(creditLineFactory, ERROR_NAME_ZERO_ADDRESS);
+      ])).to.be.revertedWithCustomError(creditLineFactory, ERROR_NAME_ADDRESS_ZERO);
     });
 
     it("Is reverted if the token address is not a contract address", async () => {
@@ -682,7 +682,7 @@ describe("Contract 'CreditLine'", () => {
       config.minBorrowedAmount = config.maxBorrowedAmount + 1n;
 
       await expect(creditLine.configureCreditLine(config))
-        .to.be.revertedWithCustomError(creditLine, ERROR_NAME_INVALID_CREDIT_LINE_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLine, ERROR_NAME_CREDIT_LINE_CONFIGURATION_INVALID);
     });
 
     it("Is reverted if the min loan duration is greater than the max one", async () => {
@@ -691,7 +691,7 @@ describe("Contract 'CreditLine'", () => {
       config.minDurationInPeriods = config.maxDurationInPeriods + 1n;
 
       await expect(creditLine.configureCreditLine(config))
-        .to.be.revertedWithCustomError(creditLine, ERROR_NAME_INVALID_CREDIT_LINE_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLine, ERROR_NAME_CREDIT_LINE_CONFIGURATION_INVALID);
     });
 
     it("Is reverted if the min primary interest rate is greater than the max one", async () => {
@@ -700,7 +700,7 @@ describe("Contract 'CreditLine'", () => {
       config.minInterestRatePrimary = config.maxInterestRatePrimary + 1n;
 
       await expect(creditLine.configureCreditLine(config))
-        .to.be.revertedWithCustomError(creditLine, ERROR_NAME_INVALID_CREDIT_LINE_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLine, ERROR_NAME_CREDIT_LINE_CONFIGURATION_INVALID);
     });
 
     it("Is reverted if the min secondary interest rate is greater than the max one", async () => {
@@ -709,7 +709,7 @@ describe("Contract 'CreditLine'", () => {
       config.minInterestRateSecondary = config.maxInterestRateSecondary + 1n;
 
       await expect(creditLine.configureCreditLine(config))
-        .to.be.revertedWithCustomError(creditLine, ERROR_NAME_INVALID_CREDIT_LINE_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLine, ERROR_NAME_CREDIT_LINE_CONFIGURATION_INVALID);
     });
 
     it("Is reverted if the min addon fixed rate is not zero", async () => {
@@ -718,7 +718,7 @@ describe("Contract 'CreditLine'", () => {
       config.minAddonFixedRate = 1n;
 
       await expect(creditLine.configureCreditLine(config))
-        .to.be.revertedWithCustomError(creditLine, ERROR_NAME_INVALID_CREDIT_LINE_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLine, ERROR_NAME_CREDIT_LINE_CONFIGURATION_INVALID);
     });
 
     it("Is reverted if the max addon fixed rate is not zero", async () => {
@@ -727,7 +727,7 @@ describe("Contract 'CreditLine'", () => {
       config.maxAddonFixedRate = 1n;
 
       await expect(creditLine.configureCreditLine(config))
-        .to.be.revertedWithCustomError(creditLine, ERROR_NAME_INVALID_CREDIT_LINE_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLine, ERROR_NAME_CREDIT_LINE_CONFIGURATION_INVALID);
     });
 
     it("Is reverted if the min addon period rate is not zero", async () => {
@@ -736,7 +736,7 @@ describe("Contract 'CreditLine'", () => {
       config.minAddonPeriodRate = 1n;
 
       await expect(creditLine.configureCreditLine(config))
-        .to.be.revertedWithCustomError(creditLine, ERROR_NAME_INVALID_CREDIT_LINE_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLine, ERROR_NAME_CREDIT_LINE_CONFIGURATION_INVALID);
     });
 
     it("Is reverted if the max addon period rate is not zero", async () => {
@@ -745,7 +745,7 @@ describe("Contract 'CreditLine'", () => {
       config.maxAddonPeriodRate = 1n;
 
       await expect(creditLine.configureCreditLine(config))
-        .to.be.revertedWithCustomError(creditLine, ERROR_NAME_INVALID_CREDIT_LINE_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLine, ERROR_NAME_CREDIT_LINE_CONFIGURATION_INVALID);
     });
   });
 
@@ -791,7 +791,7 @@ describe("Contract 'CreditLine'", () => {
       await expect(creditLineViaAdmin[FUNC_CONFIGURE_BORROWER_NEW](
         ZERO_ADDRESS, // borrower
         config,
-      )).to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_ZERO_ADDRESS);
+      )).to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_ADDRESS_ZERO);
     });
 
     it("Is reverted if the min borrowed amount is greater than the max one", async () => {
@@ -800,7 +800,7 @@ describe("Contract 'CreditLine'", () => {
       config.minBorrowedAmount = config.maxBorrowedAmount + 1n;
 
       await expect(creditLineViaAdmin[FUNC_CONFIGURE_BORROWER_NEW](borrower.address, config))
-        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_INVALID_BORROWER_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_BORROWER_CONFIGURATION_INVALID);
     });
 
     it("Is reverted if the min borrowed amount is less than credit line's one", async () => {
@@ -809,7 +809,7 @@ describe("Contract 'CreditLine'", () => {
       borrowerConfig.minBorrowedAmount = creditLineConfig.minBorrowedAmount - 1n;
 
       await expect(creditLineViaAdmin[FUNC_CONFIGURE_BORROWER_NEW](borrower.address, borrowerConfig))
-        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_INVALID_BORROWER_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_BORROWER_CONFIGURATION_INVALID);
     });
 
     it("Is reverted if the max borrowed amount is greater than credit line's one", async () => {
@@ -818,7 +818,7 @@ describe("Contract 'CreditLine'", () => {
       borrowerConfig.maxBorrowedAmount = creditLineConfig.maxBorrowedAmount + 1n;
 
       await expect(creditLineViaAdmin[FUNC_CONFIGURE_BORROWER_NEW](borrower.address, borrowerConfig))
-        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_INVALID_BORROWER_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_BORROWER_CONFIGURATION_INVALID);
     });
 
     it("Is reverted if the min duration in periods is greater than the max one", async () => {
@@ -827,7 +827,7 @@ describe("Contract 'CreditLine'", () => {
       borrowerConfig.minDurationInPeriods = creditLineConfig.maxDurationInPeriods + 1n;
 
       await expect(creditLineViaAdmin[FUNC_CONFIGURE_BORROWER_NEW](borrower.address, borrowerConfig))
-        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_INVALID_BORROWER_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_BORROWER_CONFIGURATION_INVALID);
     });
 
     it("Is reverted if the min loan duration is less than credit line's one", async () => {
@@ -836,7 +836,7 @@ describe("Contract 'CreditLine'", () => {
       borrowerConfig.minDurationInPeriods = creditLineConfig.minDurationInPeriods - 1n;
 
       await expect(creditLineViaAdmin[FUNC_CONFIGURE_BORROWER_NEW](borrower.address, borrowerConfig))
-        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_INVALID_BORROWER_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_BORROWER_CONFIGURATION_INVALID);
     });
 
     it("Is reverted if the max loan duration is greater than credit line's one", async () => {
@@ -845,7 +845,7 @@ describe("Contract 'CreditLine'", () => {
       borrowerConfig.maxDurationInPeriods = creditLineConfig.maxDurationInPeriods + 1n;
 
       await expect(creditLineViaAdmin[FUNC_CONFIGURE_BORROWER_NEW](borrower.address, borrowerConfig))
-        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_INVALID_BORROWER_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_BORROWER_CONFIGURATION_INVALID);
     });
 
     it("Is reverted if the primary interest rate is less than credit line's minimum one", async () => {
@@ -854,7 +854,7 @@ describe("Contract 'CreditLine'", () => {
       borrowerConfig.interestRatePrimary = creditLineConfig.minInterestRatePrimary - 1n;
 
       await expect(creditLineViaAdmin[FUNC_CONFIGURE_BORROWER_NEW](borrower.address, borrowerConfig))
-        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_INVALID_BORROWER_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_BORROWER_CONFIGURATION_INVALID);
     });
 
     it("Is reverted if the primary interest rate is greater than credit line's maximum one", async () => {
@@ -863,7 +863,7 @@ describe("Contract 'CreditLine'", () => {
       borrowerConfig.interestRatePrimary = creditLineConfig.maxInterestRatePrimary + 1n;
 
       await expect(creditLineViaAdmin[FUNC_CONFIGURE_BORROWER_NEW](borrower.address, borrowerConfig))
-        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_INVALID_BORROWER_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_BORROWER_CONFIGURATION_INVALID);
     });
 
     it("Is reverted if the secondary interest rate is less than credit line's minimum one", async () => {
@@ -872,7 +872,7 @@ describe("Contract 'CreditLine'", () => {
       borrowerConfig.interestRateSecondary = creditLineConfig.minInterestRateSecondary - 1n;
 
       await expect(creditLineViaAdmin[FUNC_CONFIGURE_BORROWER_NEW](borrower.address, borrowerConfig))
-        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_INVALID_BORROWER_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_BORROWER_CONFIGURATION_INVALID);
     });
 
     it("Is reverted if the secondary interest rate is greater than credit line's maximum one", async () => {
@@ -881,7 +881,7 @@ describe("Contract 'CreditLine'", () => {
       borrowerConfig.interestRateSecondary = creditLineConfig.maxInterestRateSecondary + 1n;
 
       await expect(creditLineViaAdmin[FUNC_CONFIGURE_BORROWER_NEW](borrower.address, borrowerConfig))
-        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_INVALID_BORROWER_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_BORROWER_CONFIGURATION_INVALID);
     });
 
     it("Is reverted if the addon fixed rate is not zero", async () => {
@@ -890,7 +890,7 @@ describe("Contract 'CreditLine'", () => {
       borrowerConfig.addonFixedRate = 1n;
 
       await expect(creditLineViaAdmin[FUNC_CONFIGURE_BORROWER_NEW](borrower.address, borrowerConfig))
-        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_INVALID_BORROWER_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_BORROWER_CONFIGURATION_INVALID);
     });
 
     it("Is reverted if the addon period rate is not zero", async () => {
@@ -899,7 +899,7 @@ describe("Contract 'CreditLine'", () => {
       borrowerConfig.addonPeriodRate = 1n;
 
       await expect(creditLineViaAdmin[FUNC_CONFIGURE_BORROWER_NEW](borrower.address, borrowerConfig))
-        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_INVALID_BORROWER_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_BORROWER_CONFIGURATION_INVALID);
     });
   });
 
@@ -1002,7 +1002,7 @@ describe("Contract 'CreditLine'", () => {
       await expect(creditLineViaAdmin[FUNC_CONFIGURE_BORROWER_LEGACY](
         ZERO_ADDRESS, // borrower
         config,
-      )).to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_ZERO_ADDRESS);
+      )).to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_ADDRESS_ZERO);
     });
 
     it("Is reverted if the min borrowed amount is greater than the max one", async () => {
@@ -1011,7 +1011,7 @@ describe("Contract 'CreditLine'", () => {
       config.minBorrowedAmount = config.maxBorrowedAmount + 1n;
 
       await expect(creditLineViaAdmin[FUNC_CONFIGURE_BORROWER_LEGACY](borrower.address, config))
-        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_INVALID_BORROWER_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_BORROWER_CONFIGURATION_INVALID);
     });
 
     it("Is reverted if the min borrowed amount is less than credit line's one", async () => {
@@ -1020,7 +1020,7 @@ describe("Contract 'CreditLine'", () => {
       borrowerConfig.minBorrowedAmount = creditLineConfig.minBorrowedAmount - 1n;
 
       await expect(creditLineViaAdmin[FUNC_CONFIGURE_BORROWER_LEGACY](borrower.address, borrowerConfig))
-        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_INVALID_BORROWER_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_BORROWER_CONFIGURATION_INVALID);
     });
 
     it("Is reverted if the max borrowed amount is greater than credit line's one", async () => {
@@ -1029,7 +1029,7 @@ describe("Contract 'CreditLine'", () => {
       borrowerConfig.maxBorrowedAmount = creditLineConfig.maxBorrowedAmount + 1n;
 
       await expect(creditLineViaAdmin[FUNC_CONFIGURE_BORROWER_LEGACY](borrower.address, borrowerConfig))
-        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_INVALID_BORROWER_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_BORROWER_CONFIGURATION_INVALID);
     });
 
     it("Is reverted if the min duration in periods is greater than the max one", async () => {
@@ -1038,7 +1038,7 @@ describe("Contract 'CreditLine'", () => {
       borrowerConfig.minDurationInPeriods = creditLineConfig.maxDurationInPeriods + 1n;
 
       await expect(creditLineViaAdmin[FUNC_CONFIGURE_BORROWER_LEGACY](borrower.address, borrowerConfig))
-        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_INVALID_BORROWER_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_BORROWER_CONFIGURATION_INVALID);
     });
 
     it("Is reverted if the min loan duration is less than credit line's one", async () => {
@@ -1047,7 +1047,7 @@ describe("Contract 'CreditLine'", () => {
       borrowerConfig.minDurationInPeriods = creditLineConfig.minDurationInPeriods - 1n;
 
       await expect(creditLineViaAdmin[FUNC_CONFIGURE_BORROWER_LEGACY](borrower.address, borrowerConfig))
-        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_INVALID_BORROWER_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_BORROWER_CONFIGURATION_INVALID);
     });
 
     it("Is reverted if the max loan duration is greater than credit line's one", async () => {
@@ -1056,7 +1056,7 @@ describe("Contract 'CreditLine'", () => {
       borrowerConfig.maxDurationInPeriods = creditLineConfig.maxDurationInPeriods + 1n;
 
       await expect(creditLineViaAdmin[FUNC_CONFIGURE_BORROWER_LEGACY](borrower.address, borrowerConfig))
-        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_INVALID_BORROWER_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_BORROWER_CONFIGURATION_INVALID);
     });
 
     it("Is reverted if the primary interest rate is less than credit line's minimum one", async () => {
@@ -1065,7 +1065,7 @@ describe("Contract 'CreditLine'", () => {
       borrowerConfig.interestRatePrimary = creditLineConfig.minInterestRatePrimary - 1n;
 
       await expect(creditLineViaAdmin[FUNC_CONFIGURE_BORROWER_LEGACY](borrower.address, borrowerConfig))
-        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_INVALID_BORROWER_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_BORROWER_CONFIGURATION_INVALID);
     });
 
     it("Is reverted if the primary interest rate is greater than credit line's maximum one", async () => {
@@ -1074,7 +1074,7 @@ describe("Contract 'CreditLine'", () => {
       borrowerConfig.interestRatePrimary = creditLineConfig.maxInterestRatePrimary + 1n;
 
       await expect(creditLineViaAdmin[FUNC_CONFIGURE_BORROWER_LEGACY](borrower.address, borrowerConfig))
-        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_INVALID_BORROWER_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_BORROWER_CONFIGURATION_INVALID);
     });
 
     it("Is reverted if the secondary interest rate is less than credit line's minimum one", async () => {
@@ -1083,7 +1083,7 @@ describe("Contract 'CreditLine'", () => {
       borrowerConfig.interestRateSecondary = creditLineConfig.minInterestRateSecondary - 1n;
 
       await expect(creditLineViaAdmin[FUNC_CONFIGURE_BORROWER_LEGACY](borrower.address, borrowerConfig))
-        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_INVALID_BORROWER_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_BORROWER_CONFIGURATION_INVALID);
     });
 
     it("Is reverted if the secondary interest rate is greater than credit line's maximum one", async () => {
@@ -1092,7 +1092,7 @@ describe("Contract 'CreditLine'", () => {
       borrowerConfig.interestRateSecondary = creditLineConfig.maxInterestRateSecondary + 1n;
 
       await expect(creditLineViaAdmin[FUNC_CONFIGURE_BORROWER_LEGACY](borrower.address, borrowerConfig))
-        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_INVALID_BORROWER_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_BORROWER_CONFIGURATION_INVALID);
     });
 
     it("Is reverted if the addon fixed rate is not zero", async () => {
@@ -1101,7 +1101,7 @@ describe("Contract 'CreditLine'", () => {
       borrowerConfig.addonFixedRate = 1n;
 
       await expect(creditLineViaAdmin[FUNC_CONFIGURE_BORROWER_LEGACY](borrower.address, borrowerConfig))
-        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_INVALID_BORROWER_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_BORROWER_CONFIGURATION_INVALID);
     });
 
     it("Is reverted if the addon period rate is not zero", async () => {
@@ -1110,7 +1110,7 @@ describe("Contract 'CreditLine'", () => {
       borrowerConfig.addonPeriodRate = 1n;
 
       await expect(creditLineViaAdmin[FUNC_CONFIGURE_BORROWER_LEGACY](borrower.address, borrowerConfig))
-        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_INVALID_BORROWER_CONFIGURATION);
+        .to.be.revertedWithCustomError(creditLineViaAdmin, ERROR_NAME_BORROWER_CONFIGURATION_INVALID);
     });
   });
 
@@ -1201,7 +1201,7 @@ describe("Contract 'CreditLine'", () => {
       const { creditLine } = await setUpFixture(deployAndConfigureContractsWithBorrower);
 
       await expect(creditLine.onBeforeLoanTaken(LOAN_ID))
-        .to.be.revertedWithCustomError(creditLine, ERROR_NAME_UNAUTHORIZED);
+        .to.be.revertedWithCustomError(creditLine, ERROR_NAME_CALLER_UNAUTHORIZED);
     });
 
     it("Is reverted if the contract is paused", async () => {
@@ -1300,7 +1300,7 @@ describe("Contract 'CreditLine'", () => {
       const { creditLine } = await setUpFixture(deployAndConfigureContractsWithBorrower);
 
       await expect(creditLine.onBeforeLoanReopened(LOAN_ID))
-        .to.be.revertedWithCustomError(creditLine, ERROR_NAME_UNAUTHORIZED);
+        .to.be.revertedWithCustomError(creditLine, ERROR_NAME_CALLER_UNAUTHORIZED);
     });
 
     it("Is reverted if the contract is paused", async () => {
@@ -1408,7 +1408,7 @@ describe("Contract 'CreditLine'", () => {
       const { creditLine } = await setUpFixture(deployAndConfigureContractsWithBorrower);
 
       await expect(connect(creditLine, attacker).onAfterLoanPayment(LOAN_ID, REPAYMENT_AMOUNT))
-        .to.be.revertedWithCustomError(creditLine, ERROR_NAME_UNAUTHORIZED);
+        .to.be.revertedWithCustomError(creditLine, ERROR_NAME_CALLER_UNAUTHORIZED);
     });
 
     it("Is reverted if contract is paused", async () => {
@@ -1448,7 +1448,7 @@ describe("Contract 'CreditLine'", () => {
       const { creditLine } = await setUpFixture(deployAndConfigureContractsWithBorrower);
 
       await expect(connect(creditLine, attacker).onAfterLoanRevocation(LOAN_ID))
-        .to.be.revertedWithCustomError(creditLine, ERROR_NAME_UNAUTHORIZED);
+        .to.be.revertedWithCustomError(creditLine, ERROR_NAME_CALLER_UNAUTHORIZED);
     });
 
     it("Is reverted if contract is paused", async () => {
@@ -1493,7 +1493,7 @@ describe("Contract 'CreditLine'", () => {
         ZERO_ADDRESS, // borrower
         borrowerConfig.minBorrowedAmount,
         borrowerConfig.minDurationInPeriods,
-      )).to.be.revertedWithCustomError(creditLine, ERROR_NAME_ZERO_ADDRESS);
+      )).to.be.revertedWithCustomError(creditLine, ERROR_NAME_ADDRESS_ZERO);
     });
 
     it("Is reverted if the borrowed amount is zero", async () => {
@@ -1502,7 +1502,7 @@ describe("Contract 'CreditLine'", () => {
         borrower.address,
         0, // borrowedAmount
         borrowerConfig.minDurationInPeriods,
-      )).to.be.revertedWithCustomError(creditLine, ERROR_NAME_INVALID_AMOUNT);
+      )).to.be.revertedWithCustomError(creditLine, ERROR_NAME_AMOUNT_INVALID);
     });
 
     it("Is reverted if the borrower configuration has been expired", async () => {
@@ -1526,7 +1526,7 @@ describe("Contract 'CreditLine'", () => {
         borrower.address,
         borrowerConfig.maxBorrowedAmount + 1n, // borrowedAmount
         borrowerConfig.minDurationInPeriods, // durationInPeriods
-      )).to.be.revertedWithCustomError(creditLine, ERROR_NAME_INVALID_AMOUNT);
+      )).to.be.revertedWithCustomError(creditLine, ERROR_NAME_AMOUNT_INVALID);
     });
 
     it("Is reverted if the borrowed amount is less than the min allowed one", async () => {
@@ -1535,7 +1535,7 @@ describe("Contract 'CreditLine'", () => {
         borrower.address,
         borrowerConfig.minBorrowedAmount - 1n, // borrowedAmount
         borrowerConfig.minDurationInPeriods, // durationInPeriods
-      )).to.be.revertedWithCustomError(creditLine, ERROR_NAME_INVALID_AMOUNT);
+      )).to.be.revertedWithCustomError(creditLine, ERROR_NAME_AMOUNT_INVALID);
     });
 
     it("Is reverted if the loan duration is less than the min allowed one", async () => {

@@ -629,7 +629,7 @@ contract Cashier is
      */
     function _validateTxId(bytes32 txId) internal pure {
         if (txId == 0) {
-            revert Cashier_TxIdZero();
+            revert Cashier_TransactionIdZero();
         }
     }
 
@@ -796,7 +796,7 @@ contract Cashier is
             revert Cashier_HookCallableContractAddressZero();
         }
         if (newHookFlags == 0 && newCallableContract != address(0)) {
-            revert Cashier_HookCallableContractAddressNonZero();
+            revert Cashier_HookCallableContractAddressNonzero();
         }
         hooksConfig.callableContract = newCallableContract;
         hooksConfig.hookFlags = uint32(newHookFlags);

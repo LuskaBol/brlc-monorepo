@@ -90,7 +90,7 @@ describe("Contracts 'BalanceFreezer'", async () => {
   const ERROR_NAME_AMOUNT_EXCESS = "BalanceFreezer_AmountExcess";
   const ERROR_NAME_IMPLEMENTATION_ADDRESS_INVALID = "BalanceFreezer_ImplementationAddressInvalid";
   const ERROR_NAME_TOKEN_ADDRESS_ZERO = "BalanceFreezer_TokenAddressZero";
-  const ERROR_NAME_TX_ID_ZERO = "BalanceFreezer_TxIdZero";
+  const ERROR_NAME_TRANSACTION_ID_ZERO = "BalanceFreezer_TransactionIdZero";
 
   const EXPECTED_VERSION: Version = {
     major: 1,
@@ -353,7 +353,7 @@ describe("Contracts 'BalanceFreezer'", async () => {
       const [operation] = defineTestOperations();
       operation.txId = TX_ID_ZERO;
       await expect(connect(freezerContract, freezer).freeze(operation.account, operation.amount, operation.txId))
-        .to.be.revertedWithCustomError(freezerContract, ERROR_NAME_TX_ID_ZERO);
+        .to.be.revertedWithCustomError(freezerContract, ERROR_NAME_TRANSACTION_ID_ZERO);
     });
 
     it("Is reverted if the provided amount is greater than 64-bit unsigned integer", async () => {
@@ -451,7 +451,7 @@ describe("Contracts 'BalanceFreezer'", async () => {
       operation.txId = TX_ID_ZERO;
       await expect(
         connect(freezerContract, freezer).freezeIncrease(operation.account, operation.amount, operation.txId),
-      ).to.be.revertedWithCustomError(freezerContract, ERROR_NAME_TX_ID_ZERO);
+      ).to.be.revertedWithCustomError(freezerContract, ERROR_NAME_TRANSACTION_ID_ZERO);
     });
 
     it("Is reverted if the provided amount is greater than 64-bit unsigned integer", async () => {
@@ -558,7 +558,7 @@ describe("Contracts 'BalanceFreezer'", async () => {
       operation.txId = TX_ID_ZERO;
       await expect(
         connect(freezerContract, freezer).freezeDecrease(operation.account, operation.amount, operation.txId),
-      ).to.be.revertedWithCustomError(freezerContract, ERROR_NAME_TX_ID_ZERO);
+      ).to.be.revertedWithCustomError(freezerContract, ERROR_NAME_TRANSACTION_ID_ZERO);
     });
 
     it("Is reverted if the provided amount is greater than 64-bit unsigned integer", async () => {
@@ -692,7 +692,7 @@ describe("Contracts 'BalanceFreezer'", async () => {
         receiver.address, // to
         operation.amount,
         operation.txId,
-      )).to.be.revertedWithCustomError(freezerContract, ERROR_NAME_TX_ID_ZERO);
+      )).to.be.revertedWithCustomError(freezerContract, ERROR_NAME_TRANSACTION_ID_ZERO);
     });
 
     it("Is reverted if the provided amount is greater than 64-bit unsigned integer", async () => {

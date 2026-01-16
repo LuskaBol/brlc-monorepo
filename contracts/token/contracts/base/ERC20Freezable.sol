@@ -57,39 +57,6 @@ abstract contract ERC20Freezable is ERC20Base, IERC20Freezable {
      */
     uint256[47] private __gap;
 
-    // -------------------- Errors -------------------------------- //
-
-    /**
-     * @dev [DEPRECATED] The token freezing operation is not approved by the account. No longer in use.
-     *
-     * Kept for backward compatibility with transaction analysis tools.
-     */
-    error FreezingNotApproved();
-
-    /**
-     * @dev [DEPRECATED] The token freezing is already approved by the account. No longer in use.
-     *
-     * Kept for backward compatibility with transaction analysis tools.
-     */
-    error FreezingAlreadyApproved();
-
-    /// @dev The frozen balance is exceeded during the operation.
-    error LackOfFrozenBalance();
-
-    /// @dev The transfer amount exceeded the frozen amount.
-    error TransferExceededFrozenAmount();
-
-    /**
-     * @dev [DEPRECATED] The transaction sender is not a freezer. No longer in use.
-     *
-     * Kept for backward compatibility with transaction analysis tools.
-     * Replaced by an appropriate error from the `AccessControl` library smart contract.
-     */
-    error UnauthorizedFreezer();
-
-    /// @dev The provided address belongs to a contract so its balance cannot be frozen.
-    error ContractBalanceFreezingAttempt();
-
     // -------------------- Initializers -------------------------- //
 
     /**
@@ -185,7 +152,7 @@ abstract contract ERC20Freezable is ERC20Base, IERC20Freezable {
         oldBalance = _frozenBalances[from];
 
         if (amount > oldBalance) {
-            revert LackOfFrozenBalance();
+            revert ERC20Freezable_FrozenBalanceInsufficient();
         }
 
         unchecked {
@@ -247,14 +214,14 @@ abstract contract ERC20Freezable is ERC20Base, IERC20Freezable {
         uint256 updateType
     ) internal returns (uint256 newBalance, uint256 oldBalance) {
         if (account == address(0)) {
-            revert ZeroAddress();
+            revert ERC20Base_AddressZero();
         }
         if (updateType == uint256(FrozenBalanceUpdateType.Replacement)) {
             oldBalance = _frozenBalances[account];
             newBalance = amount;
         } else {
             if (amount == 0) {
-                revert ZeroAmount();
+                revert ERC20Base_AmountZero();
             }
 
             oldBalance = _frozenBalances[account];
@@ -264,7 +231,7 @@ abstract contract ERC20Freezable is ERC20Base, IERC20Freezable {
                 newBalance += amount;
             } else {
                 if (amount > oldBalance) {
-                    revert LackOfFrozenBalance();
+                    revert ERC20Freezable_FrozenBalanceInsufficient();
                 }
                 unchecked {
                     newBalance -= amount;
@@ -272,7 +239,7 @@ abstract contract ERC20Freezable is ERC20Base, IERC20Freezable {
             }
         }
         if (newBalance != 0 && account.code.length != 0) {
-            revert ContractBalanceFreezingAttempt();
+            revert ERC20Freezable_ContractBalanceFreezingAttempt();
         }
         _freeze(account, newBalance, oldBalance);
     }

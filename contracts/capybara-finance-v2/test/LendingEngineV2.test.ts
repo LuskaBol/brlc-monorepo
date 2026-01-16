@@ -12,7 +12,7 @@ const ERROR_NAME_INVALID_INITIALIZATION = "InvalidInitialization";
 
 // Errors of the contracts under test
 const ERROR_NAME_IMPLEMENTATION_ADDRESS_INVALID = "LendingEngineV2_ImplementationAddressInvalid";
-const ERROR_NAME_UNAUTHORIZED_CALL_CONTEXT = "LendingEngineV2_UnauthorizedCallContext";
+const ERROR_NAME_CALL_CONTEXT_UNAUTHORIZED = "LendingEngineV2_CallContextUnauthorized";
 
 const EXPECTED_VERSION = {
   major: 2,
@@ -126,7 +126,7 @@ describe("Contract 'LendingEngine'", () => {
 
       await expect(
         engine.previewSubLoan(subLoanId, timestamp),
-      ).to.be.revertedWithCustomError(engine, ERROR_NAME_UNAUTHORIZED_CALL_CONTEXT);
+      ).to.be.revertedWithCustomError(engine, ERROR_NAME_CALL_CONTEXT_UNAUTHORIZED);
     });
   });
 });

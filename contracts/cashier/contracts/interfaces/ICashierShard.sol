@@ -199,7 +199,7 @@ interface ICashierShardErrors {
     error CashierShard_ImplementationAddressInvalid();
 
     /// @dev Thrown if the caller is not an admin.
-    error CashierShard_Unauthorized();
+    error CashierShard_CallerUnauthorized();
 }
 
 /**

@@ -46,7 +46,7 @@ abstract contract HarnessAdministrable is OwnableUpgradeable {
      * @dev The transaction sender is not a harness admin.
      * @param account The address of the transaction sender.
      */
-    error UnauthorizedHarnessAdmin(address account);
+    error HarnessAdministrable_UnauthorizedAdmin(address account);
 
     // ------------------ Modifiers ------------------------------- //
 
@@ -111,7 +111,7 @@ abstract contract HarnessAdministrable is OwnableUpgradeable {
      */
     function _checkHarnessAdmin(address account) internal view {
         if (!_isHarnessAdmin(account)) {
-            revert UnauthorizedHarnessAdmin(account);
+            revert HarnessAdministrable_UnauthorizedAdmin(account);
         }
     }
 

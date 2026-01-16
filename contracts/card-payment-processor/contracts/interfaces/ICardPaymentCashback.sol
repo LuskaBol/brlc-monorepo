@@ -184,37 +184,37 @@ interface ICardPaymentCashbackConfiguration {
  */
 interface ICardPaymentCashbackErrors {
     /// @dev The cashback operations are already disabled.
-    error CashbackAlreadyDisabled();
+    error CardPaymentCashback_CashbackAlreadyDisabled();
 
     /// @dev The cashback operations are already enabled.
-    error CashbackAlreadyEnabled();
+    error CardPaymentCashback_CashbackAlreadyEnabled();
 
     /// @dev The cashback distributor contract is already configured.
-    error CashbackDistributorAlreadyConfigured();
+    error CardPaymentCashback_CashbackDistributorAlreadyConfigured();
 
     /// @dev The cashback distributor contract is not configured.
-    error CashbackDistributorNotConfigured();
+    error CardPaymentCashback_CashbackDistributorUnconfigured();
 
     /// @dev The zero cashback distributor address has been passed as a function argument.
-    error CashbackDistributorZeroAddress();
+    error CardPaymentCashback_CashbackDistributorAddressZero();
 
     /// @dev The provided cashback rate exceeds the allowed maximum.
-    error CashbackRateExcess();
+    error CardPaymentCashback_CashbackRateExcess();
 
     /// @dev A new cashback rate is the same as previously set one.
-    error CashbackRateUnchanged();
+    error CardPaymentCashback_CashbackRateUnchanged();
 
     /// @dev The provided cashback rate is zero.
-    error CashbackRateZero();
+    error CardPaymentCashback_CashbackRateZero();
 
     /// @dev The resending of cashback has failed on the cashback distributor side.
-    error CashbackResendingFailed();
+    error CardPaymentCashback_CashbackResendingFailed();
 
     /// @dev The resending of cashback is unnecessary for the current payment state.
-    error CashbackResendingUnnecessary();
+    error CardPaymentCashback_CashbackResendingUnnecessary();
 
     /// @dev The configuration of this smart contract does not allow sending cashback.
-    error CashbackSendingNotConfigured();
+    error CardPaymentCashback_CashbackSendingNotConfigured();
 }
 
 /**

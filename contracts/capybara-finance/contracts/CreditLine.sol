@@ -10,7 +10,6 @@ import { UUPSExtUpgradeable } from "@cloudwalk/brlc-base/contracts/UUPSExtUpgrad
 import { Versionable } from "./Versionable.sol";
 
 import { Constants } from "./libraries/Constants.sol";
-import { Error } from "./libraries/Error.sol";
 import { Loan } from "./libraries/Loan.sol";
 
 import { ICreditLine } from "./interfaces/ICreditLine.sol";
@@ -44,7 +43,7 @@ contract CreditLine is
     /// @dev Throws if called by any account other than the lending market.
     modifier onlyMarket() {
         if (msg.sender != _market) {
-            revert Error.Unauthorized();
+            revert CreditLine_CallerUnauthorized();
         }
         _;
     }
@@ -78,7 +77,7 @@ contract CreditLine is
         address token_
     ) external initializer {
         if (owner_ == address(0)) {
-            revert Error.ZeroAddress();
+            revert CreditLine_AddressZero();
         }
 
         _checkMarket(market_);
@@ -100,31 +99,31 @@ contract CreditLine is
     /// @inheritdoc ICreditLineConfiguration
     function configureCreditLine(CreditLineConfig memory config) external onlyRole(OWNER_ROLE) {
         if (config.minBorrowedAmount > config.maxBorrowedAmount) {
-            revert InvalidCreditLineConfiguration();
+            revert CreditLine_CreditLineConfigurationInvalid();
         }
         if (config.minDurationInPeriods > config.maxDurationInPeriods) {
-            revert InvalidCreditLineConfiguration();
+            revert CreditLine_CreditLineConfigurationInvalid();
         }
         if (config.minInterestRatePrimary > config.maxInterestRatePrimary) {
-            revert InvalidCreditLineConfiguration();
+            revert CreditLine_CreditLineConfigurationInvalid();
         }
         if (config.minInterestRateSecondary > config.maxInterestRateSecondary) {
-            revert InvalidCreditLineConfiguration();
+            revert CreditLine_CreditLineConfigurationInvalid();
         }
 
         // Check that fields `minAddonFixedRate`, `maxAddonFixedRate`, `minAddonPeriodRate`, `maxAddonPeriodRate`
         // are zero because they have been deprecated since version 1.8.0
         if (config.minAddonFixedRate != 0) {
-            revert InvalidCreditLineConfiguration();
+            revert CreditLine_CreditLineConfigurationInvalid();
         }
         if (config.maxAddonFixedRate != 0) {
-            revert InvalidCreditLineConfiguration();
+            revert CreditLine_CreditLineConfigurationInvalid();
         }
         if (config.minAddonPeriodRate != 0) {
-            revert InvalidCreditLineConfiguration();
+            revert CreditLine_CreditLineConfigurationInvalid();
         }
         if (config.maxAddonPeriodRate != 0) {
-            revert InvalidCreditLineConfiguration();
+            revert CreditLine_CreditLineConfigurationInvalid();
         }
 
         _config = config;
@@ -148,7 +147,7 @@ contract CreditLine is
         BorrowerConfig[] memory configs
     ) external whenNotPaused onlyRole(ADMIN_ROLE) {
         if (borrowers.length != configs.length) {
-            revert Error.ArrayLengthMismatch();
+            revert CreditLine_ArrayLengthMismatch();
         }
 
         for (uint256 i = 0; i < borrowers.length; i++) {
@@ -170,7 +169,7 @@ contract CreditLine is
         BorrowerConfigLegacy[] memory configs
     ) external whenNotPaused onlyRole(ADMIN_ROLE) {
         if (borrowers.length != configs.length) {
-            revert Error.ArrayLengthMismatch();
+            revert CreditLine_ArrayLengthMismatch();
         }
 
         for (uint256 i = 0; i < borrowers.length; i++) {
@@ -220,28 +219,28 @@ contract CreditLine is
         uint256 durationInPeriods
     ) public view returns (Loan.Terms memory terms) {
         if (borrower == address(0)) {
-            revert Error.ZeroAddress();
+            revert CreditLine_AddressZero();
         }
         if (borrowedAmount == 0) {
-            revert Error.InvalidAmount();
+            revert CreditLine_AmountInvalid();
         }
 
         BorrowerConfig storage borrowerConfig = _borrowerConfigs[borrower];
 
         if (_blockTimestamp() > borrowerConfig.expiration) {
-            revert BorrowerConfigurationExpired();
+            revert CreditLine_BorrowerConfigurationExpired();
         }
         if (borrowedAmount > borrowerConfig.maxBorrowedAmount) {
-            revert Error.InvalidAmount();
+            revert CreditLine_AmountInvalid();
         }
         if (borrowedAmount < borrowerConfig.minBorrowedAmount) {
-            revert Error.InvalidAmount();
+            revert CreditLine_AmountInvalid();
         }
         if (durationInPeriods < borrowerConfig.minDurationInPeriods) {
-            revert LoanDurationOutOfRange();
+            revert CreditLine_LoanDurationOutOfRange();
         }
         if (durationInPeriods > borrowerConfig.maxDurationInPeriods) {
-            revert LoanDurationOutOfRange();
+            revert CreditLine_LoanDurationOutOfRange();
         }
 
         terms.token = _token;
@@ -301,13 +300,13 @@ contract CreditLine is
      */
     function _checkMarket(address market_) private view {
         if (market_ == address(0)) {
-            revert Error.ZeroAddress();
+            revert CreditLine_AddressZero();
         }
         if (market_.code.length == 0) {
-            revert Error.ContractAddressInvalid();
+            revert CreditLine_ContractAddressInvalid();
         }
         try ILendingMarket(market_).proveLendingMarket() {} catch {
-            revert Error.ContractAddressInvalid();
+            revert CreditLine_ContractAddressInvalid();
         }
     }
 
@@ -317,13 +316,13 @@ contract CreditLine is
      */
     function _checkToken(address token_) private view {
         if (token_ == address(0)) {
-            revert Error.ZeroAddress();
+            revert CreditLine_AddressZero();
         }
         if (token_.code.length == 0) {
-            revert Error.ContractAddressInvalid();
+            revert CreditLine_ContractAddressInvalid();
         }
         try IERC20(token_).balanceOf(address(0)) {} catch {
-            revert Error.ContractAddressInvalid();
+            revert CreditLine_ContractAddressInvalid();
         }
     }
 
@@ -334,51 +333,51 @@ contract CreditLine is
      */
     function _configureBorrower(address borrower, BorrowerConfig memory config) internal {
         if (borrower == address(0)) {
-            revert Error.ZeroAddress();
+            revert CreditLine_AddressZero();
         }
 
         // NOTE: We don't check for expiration here, because
         // it can be used for disabling a borrower by setting it to 0.
 
         if (config.minBorrowedAmount > config.maxBorrowedAmount) {
-            revert InvalidBorrowerConfiguration();
+            revert CreditLine_BorrowerConfigurationInvalid();
         }
         if (config.minBorrowedAmount < _config.minBorrowedAmount) {
-            revert InvalidBorrowerConfiguration();
+            revert CreditLine_BorrowerConfigurationInvalid();
         }
         if (config.maxBorrowedAmount > _config.maxBorrowedAmount) {
-            revert InvalidBorrowerConfiguration();
+            revert CreditLine_BorrowerConfigurationInvalid();
         }
 
         if (config.minDurationInPeriods > config.maxDurationInPeriods) {
-            revert InvalidBorrowerConfiguration();
+            revert CreditLine_BorrowerConfigurationInvalid();
         }
         if (config.minDurationInPeriods < _config.minDurationInPeriods) {
-            revert InvalidBorrowerConfiguration();
+            revert CreditLine_BorrowerConfigurationInvalid();
         }
         if (config.maxDurationInPeriods > _config.maxDurationInPeriods) {
-            revert InvalidBorrowerConfiguration();
+            revert CreditLine_BorrowerConfigurationInvalid();
         }
 
         if (config.interestRatePrimary < _config.minInterestRatePrimary) {
-            revert InvalidBorrowerConfiguration();
+            revert CreditLine_BorrowerConfigurationInvalid();
         }
         if (config.interestRatePrimary > _config.maxInterestRatePrimary) {
-            revert InvalidBorrowerConfiguration();
+            revert CreditLine_BorrowerConfigurationInvalid();
         }
 
         if (config.interestRateSecondary < _config.minInterestRateSecondary) {
-            revert InvalidBorrowerConfiguration();
+            revert CreditLine_BorrowerConfigurationInvalid();
         }
         if (config.interestRateSecondary > _config.maxInterestRateSecondary) {
-            revert InvalidBorrowerConfiguration();
+            revert CreditLine_BorrowerConfigurationInvalid();
         }
 
         if (config.addonFixedRate != 0) {
-            revert InvalidBorrowerConfiguration();
+            revert CreditLine_BorrowerConfigurationInvalid();
         }
         if (config.addonPeriodRate != 0) {
-            revert InvalidBorrowerConfiguration();
+            revert CreditLine_BorrowerConfigurationInvalid();
         }
 
         _borrowerConfigs[borrower] = config;
@@ -449,11 +448,11 @@ contract CreditLine is
 
             if (borrowerConfig.borrowingPolicy == BorrowingPolicy.SingleActiveLoan) {
                 if (newActiveLoanCount > 1) {
-                    revert LimitViolationOnSingleActiveLoan();
+                    revert CreditLine_LimitViolationOnSingleActiveLoan();
                 }
             } else if (borrowerConfig.borrowingPolicy == BorrowingPolicy.TotalActiveAmountLimit) {
                 if (newTotalActiveLoanAmount > borrowerConfig.maxBorrowedAmount) {
-                    revert LimitViolationOnTotalActiveLoanAmount(newTotalActiveLoanAmount);
+                    revert CreditLine_LimitViolationOnTotalActiveLoanAmount(newTotalActiveLoanAmount);
                 }
             } // else borrowerConfig.borrowingPolicy == BorrowingPolicy.MultipleActiveLoans
 
@@ -461,7 +460,7 @@ contract CreditLine is
                 newActiveLoanCount + borrowerState.closedLoanCount > type(uint16).max ||
                 newTotalActiveLoanAmount + borrowerState.totalClosedLoanAmount > type(uint64).max
             ) {
-                revert BorrowerStateOverflow();
+                revert CreditLine_BorrowerStateOverflow();
             }
             borrowerState.activeLoanCount = uint16(newActiveLoanCount);
             borrowerState.totalActiveLoanAmount = uint64(newTotalActiveLoanAmount);
@@ -487,7 +486,7 @@ contract CreditLine is
      */
     function _validateUpgrade(address newImplementation) internal view override onlyRole(OWNER_ROLE) {
         try ICreditLine(newImplementation).proveCreditLine() {} catch {
-            revert Error.ImplementationAddressInvalid();
+            revert CreditLine_ImplementationAddressInvalid();
         }
     }
 }

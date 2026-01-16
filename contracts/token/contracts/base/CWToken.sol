@@ -122,9 +122,9 @@ abstract contract CWToken is
             uint256 balanceFreezable = (balanceTotal >= balancePreminted) ? balanceTotal - balancePreminted : 0;
 
             if (balanceTotal < balancePreminted) {
-                revert TransferExceededPremintedAmount();
+                revert ERC20Mintable_PremintedAmountExcess();
             } else if (balanceFreezable < balanceFrozen && msg.sig != this.transferFrozen.selector) {
-                revert TransferExceededFrozenAmount();
+                revert ERC20Freezable_FrozenAmountExcess();
             }
         }
     }

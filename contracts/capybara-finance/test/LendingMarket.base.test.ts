@@ -177,32 +177,32 @@ const ERROR_NAME_ENFORCED_PAUSED = "EnforcedPause";
 const ERROR_NAME_INVALID_INITIALIZATION = "InvalidInitialization";
 
 // Errors of the contracts under test
-const ERROR_NAME_ADDON_TREASURY_ADDRESS_ZERO = "AddonTreasuryAddressZero";
-const ERROR_NAME_ALREADY_CONFIGURED = "AlreadyConfigured";
-const ERROR_NAME_ARRAY_LENGTH_MISMATCH = "ArrayLengthMismatch";
-const ERROR_NAME_CONTRACT_ADDRESS_INVALID = "ContractAddressInvalid";
-const ERROR_NAME_DURATION_ARRAY_INVALID = "DurationArrayInvalid";
-const ERROR_NAME_INAPPROPRIATE_DURATION_IN_PERIODS = "InappropriateLoanDuration";
-const ERROR_NAME_INAPPROPRIATE_INTEREST_RATE = "InappropriateInterestRate";
-const ERROR_NAME_INSTALLMENT_COUNT_EXCESS = "InstallmentCountExcess";
-const ERROR_NAME_INVALID_AMOUNT = "InvalidAmount";
-const ERROR_NAME_IMPLEMENTATION_ADDRESS_INVALID = "ImplementationAddressInvalid";
-const ERROR_NAME_LOAN_ALREADY_FROZEN = "LoanAlreadyFrozen";
-const ERROR_NAME_LOAN_ALREADY_REPAID = "LoanAlreadyRepaid";
-const ERROR_NAME_LOAN_ID_EXCESS = "LoanIdExcess";
-const ERROR_NAME_LOAN_NOT_EXIST = "LoanNotExist";
-const ERROR_NAME_LOAN_NOT_FROZEN = "LoanNotFrozen";
-const ERROR_NAME_LOAN_TYPE_UNEXPECTED = "LoanTypeUnexpected";
-const ERROR_NAME_PENALTY_INTEREST_RATE_BELOW_PRIMARY = "PenaltyInterestRateBelowPrimary";
-const ERROR_NAME_PENALTY_INTEREST_RATE_NON_ZERO_BEFORE_DUE = "PenaltyInterestRateNonZeroBeforeDue";
-const ERROR_NAME_PROGRAM_CREDIT_LINE_NOT_CONFIGURED = "ProgramCreditLineNotConfigured";
-const ERROR_NAME_PROGRAM_LIQUIDITY_POOL_NOT_CONFIGURED = "ProgramLiquidityPoolNotConfigured";
-const ERROR_NAME_PROGRAM_ID_EXCESS = "ProgramIdExcess";
-const ERROR_NAME_PROGRAM_NOT_EXIST = "ProgramNotExist";
-const ERROR_NAME_REPAYMENT_TIMESTAMP_INVALID = "RepaymentTimestampInvalid";
+const ERROR_NAME_ADDON_TREASURY_ADDRESS_ZERO = "LendingMarket_AddonTreasuryAddressZero";
+const ERROR_NAME_ALREADY_CONFIGURED = "LendingMarket_AlreadyConfigured";
+const ERROR_NAME_ARRAY_LENGTH_MISMATCH = "LendingMarket_ArrayLengthMismatch";
+const ERROR_NAME_CONTRACT_ADDRESS_INVALID = "LendingMarket_ContractAddressInvalid";
+const ERROR_NAME_DURATION_ARRAY_INVALID = "LendingMarket_DurationArrayInvalid";
+const ERROR_NAME_LOAN_DURATION_INAPPROPRIATE = "LendingMarket_LoanDurationInappropriate";
+const ERROR_NAME_INTEREST_RATE_INAPPROPRIATE = "LendingMarket_InterestRateInappropriate";
+const ERROR_NAME_INSTALLMENT_COUNT_EXCESS = "LendingMarket_InstallmentCountExcess";
+const ERROR_NAME_AMOUNT_INVALID = "LendingMarket_AmountInvalid";
+const ERROR_NAME_IMPLEMENTATION_ADDRESS_INVALID = "LendingMarket_ImplementationAddressInvalid";
+const ERROR_NAME_LOAN_ALREADY_FROZEN = "LendingMarket_LoanAlreadyFrozen";
+const ERROR_NAME_LOAN_ALREADY_REPAID = "LendingMarket_LoanAlreadyRepaid";
+const ERROR_NAME_LOAN_ID_EXCESS = "LendingMarket_LoanIdExcess";
+const ERROR_NAME_LOAN_NONEXISTENT = "LendingMarket_LoanNonexistent";
+const ERROR_NAME_LOAN_NOT_FROZEN = "LendingMarket_LoanNotFrozen";
+const ERROR_NAME_LOAN_TYPE_UNEXPECTED = "LendingMarket_LoanTypeUnexpected";
+const ERROR_NAME_PENALTY_INTEREST_RATE_BELOW_PRIMARY = "LendingMarket_PenaltyInterestRateBelowPrimary";
+const ERROR_NAME_PENALTY_INTEREST_RATE_NON_ZERO_BEFORE_DUE = "LendingMarket_PenaltyInterestRateNonZeroBeforeDue";
+const ERROR_NAME_PROGRAM_CREDIT_LINE_UNCONFIGURED = "LendingMarket_ProgramCreditLineUnconfigured";
+const ERROR_NAME_PROGRAM_LIQUIDITY_POOL_UNCONFIGURED = "LendingMarket_ProgramLiquidityPoolUnconfigured";
+const ERROR_NAME_PROGRAM_ID_EXCESS = "LendingMarket_ProgramIdExcess";
+const ERROR_NAME_PROGRAM_NONEXISTENT = "LendingMarket_ProgramNonexistent";
+const ERROR_NAME_REPAYMENT_TIMESTAMP_INVALID = "LendingMarket_RepaymentTimestampInvalid";
 const ERROR_NAME_SAFE_CAST_OVERFLOWED_UINT_DOWNCAST = "SafeCastOverflowedUintDowncast";
-const ERROR_NAME_TRACKED_TIMESTAMP_INVALID = "TrackedTimestampInvalid";
-const ERROR_NAME_ZERO_ADDRESS = "ZeroAddress";
+const ERROR_NAME_TRACKED_TIMESTAMP_INVALID = "LendingMarket_TrackedTimestampInvalid";
+const ERROR_NAME_ADDRESS_ZERO = "LendingMarket_AddressZero";
 
 const OWNER_ROLE = ethers.id("OWNER_ROLE");
 const GRANTOR_ROLE = ethers.id("GRANTOR_ROLE");
@@ -1227,7 +1227,7 @@ describe("Contract 'LendingMarket': base tests", () => {
       const wrongCreditLineAddress = (ZERO_ADDRESS);
 
       await expect(market.createProgram(wrongCreditLineAddress, liquidityPoolAddress))
-        .to.be.revertedWithCustomError(market, ERROR_NAME_ZERO_ADDRESS);
+        .to.be.revertedWithCustomError(market, ERROR_NAME_ADDRESS_ZERO);
     });
 
     it("Is reverted if the provided credit line address is not a contract", async () => {
@@ -1251,7 +1251,7 @@ describe("Contract 'LendingMarket': base tests", () => {
       const wrongLiquidityPoolAddress = (ZERO_ADDRESS);
 
       await expect(market.createProgram(creditLineAddress, wrongLiquidityPoolAddress))
-        .to.be.revertedWithCustomError(market, ERROR_NAME_ZERO_ADDRESS);
+        .to.be.revertedWithCustomError(market, ERROR_NAME_ADDRESS_ZERO);
     });
 
     it("Is reverted if the provided liquidity pool address is not a contract", async () => {
@@ -1330,7 +1330,7 @@ describe("Contract 'LendingMarket': base tests", () => {
       const wrongProgramId = 0;
 
       await expect(market.updateProgram(wrongProgramId, creditLineAddress, liquidityPoolAddress))
-        .to.be.revertedWithCustomError(market, ERROR_NAME_PROGRAM_NOT_EXIST);
+        .to.be.revertedWithCustomError(market, ERROR_NAME_PROGRAM_NONEXISTENT);
     });
 
     it("Is reverted if the provided credit line address is zero", async () => {
@@ -1338,7 +1338,7 @@ describe("Contract 'LendingMarket': base tests", () => {
       const wrongCreditLineAddress = (ZERO_ADDRESS);
 
       await expect(market.updateProgram(PROGRAM_ID, wrongCreditLineAddress, liquidityPoolAddress))
-        .to.be.revertedWithCustomError(market, ERROR_NAME_ZERO_ADDRESS);
+        .to.be.revertedWithCustomError(market, ERROR_NAME_ADDRESS_ZERO);
     });
 
     it("Is reverted if the provided credit line address is not a contract", async () => {
@@ -1362,7 +1362,7 @@ describe("Contract 'LendingMarket': base tests", () => {
       const wrongLiquidityPoolAddress = (ZERO_ADDRESS);
 
       await expect(market.updateProgram(PROGRAM_ID, creditLineAddress, wrongLiquidityPoolAddress))
-        .to.be.revertedWithCustomError(market, ERROR_NAME_ZERO_ADDRESS);
+        .to.be.revertedWithCustomError(market, ERROR_NAME_ADDRESS_ZERO);
     });
 
     it("Is reverted if the provided liquidity pool address is not a contract", async () => {
@@ -1542,7 +1542,7 @@ describe("Contract 'LendingMarket': base tests", () => {
             ADDON_AMOUNT,
             DURATION_IN_PERIODS,
           ),
-        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_ZERO_ADDRESS);
+        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_ADDRESS_ZERO);
       });
 
       it("The program ID is zero", async () => {
@@ -1557,7 +1557,7 @@ describe("Contract 'LendingMarket': base tests", () => {
             ADDON_AMOUNT,
             DURATION_IN_PERIODS,
           ),
-        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_PROGRAM_NOT_EXIST);
+        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_PROGRAM_NONEXISTENT);
       });
 
       it("The borrowed amount is zero", async () => {
@@ -1572,7 +1572,7 @@ describe("Contract 'LendingMarket': base tests", () => {
             ADDON_AMOUNT,
             DURATION_IN_PERIODS,
           ),
-        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_INVALID_AMOUNT);
+        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_AMOUNT_INVALID);
       });
 
       it("The borrowed amount is not rounded according to the accuracy factor", async () => {
@@ -1588,7 +1588,7 @@ describe("Contract 'LendingMarket': base tests", () => {
             ADDON_AMOUNT,
             DURATION_IN_PERIODS,
           ),
-        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_INVALID_AMOUNT);
+        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_AMOUNT_INVALID);
       });
 
       it("The addon amount is not rounded according to the accuracy factor", async () => {
@@ -1604,7 +1604,7 @@ describe("Contract 'LendingMarket': base tests", () => {
             wrongAddonAmount,
             DURATION_IN_PERIODS,
           ),
-        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_INVALID_AMOUNT);
+        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_AMOUNT_INVALID);
       });
 
       it("The credit line is not configured for a lending program", async () => {
@@ -1621,7 +1621,7 @@ describe("Contract 'LendingMarket': base tests", () => {
             ADDON_AMOUNT,
             DURATION_IN_PERIODS,
           ),
-        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_PROGRAM_CREDIT_LINE_NOT_CONFIGURED);
+        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_PROGRAM_CREDIT_LINE_UNCONFIGURED);
       });
 
       it("The liquidity pool is not configured for a lending program", async () => {
@@ -1638,7 +1638,7 @@ describe("Contract 'LendingMarket': base tests", () => {
             ADDON_AMOUNT,
             DURATION_IN_PERIODS,
           ),
-        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_PROGRAM_LIQUIDITY_POOL_NOT_CONFIGURED);
+        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_PROGRAM_LIQUIDITY_POOL_UNCONFIGURED);
       });
 
       it("The loan ID counter is greater than the max allowed value", async () => {
@@ -1786,7 +1786,7 @@ describe("Contract 'LendingMarket': base tests", () => {
             DURATIONS_IN_PERIODS,
             PENALTY_INTEREST_RATE_NON_ZERO,
           ),
-        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_ZERO_ADDRESS);
+        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_ADDRESS_ZERO);
       });
 
       it("The program ID is zero", async () => {
@@ -1802,7 +1802,7 @@ describe("Contract 'LendingMarket': base tests", () => {
             DURATIONS_IN_PERIODS,
             PENALTY_INTEREST_RATE_NON_ZERO,
           ),
-        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_PROGRAM_NOT_EXIST);
+        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_PROGRAM_NONEXISTENT);
       });
 
       it("The input borrowed amount array is empty", async () => {
@@ -1818,7 +1818,7 @@ describe("Contract 'LendingMarket': base tests", () => {
             DURATIONS_IN_PERIODS,
             PENALTY_INTEREST_RATE_NON_ZERO,
           ),
-        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_INVALID_AMOUNT);
+        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_AMOUNT_INVALID);
       });
 
       it("The total borrowed amount is not rounded according to the accuracy factor", async () => {
@@ -1835,7 +1835,7 @@ describe("Contract 'LendingMarket': base tests", () => {
             DURATIONS_IN_PERIODS,
             PENALTY_INTEREST_RATE_NON_ZERO,
           ),
-        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_INVALID_AMOUNT);
+        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_AMOUNT_INVALID);
       });
 
       it("The total addon amount is not rounded according to the accuracy factor", async () => {
@@ -1852,7 +1852,7 @@ describe("Contract 'LendingMarket': base tests", () => {
             DURATIONS_IN_PERIODS,
             PENALTY_INTEREST_RATE_NON_ZERO,
           ),
-        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_INVALID_AMOUNT);
+        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_AMOUNT_INVALID);
       });
 
       it("The durations in the input array do not correspond to a non-decreasing sequence", async () => {
@@ -1945,7 +1945,7 @@ describe("Contract 'LendingMarket': base tests", () => {
             DURATIONS_IN_PERIODS,
             PENALTY_INTEREST_RATE_NON_ZERO,
           ),
-        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_INVALID_AMOUNT);
+        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_AMOUNT_INVALID);
       });
 
       it("The credit line is not configured for a lending program", async () => {
@@ -1963,7 +1963,7 @@ describe("Contract 'LendingMarket': base tests", () => {
             DURATIONS_IN_PERIODS,
             PENALTY_INTEREST_RATE_NON_ZERO,
           ),
-        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_PROGRAM_CREDIT_LINE_NOT_CONFIGURED);
+        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_PROGRAM_CREDIT_LINE_UNCONFIGURED);
       });
 
       it("The liquidity pool is not configured for a lending program", async () => {
@@ -1981,7 +1981,7 @@ describe("Contract 'LendingMarket': base tests", () => {
             DURATIONS_IN_PERIODS,
             PENALTY_INTEREST_RATE_NON_ZERO,
           ),
-        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_PROGRAM_LIQUIDITY_POOL_NOT_CONFIGURED);
+        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_PROGRAM_LIQUIDITY_POOL_UNCONFIGURED);
       });
 
       it("The loan ID counter is greater than the max allowed value", async () => {
@@ -2108,7 +2108,7 @@ describe("Contract 'LendingMarket': base tests", () => {
             ADDON_AMOUNTS,
             DURATIONS_IN_PERIODS,
           ),
-        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_ZERO_ADDRESS);
+        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_ADDRESS_ZERO);
       });
 
       it("The program ID is zero", async () => {
@@ -2123,7 +2123,7 @@ describe("Contract 'LendingMarket': base tests", () => {
             ADDON_AMOUNTS,
             DURATIONS_IN_PERIODS,
           ),
-        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_PROGRAM_NOT_EXIST);
+        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_PROGRAM_NONEXISTENT);
       });
 
       it("The input borrowed amount array is empty", async () => {
@@ -2138,7 +2138,7 @@ describe("Contract 'LendingMarket': base tests", () => {
             ADDON_AMOUNTS,
             DURATIONS_IN_PERIODS,
           ),
-        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_INVALID_AMOUNT);
+        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_AMOUNT_INVALID);
       });
 
       it("The total borrowed amount is not rounded according to the accuracy factor", async () => {
@@ -2154,7 +2154,7 @@ describe("Contract 'LendingMarket': base tests", () => {
             ADDON_AMOUNTS,
             DURATIONS_IN_PERIODS,
           ),
-        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_INVALID_AMOUNT);
+        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_AMOUNT_INVALID);
       });
 
       it("The total addon amount is not rounded according to the accuracy factor", async () => {
@@ -2170,7 +2170,7 @@ describe("Contract 'LendingMarket': base tests", () => {
             wrongAddonAmounts,
             DURATIONS_IN_PERIODS,
           ),
-        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_INVALID_AMOUNT);
+        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_AMOUNT_INVALID);
       });
 
       it("The durations in the input array do not correspond to a non-decreasing sequence", async () => {
@@ -2243,7 +2243,7 @@ describe("Contract 'LendingMarket': base tests", () => {
             ADDON_AMOUNTS,
             DURATIONS_IN_PERIODS,
           ),
-        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_INVALID_AMOUNT);
+        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_AMOUNT_INVALID);
       });
 
       it("The credit line is not configured for a lending program", async () => {
@@ -2260,7 +2260,7 @@ describe("Contract 'LendingMarket': base tests", () => {
             ADDON_AMOUNTS,
             DURATIONS_IN_PERIODS,
           ),
-        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_PROGRAM_CREDIT_LINE_NOT_CONFIGURED);
+        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_PROGRAM_CREDIT_LINE_UNCONFIGURED);
       });
 
       it("The liquidity pool is not configured for a lending program", async () => {
@@ -2277,7 +2277,7 @@ describe("Contract 'LendingMarket': base tests", () => {
             ADDON_AMOUNTS,
             DURATIONS_IN_PERIODS,
           ),
-        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_PROGRAM_LIQUIDITY_POOL_NOT_CONFIGURED);
+        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_PROGRAM_LIQUIDITY_POOL_UNCONFIGURED);
       });
 
       it("The loan ID counter is greater than the max allowed value", async () => {
@@ -2435,7 +2435,7 @@ describe("Contract 'LendingMarket': base tests", () => {
         const wrongLoanId = loan.id + 123;
 
         await expect(market.repayLoan(wrongLoanId, REPAYMENT_AMOUNT))
-          .to.be.revertedWithCustomError(market, ERROR_NAME_LOAN_NOT_EXIST);
+          .to.be.revertedWithCustomError(market, ERROR_NAME_LOAN_NONEXISTENT);
       });
 
       it("The loan is already repaid", async () => {
@@ -2451,7 +2451,7 @@ describe("Contract 'LendingMarket': base tests", () => {
         const wrongRepaymentAmount = 0;
 
         await expect(market.repayLoan(loan.id, wrongRepaymentAmount))
-          .to.be.revertedWithCustomError(market, ERROR_NAME_INVALID_AMOUNT);
+          .to.be.revertedWithCustomError(market, ERROR_NAME_AMOUNT_INVALID);
       });
 
       it("The repayment amount is not rounded according to the accuracy factor", async () => {
@@ -2459,7 +2459,7 @@ describe("Contract 'LendingMarket': base tests", () => {
         const wrongRepaymentAmount = REPAYMENT_AMOUNT - 1;
 
         await expect(market.repayLoan(loan.id, wrongRepaymentAmount))
-          .to.be.revertedWithCustomError(market, ERROR_NAME_INVALID_AMOUNT);
+          .to.be.revertedWithCustomError(market, ERROR_NAME_AMOUNT_INVALID);
       });
 
       it("The repayment amount is greater than outstanding balance", async () => {
@@ -2467,7 +2467,7 @@ describe("Contract 'LendingMarket': base tests", () => {
         const wrongRepaymentAmount = BORROWED_AMOUNT + ADDON_AMOUNT + ACCURACY_FACTOR;
 
         await expect(market.repayLoan(loan.id, wrongRepaymentAmount))
-          .to.be.revertedWithCustomError(market, ERROR_NAME_INVALID_AMOUNT);
+          .to.be.revertedWithCustomError(market, ERROR_NAME_AMOUNT_INVALID);
       });
     });
   });
@@ -2682,7 +2682,7 @@ describe("Contract 'LendingMarket': base tests", () => {
         const repayerAddress = (ZERO_ADDRESS);
 
         await expect(marketViaAdmin.repayLoanForBatch(loanIds, repaymentAmounts, repayerAddress))
-          .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_ZERO_ADDRESS);
+          .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_ADDRESS_ZERO);
       });
 
       it("One of the loans does not exist", async () => {
@@ -2692,7 +2692,7 @@ describe("Contract 'LendingMarket': base tests", () => {
         loanIds[loanIds.length - 1] += 123;
 
         await expect(marketViaAdmin.repayLoanForBatch(loanIds, repaymentAmounts, borrower.address))
-          .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_LOAN_NOT_EXIST);
+          .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_LOAN_NONEXISTENT);
       });
 
       it("One of the loans is already repaid", async () => {
@@ -2716,7 +2716,7 @@ describe("Contract 'LendingMarket': base tests", () => {
         repaymentAmounts[loans.length - 1] = 0;
 
         await expect(marketViaAdmin.repayLoanForBatch(loanIds, repaymentAmounts, borrower.address))
-          .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_INVALID_AMOUNT);
+          .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_AMOUNT_INVALID);
       });
 
       it("One of the repayment amounts is not rounded according to the accuracy factor", async () => {
@@ -2726,7 +2726,7 @@ describe("Contract 'LendingMarket': base tests", () => {
         repaymentAmounts[loans.length - 1] = REPAYMENT_AMOUNT - 1;
 
         await expect(marketViaAdmin.repayLoanForBatch(loanIds, repaymentAmounts, borrower.address))
-          .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_INVALID_AMOUNT);
+          .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_AMOUNT_INVALID);
       });
 
       it("One of the repayment amounts is greater than outstanding balance", async () => {
@@ -2738,7 +2738,7 @@ describe("Contract 'LendingMarket': base tests", () => {
           roundSpecific(lastLoan.state.borrowedAmount + lastLoan.state.addonAmount) + ACCURACY_FACTOR;
 
         await expect(marketViaAdmin.repayLoanForBatch(loanIds, repaymentAmounts, borrower.address))
-          .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_INVALID_AMOUNT);
+          .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_AMOUNT_INVALID);
       });
     });
   });
@@ -2903,7 +2903,7 @@ describe("Contract 'LendingMarket': base tests", () => {
         loanIds[loans.length - 1] += 123;
 
         await expect(marketViaAdmin.discountLoanForBatch(loanIds, discountAmounts))
-          .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_LOAN_NOT_EXIST);
+          .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_LOAN_NONEXISTENT);
       });
 
       it("One of the loans is already repaid", async () => {
@@ -2923,7 +2923,7 @@ describe("Contract 'LendingMarket': base tests", () => {
         discountAmounts[loans.length - 1] = 0;
 
         await expect(marketViaAdmin.discountLoanForBatch(loanIds, discountAmounts))
-          .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_INVALID_AMOUNT);
+          .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_AMOUNT_INVALID);
       });
 
       it("One of the discount amounts is not rounded according to the accuracy factor", async () => {
@@ -2933,7 +2933,7 @@ describe("Contract 'LendingMarket': base tests", () => {
         discountAmounts[loans.length - 1] = DISCOUNT_AMOUNT - 1;
 
         await expect(marketViaAdmin.discountLoanForBatch(loanIds, discountAmounts))
-          .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_INVALID_AMOUNT);
+          .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_AMOUNT_INVALID);
       });
 
       it("One of the discount amounts is greater than the outstanding balance", async () => {
@@ -2945,7 +2945,7 @@ describe("Contract 'LendingMarket': base tests", () => {
           roundSpecific(lastLoan.state.borrowedAmount + lastLoan.state.addonAmount) + ACCURACY_FACTOR;
 
         await expect(marketViaAdmin.discountLoanForBatch(loanIds, discountAmounts))
-          .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_INVALID_AMOUNT);
+          .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_AMOUNT_INVALID);
       });
     });
   });
@@ -3689,7 +3689,7 @@ describe("Contract 'LendingMarket': base tests", () => {
 
         await expect(
           marketViaAdmin.undoRepaymentFor(wrongLoanId, repaymentAmount, repaymentTimestamp, receiver.address),
-        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_LOAN_NOT_EXIST);
+        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_LOAN_NONEXISTENT);
       });
 
       it("The caller does not have the admin role", async () => {
@@ -3726,7 +3726,7 @@ describe("Contract 'LendingMarket': base tests", () => {
 
         await expect(
           marketViaAdmin.undoRepaymentFor(loan.id, wrongRepaymentAmount, repaymentTimestamp, receiver.address),
-        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_INVALID_AMOUNT);
+        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_AMOUNT_INVALID);
       });
 
       it("The repayment amount is greater than the loan repaid amount", async () => {
@@ -3737,7 +3737,7 @@ describe("Contract 'LendingMarket': base tests", () => {
 
         await expect(
           marketViaAdmin.undoRepaymentFor(loan.id, wrongRepaymentAmount, repaymentTimestamp, receiver.address),
-        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_INVALID_AMOUNT);
+        ).to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_AMOUNT_INVALID);
       });
 
       it("The repayment timestamp is less than the loan start timestamp", async () => {
@@ -3823,7 +3823,7 @@ describe("Contract 'LendingMarket': base tests", () => {
       const wrongLoanId = loan.id + 123;
 
       await expect(connect(market, corrector).correctLoan(wrongLoanId, trackedTimestamp, 0, 0, 0, 0))
-        .to.be.revertedWithCustomError(market, ERROR_NAME_LOAN_NOT_EXIST);
+        .to.be.revertedWithCustomError(market, ERROR_NAME_LOAN_NONEXISTENT);
     });
 
     it("Is reverted if the caller does not have the corrector role", async () => {
@@ -3950,7 +3950,7 @@ describe("Contract 'LendingMarket': base tests", () => {
       const wrongLoanId = loan.id + 123;
 
       await expect(marketViaAdmin.freeze(wrongLoanId))
-        .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_LOAN_NOT_EXIST);
+        .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_LOAN_NONEXISTENT);
     });
 
     it("Is reverted if the loan is already repaid", async () => {
@@ -4114,7 +4114,7 @@ describe("Contract 'LendingMarket': base tests", () => {
         const wrongLoanId = loan.id + 123;
 
         await expect(marketViaAdmin.unfreeze(wrongLoanId))
-          .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_LOAN_NOT_EXIST);
+          .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_LOAN_NONEXISTENT);
       });
 
       it("The loan is already repaid", async () => {
@@ -4196,7 +4196,7 @@ describe("Contract 'LendingMarket': base tests", () => {
       const wrongLoanId = loan.id + 123;
 
       await expect(marketViaAdmin.updateLoanDuration(wrongLoanId, DURATION_IN_PERIODS))
-        .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_LOAN_NOT_EXIST);
+        .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_LOAN_NONEXISTENT);
     });
 
     it("Is reverted if the loan is already repaid", async () => {
@@ -4227,11 +4227,11 @@ describe("Contract 'LendingMarket': base tests", () => {
       let newDuration = fixture.ordinaryLoan.state.durationInPeriods;
 
       await expect(marketViaAdmin.updateLoanDuration(loan.id, newDuration))
-        .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_INAPPROPRIATE_DURATION_IN_PERIODS);
+        .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_LOAN_DURATION_INAPPROPRIATE);
 
       newDuration -= 1;
       await expect(marketViaAdmin.updateLoanDuration(loan.id, newDuration))
-        .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_INAPPROPRIATE_DURATION_IN_PERIODS);
+        .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_LOAN_DURATION_INAPPROPRIATE);
     });
 
     it("Is reverted if the loan has non-zero penalty interest rate before the due date", async () => {
@@ -4282,7 +4282,7 @@ describe("Contract 'LendingMarket': base tests", () => {
       const wrongLoanId = loan.id + 123;
 
       await expect(marketViaAdmin.updateLoanInterestRatePrimary(wrongLoanId, INTEREST_RATE_PRIMARY))
-        .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_LOAN_NOT_EXIST);
+        .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_LOAN_NONEXISTENT);
     });
 
     it("Is reverted if the loan is already repaid", async () => {
@@ -4312,11 +4312,11 @@ describe("Contract 'LendingMarket': base tests", () => {
       let newInterestRate = loan.state.interestRatePrimary;
 
       await expect(marketViaAdmin.updateLoanInterestRatePrimary(loan.id, newInterestRate))
-        .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_INAPPROPRIATE_INTEREST_RATE);
+        .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_INTEREST_RATE_INAPPROPRIATE);
 
       newInterestRate += 1;
       await expect(marketViaAdmin.updateLoanInterestRatePrimary(loan.id, newInterestRate + 1))
-        .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_INAPPROPRIATE_INTEREST_RATE);
+        .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_INTEREST_RATE_INAPPROPRIATE);
     });
   });
 
@@ -4348,7 +4348,7 @@ describe("Contract 'LendingMarket': base tests", () => {
       const wrongLoanId = loan.id + 123;
 
       await expect(marketViaAdmin.updateLoanInterestRateSecondary(wrongLoanId, INTEREST_RATE_SECONDARY))
-        .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_LOAN_NOT_EXIST);
+        .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_LOAN_NONEXISTENT);
     });
 
     it("Is reverted if the loan is already repaid", async () => {
@@ -4379,11 +4379,11 @@ describe("Contract 'LendingMarket': base tests", () => {
       let newInterestRate = loan.state.interestRateSecondary;
 
       await expect(marketViaAdmin.updateLoanInterestRateSecondary(loan.id, newInterestRate))
-        .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_INAPPROPRIATE_INTEREST_RATE);
+        .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_INTEREST_RATE_INAPPROPRIATE);
 
       newInterestRate += 1;
       await expect(marketViaAdmin.updateLoanInterestRateSecondary(loan.id, newInterestRate))
-        .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_INAPPROPRIATE_INTEREST_RATE);
+        .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_INTEREST_RATE_INAPPROPRIATE);
     });
   });
 
@@ -4465,7 +4465,7 @@ describe("Contract 'LendingMarket': base tests", () => {
         const wrongLoanId = loan.id + 123;
 
         await expect(marketViaAdmin.updateLoanPenaltyInterestRate(wrongLoanId, newPenaltyInterestRate))
-          .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_LOAN_NOT_EXIST);
+          .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_LOAN_NONEXISTENT);
       });
 
       it("The loan is already repaid", async () => {
@@ -4687,7 +4687,7 @@ describe("Contract 'LendingMarket': base tests", () => {
         const { marketViaAdmin, ordinaryLoan: loan } = fixture;
 
         await expect(marketViaAdmin.revokeLoan(loan.id + 123))
-          .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_LOAN_NOT_EXIST);
+          .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_LOAN_NONEXISTENT);
       });
 
       it("The loan is already repaid", async () => {
@@ -4981,7 +4981,7 @@ describe("Contract 'LendingMarket': base tests", () => {
         const { marketViaAdmin, installmentLoanParts: [loan] } = fixture;
 
         await expect(marketViaAdmin.revokeInstallmentLoan(loan.id + 123))
-          .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_LOAN_NOT_EXIST);
+          .to.be.revertedWithCustomError(marketViaAdmin, ERROR_NAME_LOAN_NONEXISTENT);
       });
 
       it("All the sub-loans of the installment loan are already repaid", async () => {

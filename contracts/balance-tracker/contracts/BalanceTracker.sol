@@ -45,7 +45,7 @@ contract BalanceTracker is OwnableUpgradeable, IBalanceTracker, IERC20Hook, Vers
      */
     modifier onlyToken() {
         if (_msgSender() != TOKEN) {
-            revert UnauthorizedCaller(_msgSender());
+            revert BalanceTracker_CallerUnauthorized(_msgSender());
         }
         _;
     }
@@ -151,10 +151,10 @@ contract BalanceTracker is OwnableUpgradeable, IBalanceTracker, IERC20Hook, Vers
         uint256 toDay
     ) external view returns (uint256[] memory) {
         if (fromDay < INITIALIZATION_DAY) {
-            revert FromDayPriorInitDay();
+            revert BalanceTracker_FromDayPriorInitDay();
         }
         if (fromDay > toDay) {
-            revert ToDayPriorFromDay();
+            revert BalanceTracker_ToDayPriorFromDay();
         }
 
         uint16 day;
@@ -243,7 +243,7 @@ contract BalanceTracker is OwnableUpgradeable, IBalanceTracker, IERC20Hook, Vers
      */
     function _toUint240(uint256 value) internal pure returns (uint240) {
         if (value > type(uint240).max) {
-            revert SafeCastOverflowUint240();
+            revert BalanceTracker_SafeCastOverflowUint240();
         }
 
         return uint240(value);
@@ -255,7 +255,7 @@ contract BalanceTracker is OwnableUpgradeable, IBalanceTracker, IERC20Hook, Vers
      */
     function _toUint16(uint256 value) internal pure returns (uint16) {
         if (value > type(uint16).max) {
-            revert SafeCastOverflowUint16();
+            revert BalanceTracker_SafeCastOverflowUint16();
         }
 
         return uint16(value);

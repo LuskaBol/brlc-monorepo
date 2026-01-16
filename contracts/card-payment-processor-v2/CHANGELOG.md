@@ -1,3 +1,22 @@
+# Unreleased
+
+## Main Changes
+
+- Applied custom error naming convention. Errors now follow the `ContractName_SubjectState` pattern.
+
+### Error Renames
+
+**CashbackController:**
+- `CashbackController_CashbackDoesNotExist` → `CashbackController_CashbackNonexistent`
+- `CashbackController_TreasuryNotConfigured` → `CashbackController_TreasuryUnconfigured`
+
+**HookContractMock:**
+- `RevertFromAfterPaymentMade` → `HookContractMock_RevertFromAfterPaymentMade`
+
+## Migration
+
+No special actions required. Update any off-chain code that catches these errors.
+
 # 2.4.1
 
 ## Minor changes

@@ -20,12 +20,12 @@ describe("Contract 'MultiSigGuardianWalletUpgradeable'", () => {
 
   const ERROR_MESSAGE_CONTRACT_IS_ALREADY_INITIALIZED = "Initializable: contract is already initialized";
 
-  // Base contract errors
-  const ERROR_NAME_DUPLICATE_OWNER_ADDRESS = "DuplicateOwnerAddress";
-  const ERROR_NAME_EMPTY_OWNERS_ARRAY = "EmptyOwnersArray";
-  const ERROR_NAME_INVALID_REQUIRED_APPROVALS = "InvalidRequiredApprovals";
-  const ERROR_NAME_UNAUTHORIZED_CALLER = "UnauthorizedCaller";
-  const ERROR_NAME_ZERO_OWNER_ADDRESS = "ZeroOwnerAddress";
+  // Base multisig wallet errors
+  const ERROR_NAME_OWNER_ADDRESS_DUPLICATE = "MultiSigWallet_OwnerAddressDuplicate";
+  const ERROR_NAME_OWNERS_ARRAY_EMPTY = "MultiSigWallet_OwnersArrayEmpty";
+  const ERROR_NAME_REQUIRED_APPROVALS_INVALID = "MultiSigWallet_RequiredApprovalsInvalid";
+  const ERROR_NAME_CALLER_UNAUTHORIZED = "MultiSigWallet_CallerUnauthorized";
+  const ERROR_NAME_OWNER_ADDRESS_ZERO = "MultiSigWallet_OwnerAddressZero";
 
   // Guardian-specific errors
   const ERROR_NAME_GUARDIAN_ADDRESS_DUPLICATE = "MultiSigGuardianWallet_GuardianAddressDuplicate";
@@ -173,7 +173,7 @@ describe("Contract 'MultiSigGuardianWalletUpgradeable'", () => {
         await upgrades.deployProxy(walletUpgradeableFactory, [], { initializer: false }) as Contract;
       await expect(
         uninitializedWallet.initialize([], REQUIRED_APPROVALS, guardianAddresses, REQUIRED_GUARDIAN_APPROVALS),
-      ).to.be.revertedWithCustomError(uninitializedWallet, ERROR_NAME_EMPTY_OWNERS_ARRAY);
+      ).to.be.revertedWithCustomError(uninitializedWallet, ERROR_NAME_OWNERS_ARRAY_EMPTY);
     });
 
     it("Is reverted if the input number of required approvals is zero", async () => {
@@ -187,7 +187,7 @@ describe("Contract 'MultiSigGuardianWalletUpgradeable'", () => {
           guardianAddresses,
           REQUIRED_GUARDIAN_APPROVALS,
         ),
-      ).to.be.revertedWithCustomError(uninitializedWallet, ERROR_NAME_INVALID_REQUIRED_APPROVALS);
+      ).to.be.revertedWithCustomError(uninitializedWallet, ERROR_NAME_REQUIRED_APPROVALS_INVALID);
     });
 
     it("Is reverted if required approvals exceeds the length of the owner array", async () => {
@@ -201,7 +201,7 @@ describe("Contract 'MultiSigGuardianWalletUpgradeable'", () => {
           guardianAddresses,
           REQUIRED_GUARDIAN_APPROVALS,
         ),
-      ).to.be.revertedWithCustomError(uninitializedWallet, ERROR_NAME_INVALID_REQUIRED_APPROVALS);
+      ).to.be.revertedWithCustomError(uninitializedWallet, ERROR_NAME_REQUIRED_APPROVALS_INVALID);
     });
 
     it("Is reverted if one of the input owners is the zero address", async () => {
@@ -216,7 +216,7 @@ describe("Contract 'MultiSigGuardianWalletUpgradeable'", () => {
           [ownerAddresses[0]],
           REQUIRED_GUARDIAN_APPROVALS,
         ),
-      ).to.be.revertedWithCustomError(uninitializedWallet, ERROR_NAME_ZERO_OWNER_ADDRESS);
+      ).to.be.revertedWithCustomError(uninitializedWallet, ERROR_NAME_OWNER_ADDRESS_ZERO);
     });
 
     it("Is reverted if there is a duplicate address in the input owner array", async () => {
@@ -231,7 +231,7 @@ describe("Contract 'MultiSigGuardianWalletUpgradeable'", () => {
           [ownerAddresses[0]],
           REQUIRED_GUARDIAN_APPROVALS,
         ),
-      ).to.be.revertedWithCustomError(uninitializedWallet, ERROR_NAME_DUPLICATE_OWNER_ADDRESS);
+      ).to.be.revertedWithCustomError(uninitializedWallet, ERROR_NAME_OWNER_ADDRESS_DUPLICATE);
     });
 
     it("Is reverted if the input guardian array is empty", async () => {
@@ -333,7 +333,7 @@ describe("Contract 'MultiSigGuardianWalletUpgradeable'", () => {
       const { wallet } = await setUpFixture(deployAllContracts);
 
       await expect(wallet.upgradeTo(getAddress(wallet)))
-        .to.be.revertedWithCustomError(wallet, ERROR_NAME_UNAUTHORIZED_CALLER);
+        .to.be.revertedWithCustomError(wallet, ERROR_NAME_CALLER_UNAUTHORIZED);
     });
   });
 

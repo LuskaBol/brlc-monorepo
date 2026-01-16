@@ -432,28 +432,28 @@ interface ICashbackDistributorConfiguration {
  */
 interface ICashbackDistributorErrors {
     /// @dev The cashback operations are already disabled.
-    error CashbackAlreadyDisabled();
+    error CashbackDistributor_CashbackAlreadyDisabled();
 
     /// @dev The cashback operations are already enabled.
-    error CashbackAlreadyEnabled();
+    error CashbackDistributor_CashbackAlreadyEnabled();
 
     /// @dev Zero external identifier has been passed as a function argument.
-    error ZeroExternalId();
+    error CashbackDistributor_ExternalIdZero();
 
     /// @dev The zero account address has been passed as a function argument.
-    error ZeroRecipientAddress();
+    error CashbackDistributor_RecipientAddressZero();
 
     /// @dev The zero token address has been passed as a function argument.
-    error ZeroTokenAddress();
+    error CashbackDistributor_TokenAddressZero();
 
     /// @dev The provided cashback vault address is identical to the current one for the token.
-    error CashbackVaultUnchanged();
+    error CashbackDistributor_CashbackVaultUnchanged();
 
     /// @dev The provided cashback vault contract is not a valid one.
-    error CashbackVaultInvalid();
+    error CashbackDistributor_CashbackVaultInvalid();
 
     /// @dev The token of the provided cashback vault does not match the expected one.
-    error CashbackVaultTokenMismatch();
+    error CashbackDistributor_CashbackVaultTokenMismatch();
 }
 
 /**

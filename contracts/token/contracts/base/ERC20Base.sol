@@ -8,6 +8,7 @@ import { PausableExtUpgradeable } from "@cloudwalk/brlc-base/contracts/PausableE
 
 import { LegacyCorePlaceholder } from "../legacy/LegacyCorePlaceholder.sol";
 import { ERC20Upgradeable } from "../openzeppelin_v4-9-6/ERC20Upgradeable.sol";
+import { IERC20BaseErrors } from "./interfaces/IERC20Base.sol";
 
 /**
  * @title ERC20Base contract
@@ -20,16 +21,9 @@ abstract contract ERC20Base is
     AccessControlExtUpgradeable,
     PausableExtUpgradeable,
     RescuableUpgradeable,
-    ERC20Upgradeable
+    ERC20Upgradeable,
+    IERC20BaseErrors
 {
-    // ------------------ Errors ---------------------------------- //
-
-    /// @dev Throws if the zero address is passed to the function.
-    error ZeroAddress();
-
-    /// @dev Throws if the zero amount is passed to the function.
-    error ZeroAmount();
-
     // ------------------ Initializers ---------------------------- //
 
     /**

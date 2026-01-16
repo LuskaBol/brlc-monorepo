@@ -161,7 +161,7 @@ interface IBalanceFreezerErrors {
     error BalanceFreezer_TokenAddressZero();
 
     /// @dev Thrown if the provided off-chain transaction identifier is zero.
-    error BalanceFreezer_TxIdZero();
+    error BalanceFreezer_TransactionIdZero();
 }
 
 /**

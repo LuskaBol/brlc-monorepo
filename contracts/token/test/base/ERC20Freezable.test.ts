@@ -26,10 +26,10 @@ describe("Contract 'ERC20Freezable'", async () => {
   const ERROR_NAME_NOT_INITIALIZING = "NotInitializing";
 
   // Errors of the contracts under test
-  const ERROR_NAME_CONTRACT_BALANCE_FREEZING_ATTEMPT = "ContractBalanceFreezingAttempt";
-  const ERROR_NAME_LACK_OF_FROZEN_BALANCE = "LackOfFrozenBalance";
-  const ERROR_NAME_ZERO_AMOUNT = "ZeroAmount";
-  const ERROR_NAME_ZERO_ADDRESS = "ZeroAddress";
+  const ERROR_NAME_CONTRACT_BALANCE_FREEZING_ATTEMPT = "ERC20Freezable_ContractBalanceFreezingAttempt";
+  const ERROR_NAME_FROZEN_BALANCE_INSUFFICIENT = "ERC20Freezable_FrozenBalanceInsufficient";
+  const ERROR_NAME_AMOUNT_ZERO = "ERC20Base_AmountZero";
+  const ERROR_NAME_ADDRESS_ZERO = "ERC20Base_AddressZero";
 
   const OWNER_ROLE: string = ethers.id("OWNER_ROLE");
   const GRANTOR_ROLE: string = ethers.id("GRANTOR_ROLE");
@@ -182,7 +182,7 @@ describe("Contract 'ERC20Freezable'", async () => {
     it("Is reverted if the provided account is zero", async () => {
       const { token } = await setUpFixture(deployAndConfigureToken);
       await expect(connect(token, freezerAgent).freeze(ethers.ZeroAddress, TOKEN_AMOUNT))
-        .to.be.revertedWithCustomError(token, ERROR_NAME_ZERO_ADDRESS);
+        .to.be.revertedWithCustomError(token, ERROR_NAME_ADDRESS_ZERO);
     });
 
     it("Is reverted if the provided account is a contract and the new frozen balance is non-zero", async () => {
@@ -235,7 +235,7 @@ describe("Contract 'ERC20Freezable'", async () => {
     it("Is reverted if the provided account is zero", async () => {
       const { token } = await setUpFixture(deployAndConfigureToken);
       await expect(connect(token, freezerAgent).freezeIncrease(ethers.ZeroAddress, TOKEN_AMOUNT))
-        .to.be.revertedWithCustomError(token, ERROR_NAME_ZERO_ADDRESS);
+        .to.be.revertedWithCustomError(token, ERROR_NAME_ADDRESS_ZERO);
     });
 
     it("Is reverted if the provided account is a contract", async () => {
@@ -247,7 +247,7 @@ describe("Contract 'ERC20Freezable'", async () => {
     it("Is reverted if the provided amount is zero", async () => {
       const { token } = await setUpFixture(deployAndConfigureToken);
       await expect(connect(token, freezerAgent).freezeIncrease(user1.address, 0))
-        .to.be.revertedWithCustomError(token, ERROR_NAME_ZERO_AMOUNT);
+        .to.be.revertedWithCustomError(token, ERROR_NAME_AMOUNT_ZERO);
     });
   });
 
@@ -304,7 +304,7 @@ describe("Contract 'ERC20Freezable'", async () => {
     it("Is reverted if the provided account is zero", async () => {
       const { token } = await setUpFixture(deployAndConfigureToken);
       await expect(connect(token, freezerAgent).freezeDecrease(ethers.ZeroAddress, TOKEN_AMOUNT))
-        .to.be.revertedWithCustomError(token, ERROR_NAME_ZERO_ADDRESS);
+        .to.be.revertedWithCustomError(token, ERROR_NAME_ADDRESS_ZERO);
     });
 
     it("Is reverted if the provided account is a contract and the new frozen balance is non-zero", async () => {
@@ -318,7 +318,7 @@ describe("Contract 'ERC20Freezable'", async () => {
     it("Is reverted if the provided amount is zero", async () => {
       const { token } = await setUpFixture(deployAndConfigureToken);
       await expect(connect(token, freezerAgent).freezeDecrease(user1.address, 0))
-        .to.be.revertedWithCustomError(token, ERROR_NAME_ZERO_AMOUNT);
+        .to.be.revertedWithCustomError(token, ERROR_NAME_AMOUNT_ZERO);
     });
 
     it("Is reverted if the provided amount is greater than old balance", async () => {
@@ -326,7 +326,7 @@ describe("Contract 'ERC20Freezable'", async () => {
 
       await proveTx(connect(token, freezerAgent).freezeIncrease(user1.address, TOKEN_AMOUNT));
       await expect(connect(token, freezerAgent).freezeDecrease(user1.address, TOKEN_AMOUNT + 1))
-        .to.be.revertedWithCustomError(token, ERROR_NAME_LACK_OF_FROZEN_BALANCE);
+        .to.be.revertedWithCustomError(token, ERROR_NAME_FROZEN_BALANCE_INSUFFICIENT);
     });
   });
 
@@ -419,7 +419,7 @@ describe("Contract 'ERC20Freezable'", async () => {
         await proveTx(token.mint(user1.address, TOKEN_AMOUNT));
         await proveTx(connect(token, freezerAgent).freeze(user1.address, TOKEN_AMOUNT));
         await expect(connect(token, freezerTransferor).transferFrozen(user1.address, user2.address, TOKEN_AMOUNT + 1))
-          .to.be.revertedWithCustomError(token, ERROR_NAME_LACK_OF_FROZEN_BALANCE);
+          .to.be.revertedWithCustomError(token, ERROR_NAME_FROZEN_BALANCE_INSUFFICIENT);
       });
 
       it("There is a lack of common balance", async () => {

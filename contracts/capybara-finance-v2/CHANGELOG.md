@@ -1,3 +1,26 @@
+# Unreleased
+
+## Main Changes
+
+- Applied custom error naming convention. Errors now follow the `ContractName_SubjectState` pattern.
+
+### Error Renames
+
+**LendingMarketV2:**
+- `LendingMarketV2_UnauthorizedCallContext` → `LendingMarketV2_CallContextUnauthorized`
+- `LendingMarketV2_SubLoanRapayerAddressZero` → `LendingMarketV2_SubLoanRepayerAddressZero` *(typo fix)*
+- `LendingMarketV2_SubLoanUnfrozen` → `LendingMarketV2_SubLoanNotFrozen`
+
+**LendingEngineV2:**
+- `LendingEngineV2_UnauthorizedCallContext` → `LendingEngineV2_CallContextUnauthorized`
+
+**CreditLineV2Mock:**
+- `CreditLineV2Mock_onAfterLoanClosedReverted` → `CreditLineV2Mock_OnAfterLoanClosedReverted` *(capitalization fix)*
+
+## Migration
+
+No special actions required. Update any off-chain code that catches these errors.
+
 # 2.1.0
 
 ## Main Changes.

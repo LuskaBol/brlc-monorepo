@@ -103,14 +103,14 @@ describe("Contract 'CreditAgentCapybaraV1'", () => {
   const ERROR_NAME_CASHIER_HOOK_CALLER_UNAUTHORIZED = "CreditAgent_CashierHookCallerUnauthorized";
   const ERROR_NAME_CASHIER_HOOK_INDEX_UNEXPECTED = "CreditAgent_CashierHookIndexUnexpected";
   const ERROR_NAME_CONFIGURING_PROHIBITED = "CreditAgent_ConfiguringProhibited";
-  const ERROR_NAME_CONTRACT_NOT_CONFIGURED = "CreditAgent_ContractNotConfigured";
+  const ERROR_NAME_CONTRACT_UNCONFIGURED = "CreditAgent_ContractUnconfigured";
   const ERROR_NAME_CREDIT_REQUEST_STATUS_INAPPROPRIATE = "CreditAgent_CreditRequestStatusInappropriate";
   const ERROR_NAME_INPUT_ARRAYS_INVALID = "CreditAgentCapybaraV1_InputArraysInvalid";
   const ERROR_NAME_LOAN_AMOUNT_ZERO = "CreditAgentCapybaraV1_LoanAmountZero";
   const ERROR_NAME_LOAN_DURATION_ZERO = "CreditAgentCapybaraV1_LoanDurationZero";
   const ERROR_NAME_PROGRAM_ID_ZERO = "CreditAgentCapybaraV1_ProgramIdZero";
   const ERROR_NAME_SAFE_CAST_OVERFLOWED_UINT_DOWNCAST = "SafeCastOverflowedUintDowncast";
-  const ERROR_NAME_TX_ID_ZERO = "CreditAgent_TxIdZero";
+  const ERROR_NAME_TRANSACTION_ID_ZERO = "CreditAgent_TransactionIdZero";
   const ERROR_NAME_LENDING_MARKET_INCOMPATIBLE = "CreditAgent_LendingMarketIncompatible";
   const ERROR_NAME_IMPLEMENTATION_ADDRESS_INVALID = "CreditAgentCapybaraV1_ImplementationAddressInvalid";
 
@@ -425,7 +425,7 @@ describe("Contract 'CreditAgentCapybaraV1'", () => {
         await proveTx(creditAgent.setCashier(ADDRESS_ZERO));
 
         await expect(initiateOrdinaryCredit(creditAgent))
-          .to.be.revertedWithCustomError(creditAgent, ERROR_NAME_CONTRACT_NOT_CONFIGURED);
+          .to.be.revertedWithCustomError(creditAgent, ERROR_NAME_CONTRACT_UNCONFIGURED);
       });
 
       it("The 'LendingMarket' contract address is not configured", async () => {
@@ -433,7 +433,7 @@ describe("Contract 'CreditAgentCapybaraV1'", () => {
         await proveTx(creditAgent.setLendingMarket(ADDRESS_ZERO));
 
         await expect(initiateOrdinaryCredit(creditAgent))
-          .to.be.revertedWithCustomError(creditAgent, ERROR_NAME_CONTRACT_NOT_CONFIGURED);
+          .to.be.revertedWithCustomError(creditAgent, ERROR_NAME_CONTRACT_UNCONFIGURED);
       });
 
       it("The provided 'txId' value is zero", async () => {
@@ -441,7 +441,7 @@ describe("Contract 'CreditAgentCapybaraV1'", () => {
         const credit = defineCredit({});
 
         await expect(initiateOrdinaryCredit(creditAgent, { txId: TX_ID_ZERO, credit }))
-          .to.be.revertedWithCustomError(creditAgent, ERROR_NAME_TX_ID_ZERO);
+          .to.be.revertedWithCustomError(creditAgent, ERROR_NAME_TRANSACTION_ID_ZERO);
       });
 
       it("The provided borrower address is zero", async () => {
@@ -596,7 +596,7 @@ describe("Contract 'CreditAgentCapybaraV1'", () => {
       const { creditAgent } = await setUpFixture(deployAndConfigureContracts);
 
       await expect(connect(creditAgent, manager).revokeOrdinaryCredit(TX_ID_ZERO))
-        .to.be.revertedWithCustomError(creditAgent, ERROR_NAME_TX_ID_ZERO);
+        .to.be.revertedWithCustomError(creditAgent, ERROR_NAME_TRANSACTION_ID_ZERO);
     });
 
     it("Is reverted if the credit does not exist", async () => {
@@ -1092,7 +1092,7 @@ describe("Contract 'CreditAgentCapybaraV1'", () => {
         await proveTx(creditAgent.setCashier(ADDRESS_ZERO));
 
         await expect(initiateInstallmentCredit(creditAgent))
-          .to.be.revertedWithCustomError(creditAgent, ERROR_NAME_CONTRACT_NOT_CONFIGURED);
+          .to.be.revertedWithCustomError(creditAgent, ERROR_NAME_CONTRACT_UNCONFIGURED);
       });
 
       it("The 'LendingMarket' contract address is not configured", async () => {
@@ -1100,7 +1100,7 @@ describe("Contract 'CreditAgentCapybaraV1'", () => {
         await proveTx(creditAgent.setLendingMarket(ADDRESS_ZERO));
 
         await expect(initiateInstallmentCredit(creditAgent))
-          .to.be.revertedWithCustomError(creditAgent, ERROR_NAME_CONTRACT_NOT_CONFIGURED);
+          .to.be.revertedWithCustomError(creditAgent, ERROR_NAME_CONTRACT_UNCONFIGURED);
       });
 
       it("The provided 'txId' value is zero", async () => {
@@ -1108,7 +1108,7 @@ describe("Contract 'CreditAgentCapybaraV1'", () => {
         const credit = defineInstallmentCredit({});
 
         await expect(initiateInstallmentCredit(creditAgent, { txId: TX_ID_ZERO, credit }))
-          .to.be.revertedWithCustomError(creditAgent, ERROR_NAME_TX_ID_ZERO);
+          .to.be.revertedWithCustomError(creditAgent, ERROR_NAME_TRANSACTION_ID_ZERO);
       });
 
       it("The provided borrower address is zero", async () => {
@@ -1324,7 +1324,7 @@ describe("Contract 'CreditAgentCapybaraV1'", () => {
       const { creditAgent } = await setUpFixture(deployAndConfigureContracts);
 
       await expect(connect(creditAgent, manager).revokeInstallmentCredit(TX_ID_ZERO))
-        .to.be.revertedWithCustomError(creditAgent, ERROR_NAME_TX_ID_ZERO);
+        .to.be.revertedWithCustomError(creditAgent, ERROR_NAME_TRANSACTION_ID_ZERO);
     });
 
     it("Is reverted if the credit does not exist", async () => {

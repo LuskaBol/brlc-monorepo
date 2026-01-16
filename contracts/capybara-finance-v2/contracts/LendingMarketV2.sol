@@ -48,7 +48,7 @@ contract LendingMarketV2 is
      */
     modifier onlySelf() {
         if (_msgSender() != address(this)) {
-            revert LendingMarketV2_UnauthorizedCallContext();
+            revert LendingMarketV2_CallContextUnauthorized();
         }
         _;
     }

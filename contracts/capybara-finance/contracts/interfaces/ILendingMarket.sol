@@ -674,67 +674,85 @@ interface ILendingMarketConfiguration {
  * @dev Defines the custom errors used in the lending market contract.
  */
 interface ILendingMarketErrors {
+    /// @dev Thrown when a zero address is provided.
+    error LendingMarket_AddressZero();
+
+    /// @dev Thrown when the provided amount is invalid.
+    error LendingMarket_AmountInvalid();
+
+    /// @dev Thrown when the configuration is already applied.
+    error LendingMarket_AlreadyConfigured();
+
+    /// @dev Thrown when array lengths do not match each other.
+    error LendingMarket_ArrayLengthMismatch();
+
+    /// @dev Thrown when the provided address does not belong to a contract of expected type.
+    error LendingMarket_ContractAddressInvalid();
+
+    /// @dev Thrown if the provided new implementation address is not of a lending market contract.
+    error LendingMarket_ImplementationAddressInvalid();
+
     /// @dev Thrown when the addon treasury address is zero.
-    error AddonTreasuryAddressZero();
+    error LendingMarket_AddonTreasuryAddressZero();
 
     /// @dev Thrown when the loan ID exceeds the maximum allowed value.
-    error LoanIdExcess();
+    error LendingMarket_LoanIdExcess();
 
     /// @dev Thrown when the loan does not exist.
-    error LoanNotExist();
+    error LendingMarket_LoanNonexistent();
 
     /// @dev Thrown when the loan is not frozen.
-    error LoanNotFrozen();
+    error LendingMarket_LoanNotFrozen();
 
     /// @dev Thrown when the loan is already repaid.
-    error LoanAlreadyRepaid();
+    error LendingMarket_LoanAlreadyRepaid();
 
     /// @dev Thrown when the loan is already frozen.
-    error LoanAlreadyFrozen();
+    error LendingMarket_LoanAlreadyFrozen();
 
     /**
      * @dev Thrown when the loan type according to the provided ID does not match the expected one.
      * @param actualType The actual type of the loan.
      * @param expectedType The expected type of the loan.
      */
-    error LoanTypeUnexpected(Loan.Type actualType, Loan.Type expectedType);
+    error LendingMarket_LoanTypeUnexpected(Loan.Type actualType, Loan.Type expectedType);
 
     /// @dev Thrown when provided interest rate is inappropriate.
-    error InappropriateInterestRate();
+    error LendingMarket_InterestRateInappropriate();
 
     /// @dev Thrown when provided loan duration is inappropriate.
-    error InappropriateLoanDuration();
+    error LendingMarket_LoanDurationInappropriate();
 
     /// @dev Thrown when the credit line is not configured for the provided lending program.
-    error ProgramCreditLineNotConfigured();
+    error LendingMarket_ProgramCreditLineUnconfigured();
 
     /// @dev Thrown when the liquidity pool is not configured for the provided lending program.
-    error ProgramLiquidityPoolNotConfigured();
+    error LendingMarket_ProgramLiquidityPoolUnconfigured();
 
     /// @dev Thrown when the program does not exist.
-    error ProgramNotExist();
+    error LendingMarket_ProgramNonexistent();
 
     /// @dev Thrown when the lending program ID exceeds the maximum allowed value.
-    error ProgramIdExcess();
+    error LendingMarket_ProgramIdExcess();
 
     /// @dev Thrown when the provided duration array is invalid.
-    error DurationArrayInvalid();
+    error LendingMarket_DurationArrayInvalid();
 
     /// @dev Thrown when the installment count exceeds the maximum allowed value.
-    error InstallmentCountExcess();
+    error LendingMarket_InstallmentCountExcess();
 
     /// @dev Thrown when the provided repayment timestamp is invalid.
-    error RepaymentTimestampInvalid();
+    error LendingMarket_RepaymentTimestampInvalid();
 
     /// @dev Thrown when the provided tracked timestamp is invalid, e.g. it is earlier than the loan start timestamp.
-    error TrackedTimestampInvalid();
+    error LendingMarket_TrackedTimestampInvalid();
 
     /**
      * @dev Thrown when the penalty interest rate is less than the primary interest rate.
      *
      * See details about conditions for the penalty interest rate in the comments for the {Loan} struct.
      */
-    error PenaltyInterestRateBelowPrimary();
+    error LendingMarket_PenaltyInterestRateBelowPrimary();
 
     /**
      * @dev Thrown when the penalty interest rate is non-zero before the due date.
@@ -749,7 +767,7 @@ interface ILendingMarketErrors {
      * - then execute the protected operation,
      * - then set the penalty interest rate back to the original value or a corrected one.
      */
-    error PenaltyInterestRateNonZeroBeforeDue();
+    error LendingMarket_PenaltyInterestRateNonZeroBeforeDue();
 }
 
 /**

@@ -424,7 +424,7 @@ interface ICashierErrors {
     error Cashier_ContractNotShard();
 
     /// @dev The provided address of the callable contract with the hook function is non-zero but must be.
-    error Cashier_HookCallableContractAddressNonZero();
+    error Cashier_HookCallableContractAddressNonzero();
 
     /// @dev The provided address of the callable contract with the hook function is zero but must not be.
     error Cashier_HookCallableContractAddressZero();
@@ -466,7 +466,7 @@ interface ICashierErrors {
     error Cashier_TokenMintingFailure();
 
     /// @dev Thrown if the provided off-chain transaction identifier is zero.
-    error Cashier_TxIdZero();
+    error Cashier_TransactionIdZero();
 }
 
 /**

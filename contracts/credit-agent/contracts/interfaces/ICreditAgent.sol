@@ -261,7 +261,7 @@ interface ICreditAgentErrors is ICreditAgentTypes {
     error CreditAgent_ConfiguringProhibited();
 
     /// @dev This agent contract is not configured yet.
-    error CreditAgent_ContractNotConfigured();
+    error CreditAgent_ContractUnconfigured();
 
     /**
      * @dev The related credit has inappropriate status to execute the requested operation.
@@ -271,7 +271,7 @@ interface ICreditAgentErrors is ICreditAgentTypes {
     error CreditAgent_CreditRequestStatusInappropriate(bytes32 txId, CreditRequestStatus status);
 
     /// @dev The zero off-chain transaction identifier has been passed as a function argument.
-    error CreditAgent_TxIdZero();
+    error CreditAgent_TransactionIdZero();
 
     /**
      * @dev The provided lending market contract is not a contract.

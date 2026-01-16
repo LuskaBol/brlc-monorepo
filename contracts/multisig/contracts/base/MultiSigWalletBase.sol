@@ -18,50 +18,6 @@ abstract contract MultiSigWalletBase is MultiSigWalletStorage, IMultiSigWallet, 
     /// @dev The minimum transaction expiration time.
     uint256 public constant MINIMUM_EXPIRATION_TIME = 60 minutes;
 
-    // ------------------ Errors ---------------------------------- //
-
-    /// @dev An unauthorized account called a function.
-    error UnauthorizedCaller();
-
-    /// @dev A transaction with the specified ID does not exist.
-    error TransactionNotExist();
-
-    /// @dev A transaction with the specified ID is already executed.
-    error TransactionAlreadyExecuted();
-
-    /// @dev A transaction with the specified ID must be approved by the caller.
-    error TransactionNotApproved();
-
-    /// @dev A transaction with the specified ID is already approved by the caller.
-    error TransactionAlreadyApproved();
-
-    /// @dev An empty array of addresses was passed when configuring the wallet owners.
-    error EmptyOwnersArray();
-
-    /// @dev The zero address was passed within the owners array when configuring the wallet owners.
-    error ZeroOwnerAddress();
-
-    /// @dev A duplicate address was passed within the owners array when configuring the wallet owners.
-    error DuplicateOwnerAddress();
-
-    /// @dev An invalid number of required approvals was passed when configuring the wallet owners.
-    error InvalidRequiredApprovals();
-
-    /// @dev The number of approvals for a given transaction is less than the required minimum.
-    error NotEnoughApprovals();
-
-    /// @dev A low-level call/transaction to the transaction receiver failed.
-    error InternalTransactionFailed(bytes data);
-
-    /// @dev A transaction with the specified ID has already expired.
-    error TransactionExpired();
-
-    /// @dev A transaction with the specified ID is on cooldown.
-    error CooldownNotEnded();
-
-    /// @dev An invalid amount of time was passed when configuring the expiration time.
-    error InvalidExpirationTime();
-
     // ------------------ Modifiers ------------------------------- //
 
     /**
@@ -69,7 +25,7 @@ abstract contract MultiSigWalletBase is MultiSigWalletStorage, IMultiSigWallet, 
      */
     modifier onlyOwner() {
         if (!_isOwner[msg.sender]) {
-            revert UnauthorizedCaller();
+            revert MultiSigWallet_CallerUnauthorized();
         }
         _;
     }
@@ -79,7 +35,7 @@ abstract contract MultiSigWalletBase is MultiSigWalletStorage, IMultiSigWallet, 
      */
     modifier onlySelfCall() {
         if (msg.sender != address(this)) {
-            revert UnauthorizedCaller();
+            revert MultiSigWallet_CallerUnauthorized();
         }
         _;
     }
@@ -313,7 +269,7 @@ abstract contract MultiSigWalletBase is MultiSigWalletStorage, IMultiSigWallet, 
      */
     function getTransaction(uint256 txId) external view returns (Transaction memory) {
         if (txId >= _transactions.length) {
-            revert TransactionNotExist();
+            revert MultiSigWallet_TransactionNonexistent();
         }
         return _transactions[txId];
     }
@@ -426,19 +382,19 @@ abstract contract MultiSigWalletBase is MultiSigWalletStorage, IMultiSigWallet, 
      */
     function _approve(uint256 txId) internal {
         if (txId >= _transactions.length) {
-            revert TransactionNotExist();
+            revert MultiSigWallet_TransactionNonexistent();
         }
         if (_approvalStatus[txId][msg.sender]) {
-            revert TransactionAlreadyApproved();
+            revert MultiSigWallet_TransactionAlreadyApproved();
         }
 
         Transaction memory transaction = _transactions[txId];
 
         if (transaction.executed) {
-            revert TransactionAlreadyExecuted();
+            revert MultiSigWallet_TransactionAlreadyExecuted();
         }
         if (transaction.expiration < block.timestamp) {
-            revert TransactionExpired();
+            revert MultiSigWallet_TransactionExpired();
         }
 
         _approvalCount[txId] += 1;
@@ -452,22 +408,22 @@ abstract contract MultiSigWalletBase is MultiSigWalletStorage, IMultiSigWallet, 
      */
     function _execute(uint256 txId) internal {
         if (txId >= _transactions.length) {
-            revert TransactionNotExist();
+            revert MultiSigWallet_TransactionNonexistent();
         }
 
         Transaction storage transaction = _transactions[txId];
 
         if (transaction.executed) {
-            revert TransactionAlreadyExecuted();
+            revert MultiSigWallet_TransactionAlreadyExecuted();
         }
         if (transaction.cooldown > block.timestamp) {
-            revert CooldownNotEnded();
+            revert MultiSigWallet_CooldownActive();
         }
         if (transaction.expiration < block.timestamp) {
-            revert TransactionExpired();
+            revert MultiSigWallet_TransactionExpired();
         }
         if (_approvalCount[txId] < _requiredApprovals) {
-            revert NotEnoughApprovals();
+            revert MultiSigWallet_ApprovalsInsufficient();
         }
 
         _beforeExecute(txId);
@@ -478,7 +434,7 @@ abstract contract MultiSigWalletBase is MultiSigWalletStorage, IMultiSigWallet, 
 
         (bool success, bytes memory data) = transaction.to.call{ value: transaction.value }(transaction.data);
         if (!success) {
-            revert InternalTransactionFailed(data);
+            revert MultiSigWallet_InternalTransactionFailed(data);
         }
     }
 
@@ -487,19 +443,19 @@ abstract contract MultiSigWalletBase is MultiSigWalletStorage, IMultiSigWallet, 
      */
     function _revoke(uint256 txId) internal {
         if (txId >= _transactions.length) {
-            revert TransactionNotExist();
+            revert MultiSigWallet_TransactionNonexistent();
         }
         if (!_approvalStatus[txId][msg.sender]) {
-            revert TransactionNotApproved();
+            revert MultiSigWallet_TransactionUnapproved();
         }
 
         Transaction storage transaction = _transactions[txId];
 
         if (transaction.executed) {
-            revert TransactionAlreadyExecuted();
+            revert MultiSigWallet_TransactionAlreadyExecuted();
         }
         if (transaction.expiration < block.timestamp) {
-            revert TransactionExpired();
+            revert MultiSigWallet_TransactionExpired();
         }
 
         _approvalCount[txId] -= 1;
@@ -513,13 +469,13 @@ abstract contract MultiSigWalletBase is MultiSigWalletStorage, IMultiSigWallet, 
      */
     function _configureOwners(address[] memory newOwners, uint16 newRequiredApprovals) internal {
         if (newOwners.length == 0) {
-            revert EmptyOwnersArray();
+            revert MultiSigWallet_OwnersArrayEmpty();
         }
         if (newRequiredApprovals == 0) {
-            revert InvalidRequiredApprovals();
+            revert MultiSigWallet_RequiredApprovalsInvalid();
         }
         if (newRequiredApprovals > newOwners.length) {
-            revert InvalidRequiredApprovals();
+            revert MultiSigWallet_RequiredApprovalsInvalid();
         }
 
         uint256 len;
@@ -536,10 +492,10 @@ abstract contract MultiSigWalletBase is MultiSigWalletStorage, IMultiSigWallet, 
             owner = newOwners[i];
 
             if (owner == address(0)) {
-                revert ZeroOwnerAddress();
+                revert MultiSigWallet_OwnerAddressZero();
             }
             if (_isOwner[owner]) {
-                revert DuplicateOwnerAddress();
+                revert MultiSigWallet_OwnerAddressDuplicate();
             }
 
             _isOwner[owner] = true;
@@ -558,7 +514,7 @@ abstract contract MultiSigWalletBase is MultiSigWalletStorage, IMultiSigWallet, 
      */
     function _configureExpirationTime(uint120 newExpirationTime) internal {
         if (newExpirationTime < MINIMUM_EXPIRATION_TIME) {
-            revert InvalidExpirationTime();
+            revert MultiSigWallet_ExpirationTimeInvalid();
         }
         _expirationTime = newExpirationTime;
         emit ConfigureExpirationTime(newExpirationTime);

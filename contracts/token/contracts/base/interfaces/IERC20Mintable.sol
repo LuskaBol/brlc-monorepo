@@ -3,11 +3,63 @@
 pragma solidity ^0.8.0;
 
 /**
+ * @title IERC20MintableErrors interface
+ * @author CloudWalk Inc. (See https://www.cloudwalk.io)
+ * @dev Defines the custom errors used in the ERC20Mintable contract.
+ */
+interface IERC20MintableErrors {
+    /// @dev The zero amount of tokens is passed during the mint operation.
+    error ERC20Mintable_MintAmountZero();
+
+    /// @dev The zero amount of tokens is passed during the burn operation.
+    error ERC20Mintable_BurnAmountZero();
+
+    /// @dev The zero amount of tokens is passed during the premint operation.
+    error ERC20Mintable_PremintAmountZero();
+
+    /// @dev The transfer amount exceeded the preminted (not available) amount.
+    error ERC20Mintable_PremintedAmountExcess();
+
+    /// @dev The same maximum count of pending premints is already configured.
+    error ERC20Mintable_MaxPendingPremintsCountAlreadyConfigured();
+
+    /// @dev The maximum number of pending premints has been reached.
+    error ERC20Mintable_MaxPendingPremintsLimitReached();
+
+    /// @dev The premint release timestamp must be in the future.
+    error ERC20Mintable_PremintReleaseTimePassed();
+
+    /// @dev The premint rescheduling with the provided parameters is already configured.
+    error ERC20Mintable_PremintReschedulingAlreadyConfigured();
+
+    /// @dev The target premint release timestamp for the premint rescheduling must be in the future.
+    error ERC20Mintable_PremintReschedulingTimePassed();
+
+    /// @dev The premint rescheduling leads to a rescheduling chain like A => B => C that is prohibited.
+    error ERC20Mintable_PremintReschedulingChain();
+
+    /// @dev The premint operation assumes changing of an existing premint, but it is not found.
+    error ERC20Mintable_PremintNonexistent();
+
+    /// @dev The premint operation assumes decreasing an existing premint amount but it is too small.
+    error ERC20Mintable_PremintAmountInsufficient();
+
+    /// @dev The existing premint has not been changed during the operation.
+    error ERC20Mintable_PremintUnchanged();
+
+    /// @dev The provided value cannot be cast to uint64 type.
+    error ERC20Mintable_Uint64ValueExcess(uint256 value);
+
+    /// @dev The amount of tokens to burn is greater than the total reserve supply.
+    error ERC20Mintable_ReserveSupplyInsufficient();
+}
+
+/**
  * @title IERC20Mintable interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev The interface of a token that supports mint and burn operations.
  */
-interface IERC20Mintable {
+interface IERC20Mintable is IERC20MintableErrors {
     // ------------------ Events ---------------------------------- //
 
     /**

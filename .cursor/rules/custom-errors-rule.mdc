@@ -1,0 +1,222 @@
+﻿---
+description: Custom error naming conventions for Solidity contracts
+globs: "*.sol"
+alwaysApply: false
+---
+
+# Custom Errors Naming Convention
+
+> Applicable to: `*.sol` files
+
+## Core Pattern
+
+All custom errors MUST follow the namespaced pattern:
+
+```
+ContractName_SubjectState
+```
+
+**Example:**
+```solidity
+error LendingMarket_LoanNonexistent();
+error CardPaymentProcessor_PaymentAlreadyExistent();
+error CashbackController_BalanceInsufficient();
+```
+
+## Why Namespacing
+
+Blockscout Explorer only shows error names without contract context. Prefixing with contract name enables immediate identification of the error source in failed transactions.
+
+## Naming Rules
+
+### 1. Always Use Contract Prefix
+Apply to **ALL** contracts without exception:
+- Production contracts
+- Mock contracts (`*Mock.sol`)
+- Harness contracts (`Harness*.sol`)
+- Test helper contracts
+
+**Only exception:** Legacy contracts in `token/contracts/legacy/` (backward compatibility).
+
+### 2. Use Active Voice (State-Based)
+Describe **what the subject IS**, not what happened.
+
+| Correct | Incorrect |
+|---------|-----------|
+| `CallerUnauthorized` | `AuthorizationDenied` |
+| `BalanceInsufficient` | `TransferFailed` |
+| `AmountInvalid` | `ValidationFailed` |
+
+### 3. Use Present Tense / State
+Errors describe the **current invalid state** at revert time.
+
+| Correct | Incorrect |
+|---------|-----------|
+| `BalanceInsufficient` | `BalanceExceeded` |
+| `LimitExceeds` | `LimitExceeded` |
+| `AddressInvalid` | `AddressWasInvalid` |
+
+### 4. Use Adjectives Over Verbs
+Prefer state adjectives over action verbs.
+
+| Correct | Incorrect |
+|---------|-----------|
+| `OperationNonexistent` | `OperationFailed` |
+| `TokenInvalid` | `TokenRejected` |
+| `AmountInsufficient` | `AmountDepleted` |
+
+**Exception:** Use verbs only for true action failures: `CallFailed`, `TransferReverted`.
+
+### 5. Use Single-Word Antonyms for Negation
+Avoid `Not...` prefixes; use concise antonyms.
+
+| Correct | Incorrect |
+|---------|-----------|
+| `Nonexistent` | `NotFound`, `DoesNotExist` |
+| `Unauthorized` | `NotAuthorized`, `NotAllowed` |
+| `Unconfigured` | `NotConfigured` |
+| `Insufficient` | `NotEnough` |
+
+**Exception for verb-derived states:** When "un-" implies a state *reversal* (was X, now not X), keep `Not...` prefix to avoid semantic confusion.
+
+| Keep `Not...` | Avoid | Reason |
+|---------------|-------|--------|
+| `LoanNotFrozen` | `LoanUnfrozen` | "Unfrozen" implies thawed (was frozen) |
+| `AccountNotLocked` | `AccountUnlocked` | "Unlocked" implies was locked |
+| `ContractNotPaused` | `ContractUnpaused` | "Unpaused" implies was paused |
+
+**When "Un-" is safe:** Use "un-" only when it means "lacking" rather than "reversed":
+- `Unauthorized` = lacking authorization âœ“
+- `Unconfigured` = lacking configuration âœ“
+- `Unapproved` = lacking approval âœ“
+
+**Exception when no antonym exists:** Keep `Not...` when there's no standard English single-word alternative.
+
+| Keep `Not...` | Avoid | Reason |
+|-----------------|-------|--------|
+| `AddressNotContract` | `AddressNoncontract` | "Noncontract" is not a real word |
+
+### 6. Subject First, Then State
+Pattern: `Subject` + `Adjective/State`
+
+| Correct | Incorrect |
+|---------|-----------|
+| `BalanceInsufficient` | `InsufficientBalance` |
+| `AddressZero` | `ZeroAddress` |
+| `TokenInvalid` | `InvalidToken` |
+| `CallerUnauthorized` | `UnauthorizedCaller` |
+
+### 7. Use `Already` Prefix for Duplicate States
+
+| Correct | Incorrect |
+|---------|-----------|
+| `AlreadyConfigured` | `ConfiguredAlready` |
+| `AlreadyExists` | `ExistsAlready`, `Duplicate` |
+| `AlreadyApproved` | `ApprovedAlready` |
+
+### 8. Always Use Full Words
+No abbreviations except universally understood ones (`Id`).
+
+| Correct | Incorrect |
+|---------|-----------|
+| `TransactionNonexistent` | `TxNonexistent` |
+| `AddressZero` | `AddrZero` |
+| `AmountInsufficient` | `AmtInsufficient` |
+
+### 9. Prefer Specific Over Generic
+When multiple similar parameters exist, be specific.
+
+| Context | Correct |
+|---------|---------|
+| Single address param | `AddressZero()` |
+| Multiple address params | `RecipientAddressZero()`, `SenderAddressZero()` |
+| Single amount | `AmountInvalid()` |
+| Multiple amounts | `BorrowAmountInvalid()`, `RepayAmountInvalid()` |
+
+### 10. Prefer Separate Errors
+When semantically different conditions exist, use separate errors for clarity.
+
+```solidity
+// Preferred - separate errors
+error MyContract_RecipientAddressZero();
+error MyContract_SenderAddressZero();
+
+// Acceptable - combined with parameter (when truly same category)
+error MyContract_AddressZero(address account);
+```
+
+## Error Parameters
+
+Include parameters only for **debugging-critical information**:
+
+```solidity
+// Include: helps diagnose without reading source
+error MyContract_CallerUnauthorized(address caller);
+error MyContract_BalanceInsufficient(uint256 required, uint256 available);
+error MyContract_ArrayIndexOutOfBounds(uint256 index, uint256 length);
+
+// Omit: obvious from context or not helpful
+error MyContract_AlreadyInitialized(); // no params needed
+error MyContract_ContractPaused();      // no params needed
+```
+
+**When to include parameters:**
+- Addresses: for authorization/permission errors
+- Amounts: for balance/limit errors
+- Indices: for array/bounds errors
+- IDs: for lookup failures
+
+## Standard Vocabulary
+
+| Condition | Standard Term |
+|-----------|---------------|
+| Value is zero | `Zero` |
+| Validation failed | `Invalid` |
+| Does not exist | `Nonexistent` |
+| No permission | `Unauthorized` |
+| Not enough | `Insufficient` |
+| Already done | `Already...` |
+| Over limit | `Excess` |
+| Wrong type/mismatch | `Mismatch` |
+| Blocked/stopped | `Prohibited` |
+
+## Define Errors in Interfaces
+
+For production contracts, define errors in the interface file:
+
+```solidity
+// IMyContract.sol
+interface IMyContract {
+    error MyContract_AddressZero();
+    error MyContract_AmountInvalid();
+    error MyContract_CallerUnauthorized(address caller);
+}
+```
+
+For mocks/harnesses without interfaces, define directly in the contract.
+
+## Do NOT Modify
+
+**OpenZeppelin/External Library Errors:**
+- `AccessControlUnauthorizedAccount`
+- `EnforcedPause`
+- `ERC20InsufficientBalance`
+- `OwnableInvalidOwner`
+
+**Legacy Contracts:** `token/contracts/legacy/`
+
+## Checklist
+
+- [ ] Starts with `ContractName_`
+- [ ] Uses active voice (state-based)
+- [ ] Uses present tense
+- [ ] Uses adjective over verb
+- [ ] Uses single-word antonym (not `Not...`) - except verb-derived reversals
+- [ ] Subject comes before state
+- [ ] Full words (no abbreviations)
+- [ ] Specific when multiple similar params exist
+- [ ] Parameters for debugging-critical info only
+- [ ] Defined in interface (production contracts)
+- [ ] Test files updated with new error name
+
+

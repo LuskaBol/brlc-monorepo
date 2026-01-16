@@ -202,7 +202,7 @@ contract BalanceFreezer is
         uint256 amount
     ) internal {
         if (txId == 0) {
-            revert BalanceFreezer_TxIdZero();
+            revert BalanceFreezer_TransactionIdZero();
         }
         if (amount > type(uint64).max) {
             revert BalanceFreezer_AmountExcess(amount);

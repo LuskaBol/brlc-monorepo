@@ -1,3 +1,28 @@
+# Unreleased
+
+## Main Changes
+
+- Applied custom error naming convention. Errors now follow the `ContractName_SubjectState` pattern.
+
+### Error Renames
+
+**BlocklistableUpgradeable:**
+- `BlocklistedAccount` → `Blocklistable_BlocklistedAccount`
+
+**CashbackDistributor:**
+- `CashbackAlreadyDisabled` → `CashbackDistributor_CashbackAlreadyDisabled`
+- `CashbackAlreadyEnabled` → `CashbackDistributor_CashbackAlreadyEnabled`
+- `ZeroExternalId` → `CashbackDistributor_ExternalIdZero`
+- `ZeroRecipientAddress` → `CashbackDistributor_RecipientAddressZero`
+- `ZeroTokenAddress` → `CashbackDistributor_TokenAddressZero`
+- `CashbackVaultUnchanged` → `CashbackDistributor_CashbackVaultUnchanged`
+- `CashbackVaultInvalid` → `CashbackDistributor_CashbackVaultInvalid`
+- `CashbackVaultTokenMismatch` → `CashbackDistributor_CashbackVaultTokenMismatch`
+
+## Migration
+
+No special actions required. Update any off-chain code that catches these errors.
+
 # 1.5.0
 
 ## Main changes

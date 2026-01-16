@@ -245,7 +245,7 @@ interface ICashbackControllerConfiguration is ICashbackControllerTypes {
  */
 interface ICashbackControllerErrors {
     /// @dev The payment cashback does not exist.
-    error CashbackController_CashbackDoesNotExist();
+    error CashbackController_CashbackNonexistent();
 
     /// @dev The provided cashback vault contract is not a valid one.
     error CashbackController_CashbackVaultInvalid();
@@ -269,7 +269,7 @@ interface ICashbackControllerErrors {
     error CashbackController_TreasuryAllowanceZero();
 
     /// @dev The cashback treasury address is not configured.
-    error CashbackController_TreasuryNotConfigured();
+    error CashbackController_TreasuryUnconfigured();
 
     /// @dev The cashback treasury address is the same as the previously set one.
     error CashbackController_TreasuryUnchanged();

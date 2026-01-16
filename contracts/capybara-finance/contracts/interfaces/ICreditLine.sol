@@ -170,26 +170,44 @@ interface ICreditLineHooks {
  * @dev Defines the custom errors used in the credit line contract.
  */
 interface ICreditLineErrors {
+    /// @dev Thrown when the caller is not authorized.
+    error CreditLine_CallerUnauthorized();
+
+    /// @dev Thrown when a zero address is provided.
+    error CreditLine_AddressZero();
+
+    /// @dev Thrown when the provided amount is invalid.
+    error CreditLine_AmountInvalid();
+
+    /// @dev Thrown when array lengths do not match each other.
+    error CreditLine_ArrayLengthMismatch();
+
+    /// @dev Thrown when the provided address does not belong to a contract of expected type.
+    error CreditLine_ContractAddressInvalid();
+
+    /// @dev Thrown if the provided new implementation address is not of a credit line contract.
+    error CreditLine_ImplementationAddressInvalid();
+
     /// @dev Thrown when the credit line configuration is invalid.
-    error InvalidCreditLineConfiguration();
+    error CreditLine_CreditLineConfigurationInvalid();
 
     /// @dev Thrown when the borrower configuration is invalid.
-    error InvalidBorrowerConfiguration();
+    error CreditLine_BorrowerConfigurationInvalid();
 
     /// @dev Thrown when the borrower configuration has expired.
-    error BorrowerConfigurationExpired();
+    error CreditLine_BorrowerConfigurationExpired();
 
     /// @dev Thrown when the loan duration is out of range.
-    error LoanDurationOutOfRange();
+    error CreditLine_LoanDurationOutOfRange();
 
     /// @dev Thrown when another loan is requested by an account but only one active loan is allowed.
-    error LimitViolationOnSingleActiveLoan();
+    error CreditLine_LimitViolationOnSingleActiveLoan();
 
     /// @dev Thrown when the total borrowed amount of active loans exceeds the maximum borrowed amount of a single loan.
-    error LimitViolationOnTotalActiveLoanAmount(uint256 newTotalActiveLoanAmount);
+    error CreditLine_LimitViolationOnTotalActiveLoanAmount(uint256 newTotalActiveLoanAmount);
 
     /// @dev Thrown when the borrower state counters or amounts would overflow their maximum values.
-    error BorrowerStateOverflow();
+    error CreditLine_BorrowerStateOverflow();
 }
 
 /**

@@ -277,12 +277,12 @@ describe("Contract 'BalanceTracker'", async () => {
   const ERROR_MESSAGE_OWNABLE_CALLER_IS_NOT_THE_OWNER = "Ownable: caller is not the owner";
 
   // Errors of the contract under test
-  const ERROR_NAME_FROM_DAY_PRIOR_INIT_DAY = "FromDayPriorInitDay";
-  const ERROR_NAME_TO_DAY_PRIOR_FROM_DAY = "ToDayPriorFromDay";
-  const ERROR_NAME_SAFE_CAST_OVERFLOW_UINT16 = "SafeCastOverflowUint16";
-  const ERROR_NAME_SAFE_CAST_OVERFLOW_UINT240 = "SafeCastOverflowUint240";
-  const ERROR_NAME_UNAUTHORIZED_CALLER = "UnauthorizedCaller";
-  const ERROR_NAME_UNAUTHORIZED_HARNESS_ADMIN = "UnauthorizedHarnessAdmin";
+  const ERROR_NAME_FROM_DAY_PRIOR_INIT_DAY = "BalanceTracker_FromDayPriorInitDay";
+  const ERROR_NAME_TO_DAY_PRIOR_FROM_DAY = "BalanceTracker_ToDayPriorFromDay";
+  const ERROR_NAME_SAFE_CAST_OVERFLOW_UINT16 = "BalanceTracker_SafeCastOverflowUint16";
+  const ERROR_NAME_SAFE_CAST_OVERFLOW_UINT240 = "BalanceTracker_SafeCastOverflowUint240";
+  const ERROR_NAME_CALLER_UNAUTHORIZED = "BalanceTracker_CallerUnauthorized";
+  const ERROR_NAME_UNAUTHORIZED_HARNESS_ADMIN = "HarnessAdministrable_UnauthorizedAdmin";
 
   const EXPECTED_VERSION: Version = {
     major: 1,
@@ -536,7 +536,7 @@ describe("Contract 'BalanceTracker'", async () => {
       it("Is called not by a token", async () => {
         const context: TestContext = await initTestContext();
         await expect(connect(context.balanceTracker, attacker).afterTokenTransfer(user1.address, user2.address, 123))
-          .to.be.revertedWithCustomError(context.balanceTracker, ERROR_NAME_UNAUTHORIZED_CALLER)
+          .to.be.revertedWithCustomError(context.balanceTracker, ERROR_NAME_CALLER_UNAUTHORIZED)
           .withArgs(attacker.address);
       });
 
@@ -592,7 +592,7 @@ describe("Contract 'BalanceTracker'", async () => {
       it("Is called not by a token", async () => {
         const context: TestContext = await initTestContext();
         await expect(connect(context.balanceTracker, attacker).beforeTokenTransfer(user1.address, user2.address, 123))
-          .to.be.revertedWithCustomError(context.balanceTracker, ERROR_NAME_UNAUTHORIZED_CALLER)
+          .to.be.revertedWithCustomError(context.balanceTracker, ERROR_NAME_CALLER_UNAUTHORIZED)
           .withArgs(attacker.address);
       });
     });

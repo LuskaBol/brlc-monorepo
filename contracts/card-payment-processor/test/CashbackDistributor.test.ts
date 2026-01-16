@@ -202,14 +202,14 @@ describe("Contract 'CashbackDistributor'", () => {
   const ERROR_MESSAGE_ERC20_INSUFFICIENT_ALLOWANCE = "ERC20: insufficient allowance";
 
   // Errors of the contract under test
-  const ERROR_NAME_CASHBACK_ALREADY_DISABLED = "CashbackAlreadyDisabled";
-  const ERROR_NAME_CASHBACK_ALREADY_ENABLED = "CashbackAlreadyEnabled";
-  const ERROR_NAME_ZERO_EXTERNAL_ID = "ZeroExternalId";
-  const ERROR_NAME_ZERO_RECIPIENT_ADDRESS = "ZeroRecipientAddress";
-  const ERROR_NAME_ZERO_TOKEN_ADDRESS = "ZeroTokenAddress";
-  const ERROR_NAME_CASHBACK_VAULT_INVALID = "CashbackVaultInvalid";
-  const ERROR_NAME_CASHBACK_VAULT_UNCHANGED = "CashbackVaultUnchanged";
-  const ERROR_NAME_CASHBACK_VAULT_TOKEN_MISMATCH = "CashbackVaultTokenMismatch";
+  const ERROR_NAME_CASHBACK_ALREADY_DISABLED = "CashbackDistributor_CashbackAlreadyDisabled";
+  const ERROR_NAME_CASHBACK_ALREADY_ENABLED = "CashbackDistributor_CashbackAlreadyEnabled";
+  const ERROR_NAME_EXTERNAL_ID_ZERO = "CashbackDistributor_ExternalIdZero";
+  const ERROR_NAME_RECIPIENT_ADDRESS_ZERO = "CashbackDistributor_RecipientAddressZero";
+  const ERROR_NAME_TOKEN_ADDRESS_ZERO = "CashbackDistributor_TokenAddressZero";
+  const ERROR_NAME_CASHBACK_VAULT_INVALID = "CashbackDistributor_CashbackVaultInvalid";
+  const ERROR_NAME_CASHBACK_VAULT_UNCHANGED = "CashbackDistributor_CashbackVaultUnchanged";
+  const ERROR_NAME_CASHBACK_VAULT_TOKEN_MISMATCH = "CashbackDistributor_CashbackVaultTokenMismatch";
 
   const OWNER_ROLE: string = ethers.id("OWNER_ROLE");
   const GRANTOR_ROLE: string = ethers.id("GRANTOR_ROLE");
@@ -658,7 +658,7 @@ describe("Contract 'CashbackDistributor'", () => {
 
     it("Is reverted if the token address is zero", async () => {
       await expect(cashbackDistributor.setCashbackVault(ZERO_ADDRESS, getAddress(cashbackVaults[1][0])))
-        .to.be.revertedWithCustomError(cashbackDistributor, ERROR_NAME_ZERO_TOKEN_ADDRESS);
+        .to.be.revertedWithCustomError(cashbackDistributor, ERROR_NAME_TOKEN_ADDRESS_ZERO);
     });
   });
 
@@ -983,7 +983,7 @@ describe("Contract 'CashbackDistributor'", () => {
                 cashback.recipient.address,
                 cashback.requestedAmount,
               ),
-            ).to.be.revertedWithCustomError(cashbackDistributor, ERROR_NAME_ZERO_TOKEN_ADDRESS);
+            ).to.be.revertedWithCustomError(cashbackDistributor, ERROR_NAME_TOKEN_ADDRESS_ZERO);
           });
 
           it("The recipient address is zero", async () => {
@@ -996,7 +996,7 @@ describe("Contract 'CashbackDistributor'", () => {
                 ZERO_ADDRESS,
                 cashback.requestedAmount,
               ),
-            ).to.be.revertedWithCustomError(cashbackDistributor, ERROR_NAME_ZERO_RECIPIENT_ADDRESS);
+            ).to.be.revertedWithCustomError(cashbackDistributor, ERROR_NAME_RECIPIENT_ADDRESS_ZERO);
           });
 
           it("The cashback external ID is zero", async () => {
@@ -1010,7 +1010,7 @@ describe("Contract 'CashbackDistributor'", () => {
                 cashback.recipient.address,
                 cashback.requestedAmount,
               ),
-            ).to.be.revertedWithCustomError(cashbackDistributor, ERROR_NAME_ZERO_EXTERNAL_ID);
+            ).to.be.revertedWithCustomError(cashbackDistributor, ERROR_NAME_EXTERNAL_ID_ZERO);
           });
         });
       });

@@ -167,7 +167,7 @@ contract CardPaymentProcessor is
      */
     function initialize(address token_) external initializer {
         if (token_ == address(0)) {
-            revert ZeroTokenAddress();
+            revert CardPaymentProcessor_TokenAddressZero();
         }
 
         __AccessControlExt_init_unchained();
@@ -197,7 +197,7 @@ contract CardPaymentProcessor is
         address oldCashOutAccount = _cashOutAccount;
 
         if (newCashOutAccount == oldCashOutAccount) {
-            revert CashOutAccountUnchanged();
+            revert CardPaymentProcessor_CashOutAccountUnchanged();
         }
 
         _cashOutAccount = newCashOutAccount;
@@ -278,10 +278,10 @@ contract CardPaymentProcessor is
         int16 cashbackRateInPermil
     ) external whenNotPaused onlyRole(EXECUTOR_ROLE) {
         if (account == address(0)) {
-            revert ZeroAccount();
+            revert CardPaymentProcessor_AccountAddressZero();
         }
         if (cashbackRateInPermil > 0 && uint16(cashbackRateInPermil) > MAX_CASHBACK_RATE_IN_PERMIL) {
-            revert CashbackRateExcess();
+            revert CardPaymentCashback_CashbackRateExcess();
         }
         MakingOperation memory operation = MakingOperation({
             sender: _msgSender(),
@@ -356,7 +356,7 @@ contract CardPaymentProcessor is
      */
     function clearPayments(bytes16[] memory authorizationIds) external whenNotPaused onlyRole(EXECUTOR_ROLE) {
         if (authorizationIds.length == 0) {
-            revert EmptyAuthorizationIdsArray();
+            revert CardPaymentProcessor_AuthorizationIdsArrayEmpty();
         }
 
         uint256 cumulativeAmount = 0;
@@ -399,7 +399,7 @@ contract CardPaymentProcessor is
      */
     function unclearPayments(bytes16[] memory authorizationIds) external whenNotPaused onlyRole(EXECUTOR_ROLE) {
         if (authorizationIds.length == 0) {
-            revert EmptyAuthorizationIdsArray();
+            revert CardPaymentProcessor_AuthorizationIdsArrayEmpty();
         }
 
         uint256 cumulativeAmount = 0;
@@ -447,7 +447,7 @@ contract CardPaymentProcessor is
         bytes32 parentTxHash
     ) external whenNotPaused onlyRole(EXECUTOR_ROLE) {
         if (_revocationLimit == 0) {
-            revert RevocationLimitReached(0);
+            revert CardPaymentProcessor_RevocationLimitReached(0);
         }
 
         _cancelPayment(authorizationId, correlationId, parentTxHash, PaymentStatus.Revoked);
@@ -482,7 +482,7 @@ contract CardPaymentProcessor is
      */
     function confirmPayments(bytes16[] memory authorizationIds) public whenNotPaused onlyRole(EXECUTOR_ROLE) {
         if (authorizationIds.length == 0) {
-            revert EmptyAuthorizationIdsArray();
+            revert CardPaymentProcessor_AuthorizationIdsArrayEmpty();
         }
 
         uint256 cumulativeAmount = 0;
@@ -552,7 +552,7 @@ contract CardPaymentProcessor is
      */
     function clearAndConfirmPayments(bytes16[] memory authorizationIds) external whenNotPaused onlyRole(EXECUTOR_ROLE) {
         if (authorizationIds.length == 0) {
-            revert EmptyAuthorizationIdsArray();
+            revert CardPaymentProcessor_AuthorizationIdsArrayEmpty();
         }
 
         uint256 cumulativeClearedAmount = 0;
@@ -615,7 +615,7 @@ contract CardPaymentProcessor is
         bytes16 correlationId
     ) external whenNotPaused onlyRole(EXECUTOR_ROLE) {
         if (account == address(0)) {
-            revert ZeroAccount();
+            revert CardPaymentProcessor_AccountAddressZero();
         }
         address cashOutAccount_ = _requireCashOutAccount();
         IERC20Upgradeable token = IERC20Upgradeable(_token);
@@ -638,10 +638,10 @@ contract CardPaymentProcessor is
         address oldCashbackDistributor = _cashbackDistributor;
 
         if (newCashbackDistributor == address(0)) {
-            revert CashbackDistributorZeroAddress();
+            revert CardPaymentCashback_CashbackDistributorAddressZero();
         }
         if (oldCashbackDistributor != address(0)) {
-            revert CashbackDistributorAlreadyConfigured();
+            revert CardPaymentCashback_CashbackDistributorAlreadyConfigured();
         }
 
         _cashbackDistributor = newCashbackDistributor;
@@ -663,10 +663,10 @@ contract CardPaymentProcessor is
     function setCashbackRate(uint16 newCashbackRateInPermil) external onlyRole(OWNER_ROLE) {
         uint16 oldCashbackRateInPermil = _cashbackRateInPermil;
         if (newCashbackRateInPermil == oldCashbackRateInPermil) {
-            revert CashbackRateUnchanged();
+            revert CardPaymentCashback_CashbackRateUnchanged();
         }
         if (newCashbackRateInPermil > MAX_CASHBACK_RATE_IN_PERMIL) {
-            revert CashbackRateExcess();
+            revert CardPaymentCashback_CashbackRateExcess();
         }
 
         _cashbackRateInPermil = newCashbackRateInPermil;
@@ -685,10 +685,10 @@ contract CardPaymentProcessor is
      */
     function enableCashback() external onlyRole(OWNER_ROLE) {
         if (_cashbackEnabled) {
-            revert CashbackAlreadyEnabled();
+            revert CardPaymentCashback_CashbackAlreadyEnabled();
         }
         if (_cashbackDistributor == address(0)) {
-            revert CashbackDistributorNotConfigured();
+            revert CardPaymentCashback_CashbackDistributorUnconfigured();
         }
 
         _cashbackEnabled = true;
@@ -706,7 +706,7 @@ contract CardPaymentProcessor is
      */
     function disableCashback() external onlyRole(OWNER_ROLE) {
         if (!_cashbackEnabled) {
-            revert CashbackAlreadyDisabled();
+            revert CardPaymentCashback_CashbackAlreadyDisabled();
         }
 
         _cashbackEnabled = false;
@@ -734,21 +734,21 @@ contract CardPaymentProcessor is
     ) external whenNotPaused onlyRole(EXECUTOR_ROLE) {
         address distributor = _cashbackDistributor;
         if (!_cashbackEnabled || distributor == address(0)) {
-            revert CashbackSendingNotConfigured();
+            revert CardPaymentCashback_CashbackSendingNotConfigured();
         }
         if (cashbackRateInPermil == 0) {
-            revert CashbackRateZero();
+            revert CardPaymentCashback_CashbackRateZero();
         }
         if (cashbackRateInPermil > 0 && uint256(cashbackRateInPermil) > uint256(MAX_CASHBACK_RATE_IN_PERMIL)) {
-            revert CashbackRateExcess();
+            revert CardPaymentCashback_CashbackRateExcess();
         }
         Payment storage payment = _payments[authorizationId];
         PaymentStatus status = payment.status;
         if (status != PaymentStatus.Uncleared && status != PaymentStatus.Cleared && status != PaymentStatus.Confirmed) {
-            revert InappropriatePaymentStatus(status);
+            revert CardPaymentProcessor_PaymentStatusInappropriate(status);
         }
         if (payment.cashbackRate != 0) {
-            revert CashbackResendingUnnecessary();
+            revert CardPaymentCashback_CashbackResendingUnnecessary();
         }
         uint256 accountBaseAmount = _defineAccountBaseAmount(payment.baseAmount, payment.subsidyLimit);
         uint256 sentAmount;
@@ -759,7 +759,7 @@ contract CardPaymentProcessor is
             int16(cashbackRateInPermil)
         );
         if (payment.cashbackRate == 0) {
-            revert CashbackResendingFailed();
+            revert CardPaymentCashback_CashbackResendingFailed();
         }
         payment.compensationAmount += sentAmount;
     }
@@ -873,19 +873,19 @@ contract CardPaymentProcessor is
      */
     function _makePayment(MakingOperation memory operation) internal {
         if (operation.authorizationId == 0) {
-            revert ZeroAuthorizationId();
+            revert CardPaymentProcessor_AuthorizationIdZero();
         }
 
         Payment storage payment = _payments[operation.authorizationId];
 
         PaymentStatus status = payment.status;
         if (status != PaymentStatus.Nonexistent && status != PaymentStatus.Revoked) {
-            revert PaymentAlreadyExists();
+            revert CardPaymentProcessor_PaymentAlreadyExistent();
         }
 
         uint8 revocationCounter = payment.revocationCounter;
         if (revocationCounter != 0 && revocationCounter >= _revocationLimit) {
-            revert RevocationLimitReached(_revocationLimit);
+            revert CardPaymentProcessor_RevocationLimitReached(_revocationLimit);
         }
 
         uint256 sumAmount = operation.baseAmount + operation.extraAmount;
@@ -971,7 +971,7 @@ contract CardPaymentProcessor is
         UpdatingOperationKind kind
     ) internal {
         if (authorizationId == 0) {
-            revert ZeroAuthorizationId();
+            revert CardPaymentProcessor_AuthorizationIdZero();
         }
 
         Payment storage payment = _payments[authorizationId];
@@ -984,13 +984,13 @@ contract CardPaymentProcessor is
         uint256 refundAmount = payment.refundAmount;
 
         if (status == PaymentStatus.Nonexistent) {
-            revert PaymentNotExist();
+            revert CardPaymentProcessor_PaymentNonexistent();
         }
         if (status != PaymentStatus.Uncleared) {
-            revert InappropriatePaymentStatus(status);
+            revert CardPaymentProcessor_PaymentStatusInappropriate(status);
         }
         if (refundAmount > newBaseAmount) {
-            revert InappropriateNewBasePaymentAmount();
+            revert CardPaymentProcessor_NewBasePaymentAmountInappropriate();
         }
         UpdatingOperation memory operation = _defineUpdatePaymentOperation(
             newBaseAmount,
@@ -1076,7 +1076,7 @@ contract CardPaymentProcessor is
         Payment storage payment
     ) internal view returns (UpdatingOperation memory) {
         if (payment.sponsor != address(0) && paymentRefundAmount != 0) {
-            revert SubsidizedPaymentWithNonZeroRefundAmount();
+            revert CardPaymentProcessor_SubsidizedPaymentWithNonZeroRefundAmount();
         }
         uint256 oldPaymentBaseAmount = payment.baseAmount;
         uint256 oldPaymentSumAmount = oldPaymentBaseAmount + payment.extraAmount;
@@ -1140,20 +1140,20 @@ contract CardPaymentProcessor is
      */
     function _clearPayment(bytes16 authorizationId) internal returns (uint256 totalAmount) {
         if (authorizationId == 0) {
-            revert ZeroAuthorizationId();
+            revert CardPaymentProcessor_AuthorizationIdZero();
         }
 
         Payment storage payment = _payments[authorizationId];
 
         PaymentStatus status = payment.status;
         if (status == PaymentStatus.Nonexistent) {
-            revert PaymentNotExist();
+            revert CardPaymentProcessor_PaymentNonexistent();
         }
         if (status == PaymentStatus.Cleared) {
-            revert PaymentAlreadyCleared();
+            revert CardPaymentProcessor_PaymentAlreadyCleared();
         }
         if (status != PaymentStatus.Uncleared) {
-            revert InappropriatePaymentStatus(status);
+            revert CardPaymentProcessor_PaymentStatusInappropriate(status);
         }
         payment.status = PaymentStatus.Cleared;
 
@@ -1187,20 +1187,20 @@ contract CardPaymentProcessor is
      */
     function _unclearPayment(bytes16 authorizationId) internal returns (uint256 totalAmount) {
         if (authorizationId == 0) {
-            revert ZeroAuthorizationId();
+            revert CardPaymentProcessor_AuthorizationIdZero();
         }
 
         Payment storage payment = _payments[authorizationId];
 
         PaymentStatus status = payment.status;
         if (status == PaymentStatus.Nonexistent) {
-            revert PaymentNotExist();
+            revert CardPaymentProcessor_PaymentNonexistent();
         }
         if (status == PaymentStatus.Uncleared) {
-            revert PaymentAlreadyUncleared();
+            revert CardPaymentProcessor_PaymentAlreadyUncleared();
         }
         if (status != PaymentStatus.Cleared) {
-            revert InappropriatePaymentStatus(status);
+            revert CardPaymentProcessor_PaymentStatusInappropriate(status);
         }
         payment.status = PaymentStatus.Uncleared;
 
@@ -1234,17 +1234,17 @@ contract CardPaymentProcessor is
      */
     function _confirmPayment(bytes16 authorizationId) internal returns (uint256 totalAmount) {
         if (authorizationId == 0) {
-            revert ZeroAuthorizationId();
+            revert CardPaymentProcessor_AuthorizationIdZero();
         }
 
         Payment storage payment = _payments[authorizationId];
 
         PaymentStatus status = payment.status;
         if (status == PaymentStatus.Nonexistent) {
-            revert PaymentNotExist();
+            revert CardPaymentProcessor_PaymentNonexistent();
         }
         if (status != PaymentStatus.Cleared) {
-            revert InappropriatePaymentStatus(status);
+            revert CardPaymentProcessor_PaymentStatusInappropriate(status);
         }
         payment.status = PaymentStatus.Confirmed;
 
@@ -1297,17 +1297,17 @@ contract CardPaymentProcessor is
         PaymentStatus targetStatus
     ) internal {
         if (authorizationId == 0) {
-            revert ZeroAuthorizationId();
+            revert CardPaymentProcessor_AuthorizationIdZero();
         }
         if (parentTxHash == 0) {
-            revert ZeroParentTransactionHash();
+            revert CardPaymentProcessor_ParentTransactionHashZero();
         }
 
         Payment storage payment = _payments[authorizationId];
         PaymentStatus status = payment.status;
 
         if (status == PaymentStatus.Nonexistent) {
-            revert PaymentNotExist();
+            revert CardPaymentProcessor_PaymentNonexistent();
         }
 
         CancelingOperation memory operation = _defineCancellationOperation(payment);
@@ -1320,7 +1320,7 @@ contract CardPaymentProcessor is
             _totalClearedBalance -= operation.paymentTotalAmount;
             _clearedBalances[account] -= operation.paymentTotalAmount;
         } else {
-            revert InappropriatePaymentStatus(status);
+            revert CardPaymentProcessor_PaymentStatusInappropriate(status);
         }
 
         _resetCompensationAndRefundFields(payment);
@@ -1430,23 +1430,23 @@ contract CardPaymentProcessor is
         bytes16 correlationId
     ) internal {
         if (authorizationId == 0) {
-            revert ZeroAuthorizationId();
+            revert CardPaymentProcessor_AuthorizationIdZero();
         }
 
         Payment storage payment = _payments[authorizationId];
         PaymentStatus status = payment.status;
 
         if (status == PaymentStatus.Nonexistent) {
-            revert PaymentNotExist();
+            revert CardPaymentProcessor_PaymentNonexistent();
         }
         if (status != PaymentStatus.Uncleared && status != PaymentStatus.Cleared && status != PaymentStatus.Confirmed) {
-            revert InappropriatePaymentStatus(status);
+            revert CardPaymentProcessor_PaymentStatusInappropriate(status);
         }
         if (payment.refundAmount + refundAmount > payment.baseAmount) {
-            revert InappropriateRefundAmount();
+            revert CardPaymentProcessor_RefundAmountInappropriate();
         }
         if (newExtraAmount > payment.extraAmount) {
-            revert InappropriateNewExtraPaymentAmount();
+            revert CardPaymentProcessor_NewExtraPaymentAmountInappropriate();
         }
 
         RefundingOperation memory operation = _defineRefundingOperation(refundAmount, newExtraAmount, payment);
@@ -1671,7 +1671,7 @@ contract CardPaymentProcessor is
     function _requireCashOutAccount() internal view returns (address account) {
         account = _cashOutAccount;
         if (account == address(0)) {
-            revert ZeroCashOutAccount();
+            revert CardPaymentProcessor_CashOutAccountZero();
         }
     }
 

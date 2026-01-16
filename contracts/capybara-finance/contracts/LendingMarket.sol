@@ -13,7 +13,6 @@ import { UUPSExtUpgradeable } from "@cloudwalk/brlc-base/contracts/UUPSExtUpgrad
 import { Versionable } from "./Versionable.sol";
 
 import { Loan } from "./libraries/Loan.sol";
-import { Error } from "./libraries/Error.sol";
 import { Rounding } from "./libraries/Rounding.sol";
 import { Constants } from "./libraries/Constants.sol";
 import { InterestMath } from "./libraries/InterestMath.sol";
@@ -93,7 +92,7 @@ contract LendingMarket is
         _checkCreditLineAndLiquidityPool(creditLine, liquidityPool);
 
         if (_programIdCounter >= type(uint32).max) {
-            revert ProgramIdExcess();
+            revert LendingMarket_ProgramIdExcess();
         }
         uint32 programId;
         unchecked {
@@ -114,11 +113,11 @@ contract LendingMarket is
         address liquidityPool
     ) external whenNotPaused onlyRole(OWNER_ROLE) {
         if (programId == 0) {
-            revert ProgramNotExist();
+            revert LendingMarket_ProgramNonexistent();
         }
         _checkCreditLineAndLiquidityPool(creditLine, liquidityPool);
         if (_programCreditLines[programId] == creditLine && _programLiquidityPools[programId] == liquidityPool) {
-            revert Error.AlreadyConfigured();
+            revert LendingMarket_AlreadyConfigured();
         }
 
         emit ProgramUpdated(programId, creditLine, liquidityPool);
@@ -198,10 +197,10 @@ contract LendingMarket is
     ) external whenNotPaused onlyRole(ADMIN_ROLE) {
         uint256 len = loanIds.length;
         if (len != repaymentAmounts.length) {
-            revert Error.ArrayLengthMismatch();
+            revert LendingMarket_ArrayLengthMismatch();
         }
         if (repayer == address(0)) {
-            revert Error.ZeroAddress();
+            revert LendingMarket_AddressZero();
         }
         for (uint256 i = 0; i < len; ++i) {
             uint256 loanId = loanIds[i];
@@ -239,7 +238,7 @@ contract LendingMarket is
 
         // If all the sub-loans are repaid the revocation is prohibited
         if (ongoingSubLoanCount == 0) {
-            revert LoanAlreadyRepaid();
+            revert LendingMarket_LoanAlreadyRepaid();
         }
 
         emit InstallmentLoanRevoked(
@@ -262,7 +261,7 @@ contract LendingMarket is
     ) external whenNotPaused onlyRole(ADMIN_ROLE) {
         uint256 len = loanIds.length;
         if (len != discountAmounts.length) {
-            revert Error.ArrayLengthMismatch();
+            revert LendingMarket_ArrayLengthMismatch();
         }
         for (uint256 i = 0; i < len; ++i) {
             uint256 loanId = loanIds[i];
@@ -356,7 +355,7 @@ contract LendingMarket is
         _checkLoanExistence(loan);
 
         if (newTrackedTimestamp < loan.startTimestamp) {
-            revert TrackedTimestampInvalid();
+            revert LendingMarket_TrackedTimestampInvalid();
         }
 
         emit LoanCorrected(
@@ -386,7 +385,7 @@ contract LendingMarket is
         _checkIfLoanOngoing(loan);
 
         if (loan.freezeTimestamp != 0) {
-            revert LoanAlreadyFrozen();
+            revert LendingMarket_LoanAlreadyFrozen();
         }
         uint256 timestamp = _blockTimestamp();
         _checkPenaltyInterestRateBeforeDue(loan, timestamp);
@@ -402,7 +401,7 @@ contract LendingMarket is
         _checkIfLoanOngoing(loan);
 
         if (loan.freezeTimestamp == 0) {
-            revert LoanNotFrozen();
+            revert LendingMarket_LoanNotFrozen();
         }
 
         uint256 timestamp = _blockTimestamp();
@@ -431,7 +430,7 @@ contract LendingMarket is
         _checkIfLoanOngoing(loan);
 
         if (newDurationInPeriods <= loan.durationInPeriods) {
-            revert InappropriateLoanDuration();
+            revert LendingMarket_LoanDurationInappropriate();
         }
         _checkPenaltyInterestRateBeforeDue(loan, loan.trackedTimestamp);
 
@@ -451,7 +450,7 @@ contract LendingMarket is
         // IMPORTANT! If you remove this check, make sure the new interest rate does not exceed the penalty one.
         // See details about conditions for the penalty interest rate in the comments for the {Loan} struct.
         if (newInterestRate >= loan.interestRatePrimary) {
-            revert InappropriateInterestRate();
+            revert LendingMarket_InterestRateInappropriate();
         }
 
         emit LoanInterestRatePrimaryUpdated(loanId, newInterestRate, loan.interestRatePrimary);
@@ -468,7 +467,7 @@ contract LendingMarket is
         _checkIfLoanOngoing(loan);
 
         if (newInterestRate >= loan.interestRateSecondary) {
-            revert InappropriateInterestRate();
+            revert LendingMarket_InterestRateInappropriate();
         }
 
         emit LoanInterestRateSecondaryUpdated(loanId, newInterestRate, loan.interestRateSecondary);
@@ -617,13 +616,13 @@ contract LendingMarket is
         _checkDurationArray(durationsInPeriods);
         _checkInstallmentCount(installmentCount);
         if (addonAmounts.length != installmentCount || durationsInPeriods.length != installmentCount) {
-            revert Error.ArrayLengthMismatch();
+            revert LendingMarket_ArrayLengthMismatch();
         }
         // Arrays are not checked for emptiness because if the loan amount is zero, the transaction is reverted earlier
 
         for (uint256 i = 0; i < installmentCount; ++i) {
             if (borrowedAmounts[i] == 0) {
-                revert Error.InvalidAmount();
+                revert LendingMarket_AmountInvalid();
             }
             uint256 loanId = _takeLoan(
                 borrower, // Tools: prevent Prettier one-liner
@@ -668,12 +667,12 @@ contract LendingMarket is
     ) internal returns (uint256) {
         address creditLine = _programCreditLines[programId];
         if (creditLine == address(0)) {
-            revert ProgramCreditLineNotConfigured();
+            revert LendingMarket_ProgramCreditLineUnconfigured();
         }
 
         address liquidityPool = _programLiquidityPools[programId];
         if (liquidityPool == address(0)) {
-            revert ProgramLiquidityPoolNotConfigured();
+            revert LendingMarket_ProgramLiquidityPoolUnconfigured();
         }
 
         uint256 id = _loanIdCounter++;
@@ -728,7 +727,7 @@ contract LendingMarket is
         uint256[] calldata penaltyInterestRates
     ) internal {
         if (penaltyInterestRates.length != loanCount) {
-            revert Error.ArrayLengthMismatch();
+            revert LendingMarket_ArrayLengthMismatch();
         }
         for (uint256 i = 0; i < loanCount; ++i) {
             uint256 loanId = startLoanId + i;
@@ -810,10 +809,10 @@ contract LendingMarket is
     ) internal {
         uint256 oldPenaltyInterestRate = loan.penaltyInterestRate;
         if (newPenaltyInterestRate == oldPenaltyInterestRate) {
-            revert Error.AlreadyConfigured();
+            revert LendingMarket_AlreadyConfigured();
         }
         if (newPenaltyInterestRate < loan.interestRatePrimary) {
-            revert PenaltyInterestRateBelowPrimary();
+            revert LendingMarket_PenaltyInterestRateBelowPrimary();
         }
 
         emit LoanPenaltyInterestRateUpdated(loanId, newPenaltyInterestRate, oldPenaltyInterestRate);
@@ -842,7 +841,7 @@ contract LendingMarket is
             changeAmount = outstandingBalance;
         } else {
             if (changeAmount > outstandingBalance) {
-                revert Error.InvalidAmount();
+                revert LendingMarket_AmountInvalid();
             }
             // Not a full repayment or a full discount
             if (changeAmount < outstandingBalance) {
@@ -866,13 +865,13 @@ contract LendingMarket is
      */
     function _checkTrackedBalanceChange(uint256 changeAmount) internal view virtual {
         if (changeAmount == 0) {
-            revert Error.InvalidAmount();
+            revert LendingMarket_AmountInvalid();
         }
         if (changeAmount == type(uint256).max) {
             return;
         }
         if (changeAmount != Rounding.roundMath(changeAmount, Constants.ACCURACY_FACTOR)) {
-            revert Error.InvalidAmount();
+            revert LendingMarket_AmountInvalid();
         }
     }
 
@@ -890,19 +889,19 @@ contract LendingMarket is
         uint256 addonAmount
     ) internal pure {
         if (programId == 0) {
-            revert ProgramNotExist();
+            revert LendingMarket_ProgramNonexistent();
         }
         if (borrower == address(0)) {
-            revert Error.ZeroAddress();
+            revert LendingMarket_AddressZero();
         }
         if (borrowedAmount == 0) {
-            revert Error.InvalidAmount();
+            revert LendingMarket_AmountInvalid();
         }
         if (borrowedAmount != Rounding.roundMath(borrowedAmount, Constants.ACCURACY_FACTOR)) {
-            revert Error.InvalidAmount();
+            revert LendingMarket_AmountInvalid();
         }
         if (addonAmount != Rounding.roundMath(addonAmount, Constants.ACCURACY_FACTOR)) {
-            revert Error.InvalidAmount();
+            revert LendingMarket_AmountInvalid();
         }
     }
 
@@ -930,7 +929,7 @@ contract LendingMarket is
         for (uint256 i = 1; i < len; ++i) {
             uint256 duration = durationsInPeriods[i];
             if (duration < previousDuration) {
-                revert DurationArrayInvalid();
+                revert LendingMarket_DurationArrayInvalid();
             }
             previousDuration = duration;
         }
@@ -942,7 +941,7 @@ contract LendingMarket is
      */
     function _checkInstallmentCount(uint256 installmentCount) internal view {
         if (installmentCount > _installmentCountMax()) {
-            revert InstallmentCountExcess();
+            revert LendingMarket_InstallmentCountExcess();
         }
     }
 
@@ -968,7 +967,7 @@ contract LendingMarket is
      */
     function _checkLoanId(uint256 id) internal pure {
         if (id > type(uint40).max) {
-            revert LoanIdExcess();
+            revert LendingMarket_LoanIdExcess();
         }
     }
 
@@ -978,7 +977,7 @@ contract LendingMarket is
      */
     function _checkLoanExistence(Loan.State storage loan) internal view {
         if (loan.borrower == address(0)) {
-            revert LoanNotExist();
+            revert LendingMarket_LoanNonexistent();
         }
     }
 
@@ -989,7 +988,7 @@ contract LendingMarket is
     function _checkIfLoanOngoing(Loan.State storage loan) internal view {
         _checkLoanExistence(loan);
         if (_isRepaid(loan)) {
-            revert LoanAlreadyRepaid();
+            revert LendingMarket_LoanAlreadyRepaid();
         }
     }
 
@@ -1001,14 +1000,14 @@ contract LendingMarket is
     function _checkLoanType(Loan.State storage loan, uint256 expectedLoanType) internal view {
         if (loan.installmentCount == 0) {
             if (expectedLoanType != uint256(Loan.Type.Ordinary)) {
-                revert LoanTypeUnexpected(
+                revert LendingMarket_LoanTypeUnexpected(
                     Loan.Type.Ordinary, // actual
                     Loan.Type.Installment // expected
                 );
             }
         } else {
             if (expectedLoanType != uint256(Loan.Type.Installment)) {
-                revert LoanTypeUnexpected(
+                revert LendingMarket_LoanTypeUnexpected(
                     Loan.Type.Installment, // actual
                     Loan.Type.Ordinary // expected
                 );
@@ -1029,10 +1028,10 @@ contract LendingMarket is
     ) internal view {
         uint256 roundedRepaymentAmount = Rounding.roundMath(repaymentAmount, Constants.ACCURACY_FACTOR);
         if (repaymentAmount == 0 || roundedRepaymentAmount > loan.repaidAmount) {
-            revert Error.InvalidAmount();
+            revert LendingMarket_AmountInvalid();
         }
         if (repaymentTimestamp < loan.startTimestamp) {
-            revert RepaymentTimestampInvalid();
+            revert LendingMarket_RepaymentTimestampInvalid();
         }
     }
 
@@ -1043,7 +1042,7 @@ contract LendingMarket is
      */
     function _checkPenaltyInterestRateBeforeDue(Loan.State storage loan, uint256 timestamp) internal view {
         if (loan.penaltyInterestRate != 0 && timestamp < _getDueTimestamp(loan)) {
-            revert PenaltyInterestRateNonZeroBeforeDue();
+            revert LendingMarket_PenaltyInterestRateNonZeroBeforeDue();
         }
     }
 
@@ -1337,13 +1336,13 @@ contract LendingMarket is
      */
     function _checkCreditLine(address creditLine) internal view {
         if (creditLine == address(0)) {
-            revert Error.ZeroAddress();
+            revert LendingMarket_AddressZero();
         }
         if (creditLine.code.length == 0) {
-            revert Error.ContractAddressInvalid();
+            revert LendingMarket_ContractAddressInvalid();
         }
         try ICreditLine(creditLine).proveCreditLine() {} catch {
-            revert Error.ContractAddressInvalid();
+            revert LendingMarket_ContractAddressInvalid();
         }
     }
 
@@ -1353,13 +1352,13 @@ contract LendingMarket is
      */
     function _checkLiquidityPool(address liquidityPool) internal view {
         if (liquidityPool == address(0)) {
-            revert Error.ZeroAddress();
+            revert LendingMarket_AddressZero();
         }
         if (liquidityPool.code.length == 0) {
-            revert Error.ContractAddressInvalid();
+            revert LendingMarket_ContractAddressInvalid();
         }
         try ILiquidityPool(liquidityPool).proveLiquidityPool() {} catch {
-            revert Error.ContractAddressInvalid();
+            revert LendingMarket_ContractAddressInvalid();
         }
     }
 
@@ -1375,7 +1374,7 @@ contract LendingMarket is
         address token = loan.token;
         address addonTreasury = ILiquidityPool(liquidityPool).addonTreasury();
         if (addonTreasury == address(0)) {
-            revert AddonTreasuryAddressZero();
+            revert LendingMarket_AddonTreasuryAddressZero();
         }
 
         _transferFromPool(token, liquidityPool, loan.borrower, borrowedAmount);
@@ -1401,7 +1400,7 @@ contract LendingMarket is
         address token = loan.token;
         address addonTreasury = ILiquidityPool(liquidityPool).addonTreasury();
         if (addonTreasury == address(0)) {
-            revert AddonTreasuryAddressZero();
+            revert LendingMarket_AddonTreasuryAddressZero();
         }
 
         if (repaidAmount < borrowedAmount) {
@@ -1459,7 +1458,7 @@ contract LendingMarket is
      */
     function _validateUpgrade(address newImplementation) internal view override onlyRole(OWNER_ROLE) {
         try ILendingMarket(newImplementation).proveLendingMarket() {} catch {
-            revert Error.ImplementationAddressInvalid();
+            revert LendingMarket_ImplementationAddressInvalid();
         }
     }
 }

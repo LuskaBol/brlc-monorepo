@@ -434,7 +434,7 @@ interface ISharedWalletControllerErrors is ISharedWalletControllerTypes {
     error SharedWalletController_AggregatedBalanceExceedsLimit();
 
     /// @dev Thrown if the implementation address provided for the contract upgrade is invalid.
-    error SharedWalletController_ImplementationInvalid();
+    error SharedWalletController_ImplementationAddressInvalid();
 
     /// @dev Thrown if the provided participant address is zero.
     error SharedWalletController_ParticipantAddressZero();
@@ -446,7 +446,7 @@ interface ISharedWalletControllerErrors is ISharedWalletControllerTypes {
     error SharedWalletController_ParticipantBalanceInsufficient();
 
     /// @dev Thrown if the current participant balance is not zero.
-    error SharedWalletController_ParticipantBalanceNotZero(address participant);
+    error SharedWalletController_ParticipantBalanceNonzero(address participant);
 
     /// @dev Thrown if during the operation the number of participants in the wallet exceeds the limit.
     error SharedWalletController_ParticipantCountExceedsLimit();
@@ -504,7 +504,7 @@ interface ISharedWalletControllerErrors is ISharedWalletControllerTypes {
     error SharedWalletController_WalletBalanceInsufficient();
 
     /// @dev Thrown if the current wallet balance is not zero.
-    error SharedWalletController_WalletBalanceNotZero();
+    error SharedWalletController_WalletBalanceNonzero();
 
     /// @dev Thrown if the provided wallet does not exist.
     error SharedWalletController_WalletNonexistent();

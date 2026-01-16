@@ -31,11 +31,11 @@ describe("Contract 'ERC20Hookable'", async () => {
   const TOKEN_SYMBOL = "BRLC";
 
   const PANIC_ERROR_CODE = "0x1";
-  const REVERT_LOW_LEVEL_DATA_BEFORE = "0x6621cfad";
-  const REVERT_LOW_LEVEL_DATA_AFTER = "0xea12450f";
+  const REVERT_LOW_LEVEL_DATA_BEFORE = "0xd749c269";
+  const REVERT_LOW_LEVEL_DATA_AFTER = "0x16488133";
   const REVERT_REASON_MESSAGE = "error message";
 
-  const ZERO_PANIC_ERROR_CODE = "0x0";
+  const ZERO_PANIC_ERROR_CODE = 0n;
   const ZERO_REVERT_LOW_LEVEL_DATA = "0x";
   const ZERO_REVERT_REASON_MESSAGE = "";
 
@@ -53,8 +53,8 @@ describe("Contract 'ERC20Hookable'", async () => {
   const ERROR_NAME_NOT_INITIALIZING = "NotInitializing";
 
   // Errors of the contracts under test
-  const ERROR_NAME_TEST_AFTER_TOKEN_TRANSFER_HOOK = "TestAfterTokenTransferHookError";
-  const ERROR_NAME_TEST_BEFORE_TOKEN_TRANSFER_HOOK = "TestBeforeTokenTransferHookError";
+  const ERROR_NAME_TEST_AFTER_TOKEN_TRANSFER_HOOK = "ERC20HookMock_AfterTokenTransferHookError";
+  const ERROR_NAME_TEST_BEFORE_TOKEN_TRANSFER_HOOK = "ERC20HookMock_BeforeTokenTransferHookError";
 
   const OWNER_ROLE: string = ethers.id("OWNER_ROLE");
   const GRANTOR_ROLE: string = ethers.id("GRANTOR_ROLE");

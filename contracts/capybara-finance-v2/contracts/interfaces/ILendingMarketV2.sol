@@ -1590,7 +1590,7 @@ interface ILendingMarketV2Errors {
     error LendingMarketV2_SubLoanNonexistent();
 
     /// @dev Thrown when the repayer address is zero for a repayment operation.
-    error LendingMarketV2_SubLoanRapayerAddressZero();
+    error LendingMarketV2_SubLoanRepayerAddressZero();
 
     /**
      * @dev Thrown when a rate value exceeds the maximum allowed value.
@@ -1613,14 +1613,14 @@ interface ILendingMarketV2Errors {
     error LendingMarketV2_SubLoanUpdateIndexExcess();
 
     /// @dev Thrown when trying to unfreeze a sub-loan that is not frozen.
-    error LendingMarketV2_SubLoanUnfrozen();
+    error LendingMarketV2_SubLoanNotFrozen();
 
     /**
      * @dev Thrown when a function is called from an unauthorized call context.
      *
      * E.g., not from the contract itself.
      */
-    error LendingMarketV2_UnauthorizedCallContext();
+    error LendingMarketV2_CallContextUnauthorized();
 
     /// @dev Thrown when the provided underlying token address is zero.
     error LendingMarketV2_UnderlyingTokenAddressZero();

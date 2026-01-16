@@ -69,28 +69,28 @@ interface IBalanceTrackerErrors {
     /**
      * @dev Thrown when the specified "from" day is prior to the contract initialization day.
      */
-    error FromDayPriorInitDay();
+    error BalanceTracker_FromDayPriorInitDay();
 
     /**
      * @dev Thrown when the specified "to" day is prior to the specified "from" day.
      */
-    error ToDayPriorFromDay();
+    error BalanceTracker_ToDayPriorFromDay();
 
     /**
      * @dev Thrown when the value does not fit in the type uint16.
      */
-    error SafeCastOverflowUint16();
+    error BalanceTracker_SafeCastOverflowUint16();
 
     /**
      * @dev Thrown when the value does not fit in the type uint240.
      */
-    error SafeCastOverflowUint240();
+    error BalanceTracker_SafeCastOverflowUint240();
 
     /**
      * @dev Thrown when the caller is not the token contract.
      * @param account The address of the caller.
      */
-    error UnauthorizedCaller(address account);
+    error BalanceTracker_CallerUnauthorized(address account);
 }
 
 /**

@@ -268,11 +268,11 @@ abstract contract CreditAgent is
         }
 
         if (!$.agentState.configured) {
-            revert CreditAgent_ContractNotConfigured();
+            revert CreditAgent_ContractUnconfigured();
         }
 
         if (txId == bytes32(0)) {
-            revert CreditAgent_TxIdZero();
+            revert CreditAgent_TransactionIdZero();
         }
 
         CreditRequest storage creditRequest = $.creditRequests[txId];
@@ -312,7 +312,7 @@ abstract contract CreditAgent is
      */
     function _removeCreditRequest(bytes32 txId) internal {
         if (txId == bytes32(0)) {
-            revert CreditAgent_TxIdZero();
+            revert CreditAgent_TransactionIdZero();
         }
 
         CreditAgentStorage storage $ = _getCreditAgentStorage();

@@ -17,7 +17,7 @@ const EVENT_NAME_HOOK_UNREGISTERED = "HookUnregistered";
 const EVENT_NAME_LOG_AFTER_PAYMENT_MADE = "LogAfterPaymentMade";
 
 const ERROR_NAME_ACCESS_CONTROL_UNAUTHORIZED_ACCOUNT = "AccessControlUnauthorizedAccount";
-const ERROR_NAME_REVERT_FROM_AFTER_PAYMENT_MADE = "RevertFromAfterPaymentMade";
+const ERROR_NAME_REVERT_FROM_AFTER_PAYMENT_MADE = "HookContractMock_RevertFromAfterPaymentMade";
 
 let deployer: HardhatEthersSigner;
 let user1: HardhatEthersSigner;

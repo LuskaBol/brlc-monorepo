@@ -27,7 +27,7 @@ contract CreditLineV2Mock {
     error CreditLineV2Mock_OnBeforeLoanOpenedReverted();
 
     /// @dev Thrown when the onAfterLoanClosed hook is set to revert.
-    error CreditLineV2Mock_onAfterLoanClosedReverted();
+    error CreditLineV2Mock_OnAfterLoanClosedReverted();
 
     // ------------------ Hook functions -------------------------- //
 
@@ -53,7 +53,7 @@ contract CreditLineV2Mock {
      */
     function onAfterLoanClosed(uint256 firstSubLoanId, address borrower, uint256 borrowedAmount) external {
         if (revertOnAfterLoanClosed) {
-            revert CreditLineV2Mock_onAfterLoanClosedReverted();
+            revert CreditLineV2Mock_OnAfterLoanClosedReverted();
         }
 
         emit MockLoanClosed(firstSubLoanId, borrower, borrowedAmount);

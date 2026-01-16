@@ -152,7 +152,7 @@ contract SharedWalletController is
             revert SharedWalletController_WalletStatusIncompatible(WalletStatus.Active, walletState.status);
         }
         if (walletState.balance > 0) {
-            revert SharedWalletController_WalletBalanceNotZero();
+            revert SharedWalletController_WalletBalanceNonzero();
         }
 
         walletState.status = WalletStatus.Suspended;
@@ -245,7 +245,7 @@ contract SharedWalletController is
         WalletState storage walletState = _getExistentWallet(wallet, $);
 
         if (walletState.balance > 0) {
-            revert SharedWalletController_WalletBalanceNotZero();
+            revert SharedWalletController_WalletBalanceNonzero();
         }
 
         address[] memory participants = walletState.participantBalances.keys();
@@ -599,7 +599,7 @@ contract SharedWalletController is
             revert SharedWalletController_ParticipantNotRegistered(participant);
         }
         if (walletState.participantBalances.get(participant) > 0) {
-            revert SharedWalletController_ParticipantBalanceNotZero(participant);
+            revert SharedWalletController_ParticipantBalanceNonzero(participant);
         }
 
         _removeParticipantFromWallet(walletState, participant);
@@ -1001,7 +1001,7 @@ contract SharedWalletController is
      */
     function _validateUpgrade(address newImplementation) internal view override onlyRole(OWNER_ROLE) {
         try ISharedWalletController(newImplementation).proveSharedWalletController() {} catch {
-            revert SharedWalletController_ImplementationInvalid();
+            revert SharedWalletController_ImplementationAddressInvalid();
         }
     }
 }

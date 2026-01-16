@@ -679,7 +679,7 @@ describe("Contract 'CashbackController'", () => {
 
       it("the payment cashback does not exist", async () => {
         await expect(cashbackControllerFromCashbackOperator.correctCashbackAmount(paymentId("nothing"), cashbackAmount))
-          .to.be.revertedWithCustomError(cashbackController, "CashbackController_CashbackDoesNotExist");
+          .to.be.revertedWithCustomError(cashbackController, "CashbackController_CashbackNonexistent");
       });
 
       it("the contract is paused", async () => {
@@ -1059,7 +1059,7 @@ describe("Contract 'CashbackController'", () => {
                 paymentHookData,
               )).to.be.revertedWithCustomError(
                 notConfiguredCashbackController,
-                "CashbackController_TreasuryNotConfigured",
+                "CashbackController_TreasuryUnconfigured",
               );
             });
           });

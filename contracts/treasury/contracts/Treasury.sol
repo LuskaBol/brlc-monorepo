@@ -285,7 +285,7 @@ contract Treasury is
         // Recipients with type(uint256).max have unlimited withdrawals
         if (currentLimit != type(uint256).max) {
             if (currentLimit < amount) {
-                revert Treasury_InsufficientRecipientLimit(recipient, amount, currentLimit);
+                revert Treasury_RecipientLimitInsufficient(recipient, amount, currentLimit);
             }
 
             // Decrement the limit

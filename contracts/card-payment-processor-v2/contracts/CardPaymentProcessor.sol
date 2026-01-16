@@ -133,11 +133,11 @@ contract CardPaymentProcessor is
      */
     function initialize(address token_, address cashOutAccount_) external initializer {
         if (token_ == address(0)) {
-            revert TokenZeroAddress();
+            revert CardPaymentProcessor_TokenAddressZero();
         }
 
         if (cashOutAccount_ == address(0)) {
-            revert CashOutAccountZeroAddress();
+            revert CardPaymentProcessor_CashOutAccountAddressZero();
         }
 
         __AccessControlExt_init_unchained();
@@ -166,11 +166,11 @@ contract CardPaymentProcessor is
         address oldCashOutAccount = _cashOutAccount;
 
         if (newCashOutAccount == oldCashOutAccount) {
-            revert CashOutAccountUnchanged();
+            revert CardPaymentProcessor_CashOutAccountUnchanged();
         }
 
         if (newCashOutAccount == address(0)) {
-            revert CashOutAccountZeroAddress();
+            revert CardPaymentProcessor_CashOutAccountAddressZero();
         }
 
         _cashOutAccount = newCashOutAccount;
@@ -204,7 +204,7 @@ contract CardPaymentProcessor is
         uint256 confirmationAmount
     ) external whenNotPaused onlyRole(EXECUTOR_ROLE) {
         if (payer == address(0)) {
-            revert PayerZeroAddress();
+            revert CardPaymentProcessor_PayerAddressZero();
         }
         uint256 cashbackRateActual;
         if (cashbackRate_ < 0) {
@@ -212,7 +212,7 @@ contract CardPaymentProcessor is
         } else {
             cashbackRateActual = uint256(cashbackRate_);
             if (cashbackRateActual > MAX_CASHBACK_RATE) {
-                revert CashbackRateExcess();
+                revert CardPaymentProcessor_CashbackRateExcess();
             }
         }
         MakingOperation memory operation = MakingOperation({
@@ -251,7 +251,7 @@ contract CardPaymentProcessor is
         uint256 extraAmount
     ) external whenNotPaused onlyRole(EXECUTOR_ROLE) {
         if (payer == address(0)) {
-            revert PayerZeroAddress();
+            revert CardPaymentProcessor_PayerAddressZero();
         }
 
         MakingOperation memory operation = MakingOperation({
@@ -348,7 +348,7 @@ contract CardPaymentProcessor is
         PaymentConfirmation[] calldata paymentConfirmations
     ) public whenNotPaused onlyRole(EXECUTOR_ROLE) {
         if (paymentConfirmations.length == 0) {
-            revert PaymentConfirmationArrayEmpty();
+            revert CardPaymentProcessor_PaymentConfirmationArrayEmpty();
         }
 
         uint256 totalConfirmedAmount = 0;
@@ -421,7 +421,7 @@ contract CardPaymentProcessor is
         uint256 refundingAmount
     ) external whenNotPaused onlyRole(EXECUTOR_ROLE) {
         if (account == address(0)) {
-            revert AccountZeroAddress();
+            revert CardPaymentProcessor_AccountAddressZero();
         }
 
         emit AccountRefunded(
@@ -445,10 +445,10 @@ contract CardPaymentProcessor is
     function setDefaultCashbackRate(uint256 newCashbackRate) external onlyRole(OWNER_ROLE) {
         uint256 oldCashbackRate = _defaultCashbackRate;
         if (newCashbackRate == oldCashbackRate) {
-            revert DefaultCashbackRateUnchanged();
+            revert CardPaymentProcessor_DefaultCashbackRateUnchanged();
         }
         if (newCashbackRate > MAX_CASHBACK_RATE) {
-            revert CashbackRateExcess();
+            revert CardPaymentProcessor_CashbackRateExcess();
         }
 
         _defaultCashbackRate = uint16(newCashbackRate);
@@ -555,14 +555,14 @@ contract CardPaymentProcessor is
     /// @dev Making a payment internally.
     function _makePayment(MakingOperation memory operation) internal {
         if (operation.paymentId == 0) {
-            revert PaymentZeroId();
+            revert CardPaymentProcessor_PaymentZeroId();
         }
 
         Payment storage storedPayment = _payments[operation.paymentId];
 
         PaymentStatus status = storedPayment.status;
         if (status != PaymentStatus.Nonexistent && status != PaymentStatus.Revoked) {
-            revert PaymentAlreadyExistent();
+            revert CardPaymentProcessor_PaymentAlreadyExistent();
         }
 
         _processPaymentMaking(operation);
@@ -599,7 +599,7 @@ contract CardPaymentProcessor is
         UpdatingOperationKind kind
     ) internal {
         if (paymentId == 0) {
-            revert PaymentZeroId();
+            revert CardPaymentProcessor_PaymentZeroId();
         }
 
         Payment storage storedPayment = _payments[paymentId];
@@ -660,7 +660,7 @@ contract CardPaymentProcessor is
         PaymentStatus targetStatus
     ) internal {
         if (paymentId == 0) {
-            revert PaymentZeroId();
+            revert CardPaymentProcessor_PaymentZeroId();
         }
 
         Payment storage storedPayment = _payments[paymentId];
@@ -714,7 +714,7 @@ contract CardPaymentProcessor is
         uint256 confirmationAmount
     ) internal returns (uint256) {
         if (paymentId == 0) {
-            revert PaymentZeroId();
+            revert CardPaymentProcessor_PaymentZeroId();
         }
         Payment storage payment = _payments[paymentId];
         _checkActivePaymentStatus(paymentId, payment.status);
@@ -727,7 +727,7 @@ contract CardPaymentProcessor is
         uint256 oldConfirmedAmount = payment.confirmedAmount;
         uint256 newConfirmedAmount = oldConfirmedAmount + confirmationAmount;
         if (newConfirmedAmount > remainder) {
-            revert InappropriateConfirmationAmount();
+            revert CardPaymentProcessor_ConfirmationAmountInappropriate();
         }
 
         payment.confirmedAmount = uint64(newConfirmedAmount);
@@ -760,7 +760,7 @@ contract CardPaymentProcessor is
         uint256 refundingAmount
     ) internal {
         if (paymentId == 0) {
-            revert PaymentZeroId();
+            revert CardPaymentProcessor_PaymentZeroId();
         }
 
         Payment storage storedPayment = _payments[paymentId];
@@ -769,7 +769,7 @@ contract CardPaymentProcessor is
 
         uint256 newRefundAmount = uint256(payment.refundAmount) + refundingAmount;
         if (newRefundAmount > uint256(payment.baseAmount) + uint256(payment.extraAmount)) {
-            revert InappropriateRefundingAmount();
+            revert CardPaymentProcessor_RefundingAmountInappropriate();
         }
 
         PaymentDetails memory oldPaymentDetails = _definePaymentDetails(payment, PaymentRecalculationKind.None);
@@ -809,13 +809,13 @@ contract CardPaymentProcessor is
     function _processPaymentMaking(MakingOperation memory operation) internal {
         uint256 sumAmount = operation.baseAmount + operation.extraAmount;
         if (sumAmount > type(uint64).max) {
-            revert OverflowOfSumAmount();
+            revert CardPaymentProcessor_OverflowOfSumAmount();
         }
         if (operation.sponsor == address(0) && operation.subsidyLimit != 0) {
-            revert SponsorZeroAddress();
+            revert CardPaymentProcessor_SponsorAddressZero();
         }
         if (operation.subsidyLimit > type(uint64).max) {
-            revert OverflowOfSubsidyLimit();
+            revert CardPaymentProcessor_OverflowOfSubsidyLimit();
         }
         (uint256 payerSumAmount, uint256 sponsorSumAmount) = _defineSumAmountParts(sumAmount, operation.subsidyLimit);
         IERC20 erc20Token = IERC20(_token);
@@ -831,20 +831,20 @@ contract CardPaymentProcessor is
     /// @dev Checks if the status of a payment is active. Otherwise reverts with an appropriate error.
     function _checkActivePaymentStatus(bytes32 paymentId, PaymentStatus status) internal pure {
         if (status == PaymentStatus.Nonexistent) {
-            revert PaymentNonExistent(paymentId);
+            revert CardPaymentProcessor_PaymentNonexistent(paymentId);
         }
         if (status != PaymentStatus.Active) {
-            revert InappropriatePaymentStatus(paymentId, status);
+            revert CardPaymentProcessor_PaymentStatusInappropriate(paymentId, status);
         }
     }
 
     /// @dev Checks if the payment sum amount and the refund amount meet the requirements.
     function _checkPaymentSumAmount(uint256 sumAmount, uint256 refundAmount) internal pure {
         if (refundAmount > sumAmount) {
-            revert InappropriateSumAmount();
+            revert CardPaymentProcessor_SumAmountInappropriate();
         }
         if (sumAmount > type(uint64).max) {
-            revert OverflowOfSumAmount();
+            revert CardPaymentProcessor_OverflowOfSumAmount();
         }
     }
 
@@ -1082,7 +1082,7 @@ contract CardPaymentProcessor is
      */
     function _validateUpgrade(address newImplementation) internal view override onlyRole(OWNER_ROLE) {
         try ICardPaymentProcessor(newImplementation).proveCardPaymentProcessor() {} catch {
-            revert ImplementationAddressInvalid();
+            revert CardPaymentProcessor_ImplementationAddressInvalid();
         }
     }
 

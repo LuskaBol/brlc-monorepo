@@ -341,7 +341,7 @@ describe("Contract 'Treasury'", () => {
         await expect(
           treasury.connect(withdrawer).withdraw(100n),
         )
-          .to.be.revertedWithCustomError(treasury, "Treasury_InsufficientRecipientLimit")
+          .to.be.revertedWithCustomError(treasury, "Treasury_RecipientLimitInsufficient")
           .withArgs(withdrawer.address, 100n, 50n);
       });
 
@@ -352,7 +352,7 @@ describe("Contract 'Treasury'", () => {
         await expect(
           treasury.connect(newWithdrawer).withdraw(100n),
         )
-          .to.be.revertedWithCustomError(treasury, "Treasury_InsufficientRecipientLimit")
+          .to.be.revertedWithCustomError(treasury, "Treasury_RecipientLimitInsufficient")
           .withArgs(newWithdrawer.address, 100n, 0n);
       });
     });
@@ -466,7 +466,7 @@ describe("Contract 'Treasury'", () => {
         await expect(
           treasury.connect(withdrawer).withdrawTo(account.address, 100n),
         )
-          .to.be.revertedWithCustomError(treasury, "Treasury_InsufficientRecipientLimit")
+          .to.be.revertedWithCustomError(treasury, "Treasury_RecipientLimitInsufficient")
           .withArgs(account.address, 100n, 50n);
       });
 
@@ -474,7 +474,7 @@ describe("Contract 'Treasury'", () => {
         await expect(
           treasury.connect(withdrawer).withdrawTo(stranger.address, 100n),
         )
-          .to.be.revertedWithCustomError(treasury, "Treasury_InsufficientRecipientLimit")
+          .to.be.revertedWithCustomError(treasury, "Treasury_RecipientLimitInsufficient")
           .withArgs(stranger.address, 100n, 0n);
       });
     });
@@ -949,7 +949,7 @@ describe("Contract 'Treasury'", () => {
         await expect(
           treasury.connect(withdrawer).withdrawTo(account.address, 300n),
         )
-          .to.be.revertedWithCustomError(treasury, "Treasury_InsufficientRecipientLimit")
+          .to.be.revertedWithCustomError(treasury, "Treasury_RecipientLimitInsufficient")
           .withArgs(account.address, 300n, 200n);
 
         // Should allow withdrawal within limit
@@ -1049,7 +1049,7 @@ describe("Contract 'Treasury'", () => {
         await expect(
           treasury.connect(withdrawer).withdrawTo(withdrawer.address, 150n),
         )
-          .to.be.revertedWithCustomError(treasury, "Treasury_InsufficientRecipientLimit")
+          .to.be.revertedWithCustomError(treasury, "Treasury_RecipientLimitInsufficient")
           .withArgs(withdrawer.address, 150n, 100n);
       });
     });
@@ -1069,7 +1069,7 @@ describe("Contract 'Treasury'", () => {
         await expect(
           treasury.connect(withdrawer).withdrawTo(stranger.address, 100n),
         )
-          .to.be.revertedWithCustomError(treasury, "Treasury_InsufficientRecipientLimit");
+          .to.be.revertedWithCustomError(treasury, "Treasury_RecipientLimitInsufficient");
       });
 
       it("should allow unlimited withdrawals for type(uint256).max recipients", async () => {
@@ -1101,7 +1101,7 @@ describe("Contract 'Treasury'", () => {
         await expect(
           treasury.connect(withdrawer).withdrawTo(account.address, 1n),
         )
-          .to.be.revertedWithCustomError(treasury, "Treasury_InsufficientRecipientLimit");
+          .to.be.revertedWithCustomError(treasury, "Treasury_RecipientLimitInsufficient");
       });
 
       it("should keep recipient in map when limit reaches 0 after withdrawals", async () => {
@@ -1173,7 +1173,7 @@ describe("Contract 'Treasury'", () => {
         await expect(
           treasury.connect(withdrawer).withdrawTo(account.address, 500n),
         )
-          .to.be.revertedWithCustomError(treasury, "Treasury_InsufficientRecipientLimit");
+          .to.be.revertedWithCustomError(treasury, "Treasury_RecipientLimitInsufficient");
 
         await expect(
           treasury.connect(withdrawer).withdrawTo(account.address, 400n),

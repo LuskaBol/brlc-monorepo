@@ -3,11 +3,49 @@
 pragma solidity ^0.8.0;
 
 /**
+ * @title IERC20FreezableErrors interface
+ * @author CloudWalk Inc. (See https://www.cloudwalk.io)
+ * @dev Defines the custom errors used in the ERC20Freezable contract.
+ */
+interface IERC20FreezableErrors {
+    /**
+     * @dev [DEPRECATED] The token freezing operation is not approved by the account. No longer in use.
+     *
+     * Kept for backward compatibility with transaction analysis tools.
+     */
+    error ERC20Freezable_FreezingUnapproved();
+
+    /**
+     * @dev [DEPRECATED] The token freezing is already approved by the account. No longer in use.
+     *
+     * Kept for backward compatibility with transaction analysis tools.
+     */
+    error ERC20Freezable_FreezingAlreadyApproved();
+
+    /// @dev The frozen balance is exceeded during the operation.
+    error ERC20Freezable_FrozenBalanceInsufficient();
+
+    /// @dev The transfer amount exceeded the frozen amount.
+    error ERC20Freezable_FrozenAmountExcess();
+
+    /**
+     * @dev [DEPRECATED] The transaction sender is not a freezer. No longer in use.
+     *
+     * Kept for backward compatibility with transaction analysis tools.
+     * Replaced by an appropriate error from the `AccessControl` library smart contract.
+     */
+    error ERC20Freezable_FreezerUnauthorized();
+
+    /// @dev The provided address belongs to a contract so its balance cannot be frozen.
+    error ERC20Freezable_ContractBalanceFreezingAttempt();
+}
+
+/**
  * @title IERC20Freezable interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev The interface of a token that supports freezing operations.
  */
-interface IERC20Freezable {
+interface IERC20Freezable is IERC20FreezableErrors {
     // ------------------ Events ---------------------------------- //
 
     /**

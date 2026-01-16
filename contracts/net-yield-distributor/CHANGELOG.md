@@ -1,3 +1,17 @@
+# Unreleased
+
+## Main Changes
+
+- Applied custom error naming convention. Errors now follow the `ContractName_SubjectState` pattern.
+
+### Error Renames
+
+- `NetYieldDistributor_AdvancedNetYieldInsufficientBalance` → `NetYieldDistributor_AdvancedNetYieldBalanceInsufficient`
+
+## Migration
+
+No special actions required. Update any off-chain code that catches this error.
+
 # v1.2.0
 
 ## Main Changes

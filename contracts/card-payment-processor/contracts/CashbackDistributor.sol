@@ -113,13 +113,13 @@ contract CashbackDistributor is
         uint256 amount
     ) external whenNotPaused onlyRole(DISTRIBUTOR_ROLE) returns (bool success, uint256 sentAmount, uint256 nonce) {
         if (token == address(0)) {
-            revert ZeroTokenAddress();
+            revert CashbackDistributor_TokenAddressZero();
         }
         if (recipient == address(0)) {
-            revert ZeroRecipientAddress();
+            revert CashbackDistributor_RecipientAddressZero();
         }
         if (externalId == 0) {
-            revert ZeroExternalId();
+            revert CashbackDistributor_ExternalIdZero();
         }
 
         CashbackStatus status = CashbackStatus.Success;
@@ -326,19 +326,19 @@ contract CashbackDistributor is
      */
     function setCashbackVault(address token, address cashbackVault) external onlyRole(OWNER_ROLE) {
         if (token == address(0)) {
-            revert ZeroTokenAddress();
+            revert CashbackDistributor_TokenAddressZero();
         }
         address oldCashbackVault = _cashbackVaults[token];
 
         if (oldCashbackVault == cashbackVault) {
-            revert CashbackVaultUnchanged();
+            revert CashbackDistributor_CashbackVaultUnchanged();
         }
         if (cashbackVault != address(0)) {
             try ICashbackVault(cashbackVault).proveCashbackVault() {} catch {
-                revert CashbackVaultInvalid();
+                revert CashbackDistributor_CashbackVaultInvalid();
             }
             if (ICashbackVault(cashbackVault).underlyingToken() != token) {
-                revert CashbackVaultTokenMismatch();
+                revert CashbackDistributor_CashbackVaultTokenMismatch();
             }
 
             IERC20Upgradeable(token).approve(cashbackVault, type(uint256).max);
@@ -361,7 +361,7 @@ contract CashbackDistributor is
      */
     function enable() external onlyRole(OWNER_ROLE) {
         if (_enabled) {
-            revert CashbackAlreadyEnabled();
+            revert CashbackDistributor_CashbackAlreadyEnabled();
         }
 
         _enabled = true;
@@ -378,7 +378,7 @@ contract CashbackDistributor is
      */
     function disable() external onlyRole(OWNER_ROLE) {
         if (!_enabled) {
-            revert CashbackAlreadyDisabled();
+            revert CashbackDistributor_CashbackAlreadyDisabled();
         }
 
         _enabled = false;

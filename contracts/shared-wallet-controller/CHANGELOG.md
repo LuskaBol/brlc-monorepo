@@ -1,3 +1,19 @@
+# Unreleased
+
+## Main Changes
+
+- Applied custom error naming convention. Errors now follow the `ContractName_SubjectState` pattern.
+
+### Error Renames
+
+- `SharedWalletController_ImplementationInvalid` → `SharedWalletController_ImplementationAddressInvalid`
+- `SharedWalletController_ParticipantBalanceNotZero` → `SharedWalletController_ParticipantBalanceNonzero`
+- `SharedWalletController_WalletBalanceNotZero` → `SharedWalletController_WalletBalanceNonzero`
+
+## Migration
+
+No special actions required. Update any off-chain code that catches these errors.
+
 ## Main Changes
 
 - Added `deleteWallet(address wallet)` function and `WalletDeleted` event to delete an existing wallet with zero balance.

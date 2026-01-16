@@ -20,7 +20,7 @@ contract TestContractMock {
     // ------------------ Errors ---------------------------------- //
 
     /// @dev A test error with some message
-    error TestError(string message);
+    error TestContractMock_TestError(string message);
 
     // ------------------ Transactional functions ----------------- //
 
@@ -32,7 +32,7 @@ contract TestContractMock {
     function testFunction(uint256 amount) external payable {
         emit TestEvent(msg.sender, msg.value, amount);
         if (_disabled) {
-            revert TestError("Contract is disabled");
+            revert TestContractMock_TestError("Contract is disabled");
         }
     }
 

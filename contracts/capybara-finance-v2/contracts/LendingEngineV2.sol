@@ -176,7 +176,7 @@ contract LendingEngineV2 is
      */
     function _checkCallContext() internal view {
         if (_getLendingMarketStorage().storageKind != STORAGE_KIND_MARKET) {
-            revert LendingEngineV2_UnauthorizedCallContext();
+            revert LendingEngineV2_CallContextUnauthorized();
         }
         if (_blockTimestamp() > type(uint32).max) {
             revert LendingMarketV2_BlockTimestampExcess();
@@ -1257,7 +1257,7 @@ contract LendingEngineV2 is
         Operation storage operation
     ) internal view {
         if (subLoan.freezeTimestamp == 0) {
-            revert LendingMarketV2_SubLoanUnfrozen();
+            revert LendingMarketV2_SubLoanNotFrozen();
         }
 
         // Increase the sub-loan duration by the freeze period if value is zero, otherwise just unfreeze.
@@ -1697,7 +1697,7 @@ contract LendingEngineV2 is
 
         if (kind == uint256(OperationKind.Repayment)) {
             if (account == address(0)) {
-                revert LendingMarketV2_SubLoanRapayerAddressZero();
+                revert LendingMarketV2_SubLoanRepayerAddressZero();
             }
         } else if (account != address(0)) {
             revert LendingMarketV2_OperationAccountNonzero();

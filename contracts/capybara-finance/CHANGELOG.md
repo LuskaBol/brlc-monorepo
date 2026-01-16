@@ -1,3 +1,13 @@
+# Unreleased
+
+## Main Changes
+
+- Applied custom error naming convention. Updated test files to use new error names from the token package.
+
+## Migration
+
+No special actions required.
+
 # v1.23.0
 
 ## Main changes

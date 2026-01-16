@@ -16,7 +16,7 @@ describe("Contract 'BlocklistableUpgradeable'", () => {
   const ERROR_MESSAGE_INITIALIZABLE_CONTRACT_IS_NOT_INITIALIZING = "Initializable: contract is not initializing";
 
   // Errors of the contract under test
-  const ERROR_NAME_BLOCKLISTED_ACCOUNT = "BlocklistedAccount";
+  const ERROR_NAME_BLOCKLISTED_ACCOUNT = "Blocklistable_BlocklistedAccount";
 
   const OWNER_ROLE: string = ethers.id("OWNER_ROLE");
   const GRANTOR_ROLE: string = ethers.id("GRANTOR_ROLE");

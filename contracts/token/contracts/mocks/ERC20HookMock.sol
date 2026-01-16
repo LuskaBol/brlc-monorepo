@@ -32,10 +32,10 @@ contract ERC20HookMock is IERC20Hook {
     // ------------------ Errors ---------------------------------- //
 
     /// @dev Custom error to be reverted with from the `beforeTokenTransfer` hook function.
-    error TestBeforeTokenTransferHookError();
+    error ERC20HookMock_BeforeTokenTransferHookError();
 
     /// @dev Custom error to be reverted with from the `afterTokenTransfer` hook function.
-    error TestAfterTokenTransferHookError();
+    error ERC20HookMock_AfterTokenTransferHookError();
 
     // ------------------ Transactional functions ----------------- //
 
@@ -86,7 +86,7 @@ contract ERC20HookMock is IERC20Hook {
             // revert();
             // require(false);
             // OR
-            revert TestBeforeTokenTransferHookError();
+            revert ERC20HookMock_BeforeTokenTransferHookError();
         }
 
         emit TestBeforeTokenTransferHookEvent();
@@ -115,7 +115,7 @@ contract ERC20HookMock is IERC20Hook {
             // revert();
             // require(false);
             // OR
-            revert TestAfterTokenTransferHookError();
+            revert ERC20HookMock_AfterTokenTransferHookError();
         }
 
         emit TestAfterTokenTransferHookEvent();

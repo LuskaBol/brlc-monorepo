@@ -134,7 +134,7 @@ contract CashbackController is
         CashbackControllerStorage storage $ = _getCashbackControllerStorage();
 
         if ($.cashbackTreasury == address(0)) {
-            revert CashbackController_TreasuryNotConfigured();
+            revert CashbackController_TreasuryUnconfigured();
         }
 
         uint256 basePaymentAmount = _definePayerBaseAmount(payment.baseAmount, payment.subsidyLimit);
@@ -361,7 +361,7 @@ contract CashbackController is
         address recipient = paymentCashback.recipient;
 
         if (recipient == address(0)) {
-            revert CashbackController_CashbackDoesNotExist();
+            revert CashbackController_CashbackNonexistent();
         }
 
         if (desiredCashbackAmount > oldCashbackAmount) {

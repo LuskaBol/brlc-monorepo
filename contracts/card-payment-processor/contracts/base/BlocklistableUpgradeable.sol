@@ -43,7 +43,7 @@ abstract contract BlocklistableUpgradeable is AccessControlExtUpgradeable {
     // ------------------ Errors ---------------------------------- //
 
     /// @dev The account is blocklisted.
-    error BlocklistedAccount(address account);
+    error Blocklistable_BlocklistedAccount(address account);
 
     // ------------------ Modifiers ------------------------------- //
 
@@ -53,7 +53,7 @@ abstract contract BlocklistableUpgradeable is AccessControlExtUpgradeable {
      */
     modifier notBlocklisted(address account) {
         if (_blocklisted[account]) {
-            revert BlocklistedAccount(account);
+            revert Blocklistable_BlocklistedAccount(account);
         }
         _;
     }

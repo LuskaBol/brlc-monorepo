@@ -204,7 +204,7 @@ interface ITreasuryErrors {
     error Treasury_RecipientAddressZero();
 
     /// @dev Thrown if the recipient does not have sufficient limit for the requested withdrawal.
-    error Treasury_InsufficientRecipientLimit(address recipient, uint256 requested, uint256 available);
+    error Treasury_RecipientLimitInsufficient(address recipient, uint256 requested, uint256 available);
 
     /// @dev Thrown if the provided new implementation address is not of a treasury contract.
     error Treasury_ImplementationAddressInvalid();

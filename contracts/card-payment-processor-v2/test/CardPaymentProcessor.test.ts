@@ -1531,25 +1531,25 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
   const ERROR_NAME_INVALID_INITIALIZATION = "InvalidInitialization";
 
   // Errors of the contract under test
-  const ERROR_NAME_ACCOUNT_ZERO_ADDRESS = "AccountZeroAddress";
-  const ERROR_NAME_CASHBACK_RATE_EXCESS = "CashbackRateExcess";
-  const ERROR_NAME_DEFAULT_CASHBACK_RATE_UNCHANGED = "DefaultCashbackRateUnchanged";
-  const ERROR_NAME_CASH_OUT_ACCOUNT_UNCHANGED = "CashOutAccountUnchanged";
-  const ERROR_NAME_CASH_OUT_ACCOUNT_ZERO_ADDRESS = "CashOutAccountZeroAddress";
-  const ERROR_NAME_IMPLEMENTATION_ADDRESS_INVALID = "ImplementationAddressInvalid";
-  const ERROR_NAME_INAPPROPRIATE_CONFIRMATION_AMOUNT = "InappropriateConfirmationAmount";
-  const ERROR_NAME_INAPPROPRIATE_REFUNDING_AMOUNT = "InappropriateRefundingAmount";
-  const ERROR_NAME_INAPPROPRIATE_PAYMENT_STATUS = "InappropriatePaymentStatus";
-  const ERROR_NAME_INAPPROPRIATE_SUM_AMOUNT = "InappropriateSumAmount";
-  const ERROR_NAME_OVERFLOW_OF_SUBSIDY_LIMIT = "OverflowOfSubsidyLimit";
-  const ERROR_NAME_OVERFLOW_OF_SUM_AMOUNT = "OverflowOfSumAmount";
-  const ERROR_NAME_PAYER_ZERO_ADDRESS = "PayerZeroAddress";
-  const ERROR_NAME_PAYMENT_ALREADY_EXISTENT = "PaymentAlreadyExistent";
-  const ERROR_NAME_PAYMENT_CONFIRMATION_ARRAY_EMPTY = "PaymentConfirmationArrayEmpty";
-  const ERROR_NAME_PAYMENT_NON_EXISTENT = "PaymentNonExistent";
-  const ERROR_NAME_PAYMENT_ZERO_ID = "PaymentZeroId";
-  const ERROR_NAME_SPONSOR_ZERO_ADDRESS = "SponsorZeroAddress";
-  const ERROR_NAME_TOKEN_ZERO_ADDRESS = "TokenZeroAddress";
+  const ERROR_NAME_ACCOUNT_ADDRESS_ZERO = "CardPaymentProcessor_AccountAddressZero";
+  const ERROR_NAME_CASHBACK_RATE_EXCESS = "CardPaymentProcessor_CashbackRateExcess";
+  const ERROR_NAME_DEFAULT_CASHBACK_RATE_UNCHANGED = "CardPaymentProcessor_DefaultCashbackRateUnchanged";
+  const ERROR_NAME_CASH_OUT_ACCOUNT_UNCHANGED = "CardPaymentProcessor_CashOutAccountUnchanged";
+  const ERROR_NAME_CASH_OUT_ACCOUNT_ADDRESS_ZERO = "CardPaymentProcessor_CashOutAccountAddressZero";
+  const ERROR_NAME_IMPLEMENTATION_ADDRESS_INVALID = "CardPaymentProcessor_ImplementationAddressInvalid";
+  const ERROR_NAME_CONFIRMATION_AMOUNT_INAPPROPRIATE = "CardPaymentProcessor_ConfirmationAmountInappropriate";
+  const ERROR_NAME_REFUNDING_AMOUNT_INAPPROPRIATE = "CardPaymentProcessor_RefundingAmountInappropriate";
+  const ERROR_NAME_PAYMENT_STATUS_INAPPROPRIATE = "CardPaymentProcessor_PaymentStatusInappropriate";
+  const ERROR_NAME_SUM_AMOUNT_INAPPROPRIATE = "CardPaymentProcessor_SumAmountInappropriate";
+  const ERROR_NAME_OVERFLOW_OF_SUBSIDY_LIMIT = "CardPaymentProcessor_OverflowOfSubsidyLimit";
+  const ERROR_NAME_OVERFLOW_OF_SUM_AMOUNT = "CardPaymentProcessor_OverflowOfSumAmount";
+  const ERROR_NAME_PAYER_ADDRESS_ZERO = "CardPaymentProcessor_PayerAddressZero";
+  const ERROR_NAME_PAYMENT_ALREADY_EXISTENT = "CardPaymentProcessor_PaymentAlreadyExistent";
+  const ERROR_NAME_PAYMENT_CONFIRMATION_ARRAY_EMPTY = "CardPaymentProcessor_PaymentConfirmationArrayEmpty";
+  const ERROR_NAME_PAYMENT_NONEXISTENT = "CardPaymentProcessor_PaymentNonexistent";
+  const ERROR_NAME_PAYMENT_ZERO_ID = "CardPaymentProcessor_PaymentZeroId";
+  const ERROR_NAME_SPONSOR_ADDRESS_ZERO = "CardPaymentProcessor_SponsorAddressZero";
+  const ERROR_NAME_TOKEN_ADDRESS_ZERO = "CardPaymentProcessor_TokenAddressZero";
 
   const OWNER_ROLE: string = ethers.id("OWNER_ROLE");
   const GRANTOR_ROLE: string = ethers.id("GRANTOR_ROLE");
@@ -1750,7 +1750,7 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
         await upgrades.deployProxy(cardPaymentProcessorFactory, [], { initializer: false }) as Contract;
 
       await expect(anotherCardPaymentProcessor.initialize(ZERO_ADDRESS, cashOutAccount.address))
-        .to.be.revertedWithCustomError(anotherCardPaymentProcessor, ERROR_NAME_TOKEN_ZERO_ADDRESS);
+        .to.be.revertedWithCustomError(anotherCardPaymentProcessor, ERROR_NAME_TOKEN_ADDRESS_ZERO);
     });
 
     it("Is reverted for the contract implementation if it is called even for the first time", async () => {
@@ -1768,7 +1768,7 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
         await upgrades.deployProxy(cardPaymentProcessorFactory, [], { initializer: false }) as Contract;
 
       await expect(anotherCardPaymentProcessor.initialize(tokenAddress, ZERO_ADDRESS))
-        .to.be.revertedWithCustomError(anotherCardPaymentProcessor, ERROR_NAME_CASH_OUT_ACCOUNT_ZERO_ADDRESS);
+        .to.be.revertedWithCustomError(anotherCardPaymentProcessor, ERROR_NAME_CASH_OUT_ACCOUNT_ADDRESS_ZERO);
     });
   });
 
@@ -1854,7 +1854,7 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
     it("Is reverted if the new cash-out account is the zero address", async () => {
       const { cardPaymentProcessor } = await setUpFixture(deployTokenMockAndCardPaymentProcessor);
       await expect(cardPaymentProcessor.setCashOutAccount(ZERO_ADDRESS))
-        .to.be.revertedWithCustomError(cardPaymentProcessor, ERROR_NAME_CASH_OUT_ACCOUNT_ZERO_ADDRESS);
+        .to.be.revertedWithCustomError(cardPaymentProcessor, ERROR_NAME_CASH_OUT_ACCOUNT_ADDRESS_ZERO);
     });
   });
 
@@ -2228,7 +2228,7 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
             CASHBACK_RATE_AS_IN_CONTRACT,
             ZERO_CONFIRMATION_AMOUNT,
           ),
-        ).to.be.revertedWithCustomError(cardPaymentProcessorShell.contract, ERROR_NAME_PAYER_ZERO_ADDRESS);
+        ).to.be.revertedWithCustomError(cardPaymentProcessorShell.contract, ERROR_NAME_PAYER_ADDRESS_ZERO);
       });
 
       it("The payment ID is zero", async () => {
@@ -2371,7 +2371,7 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
             CASHBACK_RATE_AS_IN_CONTRACT,
             ZERO_CONFIRMATION_AMOUNT,
           ),
-        ).to.be.revertedWithCustomError(cardPaymentProcessorShell.contract, ERROR_NAME_SPONSOR_ZERO_ADDRESS);
+        ).to.be.revertedWithCustomError(cardPaymentProcessorShell.contract, ERROR_NAME_SPONSOR_ADDRESS_ZERO);
       });
 
       it("The payment subsidy limit is greater than 64-bit unsigned integer", async () => {
@@ -2412,7 +2412,7 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
           ),
         ).to.be.revertedWithCustomError(
           cardPaymentProcessorShell.contract,
-          ERROR_NAME_INAPPROPRIATE_CONFIRMATION_AMOUNT,
+          ERROR_NAME_CONFIRMATION_AMOUNT_INAPPROPRIATE,
         );
       });
     });
@@ -2485,7 +2485,7 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
             payment.baseAmount,
             payment.extraAmount,
           ),
-        ).to.be.revertedWithCustomError(cardPaymentProcessorShell.contract, ERROR_NAME_PAYER_ZERO_ADDRESS);
+        ).to.be.revertedWithCustomError(cardPaymentProcessorShell.contract, ERROR_NAME_PAYER_ADDRESS_ZERO);
       });
     });
   });
@@ -3039,7 +3039,7 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
           ),
         ).to.be.revertedWithCustomError(
           cardPaymentProcessorShell.contract,
-          ERROR_NAME_PAYMENT_NON_EXISTENT,
+          ERROR_NAME_PAYMENT_NONEXISTENT,
         ).withArgs(payment.id);
       });
 
@@ -3059,7 +3059,7 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
             newBaseAmount,
             newExtraAmount,
           ),
-        ).to.be.revertedWithCustomError(cardPaymentProcessorShell.contract, ERROR_NAME_INAPPROPRIATE_SUM_AMOUNT);
+        ).to.be.revertedWithCustomError(cardPaymentProcessorShell.contract, ERROR_NAME_SUM_AMOUNT_INAPPROPRIATE);
       });
 
       it("The new payment sum amount is greater than 64-bit unsigned integer", async () => {
@@ -3221,7 +3221,7 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
         const { cardPaymentProcessorShell, payments: [payment] } = context;
 
         await expect(connect(cardPaymentProcessorShell.contract, executor).revokePayment(payment.id))
-          .to.be.revertedWithCustomError(cardPaymentProcessorShell.contract, ERROR_NAME_PAYMENT_NON_EXISTENT)
+          .to.be.revertedWithCustomError(cardPaymentProcessorShell.contract, ERROR_NAME_PAYMENT_NONEXISTENT)
           .withArgs(payment.id);
       });
     });
@@ -3381,7 +3381,7 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
           connect(cardPaymentProcessorShell.contract, executor).confirmPayment(payment.id, ZERO_CONFIRMATION_AMOUNT),
         ).to.be.revertedWithCustomError(
           cardPaymentProcessorShell.contract,
-          ERROR_NAME_PAYMENT_NON_EXISTENT,
+          ERROR_NAME_PAYMENT_NONEXISTENT,
         ).withArgs(payment.id);
       });
 
@@ -3398,7 +3398,7 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
           connect(cardPaymentProcessorShell.contract, executor).confirmPayment(payment.id, confirmationAmount),
         ).to.be.revertedWithCustomError(
           cardPaymentProcessorShell.contract,
-          ERROR_NAME_INAPPROPRIATE_CONFIRMATION_AMOUNT,
+          ERROR_NAME_CONFIRMATION_AMOUNT_INAPPROPRIATE,
         );
       });
     });
@@ -3801,7 +3801,7 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
           connect(cardPaymentProcessorShell.contract, executor).refundPayment(payment.id, ZERO_REFUND_AMOUNT),
         ).to.be.revertedWithCustomError(
           cardPaymentProcessorShell.contract,
-          ERROR_NAME_PAYMENT_NON_EXISTENT,
+          ERROR_NAME_PAYMENT_NONEXISTENT,
         ).withArgs(payment.id);
       });
 
@@ -3814,7 +3814,7 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
         const refundAmount = payment.baseAmount + payment.extraAmount + 1;
 
         await expect(connect(cardPaymentProcessorShell.contract, executor).refundPayment(payment.id, refundAmount))
-          .to.be.revertedWithCustomError(cardPaymentProcessorShell.contract, ERROR_NAME_INAPPROPRIATE_REFUNDING_AMOUNT);
+          .to.be.revertedWithCustomError(cardPaymentProcessorShell.contract, ERROR_NAME_REFUNDING_AMOUNT_INAPPROPRIATE);
       });
     });
   });
@@ -3879,7 +3879,7 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
 
         await expect(
           connect(cardPaymentProcessorShell.contract, executor).refundAccount(ZERO_ADDRESS, nonZeroTokenAmount),
-        ).to.be.revertedWithCustomError(cardPaymentProcessorShell.contract, ERROR_NAME_ACCOUNT_ZERO_ADDRESS);
+        ).to.be.revertedWithCustomError(cardPaymentProcessorShell.contract, ERROR_NAME_ACCOUNT_ADDRESS_ZERO);
       });
 
       it("The cash-out account does not have enough token balance", async () => {
@@ -3906,15 +3906,15 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
       const paymentIds = payments.map(payment => payment.id);
 
       await expect(connect(cardPaymentProcessor, executor).revokePayment(paymentIds[0]))
-        .to.be.revertedWithCustomError(cardPaymentProcessor, ERROR_NAME_INAPPROPRIATE_PAYMENT_STATUS)
+        .to.be.revertedWithCustomError(cardPaymentProcessor, ERROR_NAME_PAYMENT_STATUS_INAPPROPRIATE)
         .withArgs(paymentIds[0], status);
 
       await expect(connect(cardPaymentProcessor, executor).reversePayment(paymentIds[0]))
-        .to.be.revertedWithCustomError(cardPaymentProcessor, ERROR_NAME_INAPPROPRIATE_PAYMENT_STATUS)
+        .to.be.revertedWithCustomError(cardPaymentProcessor, ERROR_NAME_PAYMENT_STATUS_INAPPROPRIATE)
         .withArgs(paymentIds[0], status);
 
       await expect(connect(cardPaymentProcessor, executor).confirmPayment(paymentIds[0], ZERO_CONFIRMATION_AMOUNT))
-        .to.be.revertedWithCustomError(cardPaymentProcessor, ERROR_NAME_INAPPROPRIATE_PAYMENT_STATUS)
+        .to.be.revertedWithCustomError(cardPaymentProcessor, ERROR_NAME_PAYMENT_STATUS_INAPPROPRIATE)
         .withArgs(paymentIds[0], status);
 
       const paymentConfirmations: PaymentConfirmation[] = paymentIds.map((id) => {
@@ -3925,7 +3925,7 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
       });
 
       await expect(connect(cardPaymentProcessor, executor).confirmPayments(paymentConfirmations))
-        .to.be.revertedWithCustomError(cardPaymentProcessor, ERROR_NAME_INAPPROPRIATE_PAYMENT_STATUS)
+        .to.be.revertedWithCustomError(cardPaymentProcessor, ERROR_NAME_PAYMENT_STATUS_INAPPROPRIATE)
         .withArgs(paymentIds[0], status);
 
       await expect(
@@ -3936,7 +3936,7 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
         ),
       ).to.be.revertedWithCustomError(
         cardPaymentProcessor,
-        ERROR_NAME_INAPPROPRIATE_PAYMENT_STATUS,
+        ERROR_NAME_PAYMENT_STATUS_INAPPROPRIATE,
       ).withArgs(
         paymentIds[0],
         status,
@@ -3951,7 +3951,7 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
         ),
       ).to.be.revertedWithCustomError(
         cardPaymentProcessor,
-        ERROR_NAME_INAPPROPRIATE_PAYMENT_STATUS,
+        ERROR_NAME_PAYMENT_STATUS_INAPPROPRIATE,
       ).withArgs(
         paymentIds[0],
         status,
@@ -3964,7 +3964,7 @@ describe("Contract 'CardPaymentProcessor' with CashbackController hook connected
         ),
       ).to.be.revertedWithCustomError(
         cardPaymentProcessor,
-        ERROR_NAME_INAPPROPRIATE_PAYMENT_STATUS,
+        ERROR_NAME_PAYMENT_STATUS_INAPPROPRIATE,
       ).withArgs(
         paymentIds[0],
         status,

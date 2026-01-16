@@ -371,7 +371,7 @@ const ERROR_NAME_BORROWER_ADDRESS_ZERO = "LendingMarketV2_BorrowerAddressZero";
 const ERROR_NAME_CREDIT_LINE_ADDRESS_INVALID = "LendingMarketV2_CreditLineAddressInvalid";
 const ERROR_NAME_CREDIT_LINE_ADDRESS_ZERO = "LendingMarketV2_CreditLineAddressZero";
 const ERROR_NAME_ENGINE_ADDRESS_ZERO = "LendingMarketV2_EngineAddressZero";
-const ERROR_NAME_UNAUTHORIZED_CALL_CONTEXT = "LendingMarketV2_UnauthorizedCallContext";
+const ERROR_NAME_CALL_CONTEXT_UNAUTHORIZED = "LendingMarketV2_CallContextUnauthorized";
 const ERROR_NAME_IMPLEMENTATION_ADDRESS_INVALID = "LendingMarketV2_ImplementationAddressInvalid";
 const ERROR_NAME_LIQUIDITY_POOL_ADDRESS_INVALID = "LendingMarketV2_LiquidityPoolAddressInvalid";
 const ERROR_NAME_LIQUIDITY_POOL_ADDRESS_ZERO = "LendingMarketV2_LiquidityPoolAddressZero";
@@ -398,7 +398,7 @@ const ERROR_NAME_SUB_LOAN_RATE_VALUE_EXCESS = "LendingMarketV2_SubLoanRateValueE
 const ERROR_NAME_UNDERLYING_TOKEN_ADDRESS_ZERO = "LendingMarketV2_UnderlyingTokenAddressZero";
 
 // Errors of the mock contracts
-const ERROR_NAME_CREDIT_LINE_ON_AFTER_LOAN_CLOSED_REVERTED = "CreditLineV2Mock_onAfterLoanClosedReverted";
+const ERROR_NAME_CREDIT_LINE_ON_AFTER_LOAN_CLOSED_REVERTED = "CreditLineV2Mock_OnAfterLoanClosedReverted";
 const ERROR_NAME_CREDIT_LINE_ON_BEFORE_LOAN_OPENED_REVERTED = "CreditLineV2Mock_OnBeforeLoanOpenedReverted";
 const ERROR_NAME_LIQUIDITY_POOL_ON_BEFORE_LIQUIDITY_IN_REVERTED = "LiquidityPoolMock_OnBeforeLiquidityInReverted";
 const ERROR_NAME_LIQUIDITY_POOL_ON_BEFORE_LIQUIDITY_OUT_REVERTED = "LiquidityPoolMock_OnBeforeLiquidityOutReverted";
@@ -4094,7 +4094,7 @@ describe("Contract 'LendingMarket'", () => {
       const { market } = await setUpFixture(deployContracts);
 
       await expect(market.connect(deployer).delegateToEngine("0x"))
-        .to.be.revertedWithCustomError(market, ERROR_NAME_UNAUTHORIZED_CALL_CONTEXT);
+        .to.be.revertedWithCustomError(market, ERROR_NAME_CALL_CONTEXT_UNAUTHORIZED);
     });
   });
 

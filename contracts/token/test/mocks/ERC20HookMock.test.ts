@@ -15,8 +15,8 @@ describe("Contract 'ERC20HookMock'", async () => {
   const EVENT_NAME_TEST_BEFORE_TOKEN_TRANSFER_HOOK = "TestBeforeTokenTransferHookEvent";
 
   // Errors of the contracts under test
-  const ERROR_NAME_TEST_AFTER_TOKEN_TRANSFER_HOOK = "TestAfterTokenTransferHookError";
-  const ERROR_NAME_TEST_BEFORE_TOKEN_TRANSFER_HOOK = "TestBeforeTokenTransferHookError";
+  const ERROR_NAME_TEST_AFTER_TOKEN_TRANSFER_HOOK = "ERC20HookMock_AfterTokenTransferHookError";
+  const ERROR_NAME_TEST_BEFORE_TOKEN_TRANSFER_HOOK = "ERC20HookMock_BeforeTokenTransferHookError";
 
   let hookFactory: ContractFactory;
   let deployer: HardhatEthersSigner;

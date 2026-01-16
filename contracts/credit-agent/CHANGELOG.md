@@ -1,4 +1,20 @@
-# New Features
+# Unreleased
+
+## Main Changes
+
+- Applied custom error naming convention. Errors now follow the `ContractName_SubjectState` pattern.
+
+### Error Renames
+
+**CreditAgent:**
+- `CreditAgent_ContractNotConfigured` → `CreditAgent_ContractUnconfigured`
+- `CreditAgent_TxIdZero` → `CreditAgent_TransactionIdZero`
+
+## Migration Steps
+
+No special actions required. Update any off-chain code that catches these errors.
+
+## Main Changes
 
 - Added a derived `Expired` status for credit and installment credit requests.
   After 5 minutes in the `Initiated` state, read methods treat the request as `Expired`.

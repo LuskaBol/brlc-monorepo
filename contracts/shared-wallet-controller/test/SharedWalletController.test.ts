@@ -51,12 +51,12 @@ const ERROR_NAME_ENFORCED_PAUSE = "EnforcedPause";
 const ERROR_NAME_ERC20_INSUFFICIENT_BALANCE = "ERC20InsufficientBalance";
 
 // Custom error names for contract-specific errors
-const ERROR_NAME_IMPLEMENTATION_ADDRESS_INVALID = "SharedWalletController_ImplementationInvalid";
+const ERROR_NAME_IMPLEMENTATION_ADDRESS_INVALID = "SharedWalletController_ImplementationAddressInvalid";
 const ERROR_NAME_TOKEN_ADDRESS_ZERO = "SharedWalletController_TokenAddressZero";
 const ERROR_NAME_TOKEN_UNAUTHORIZED = "SharedWalletController_TokenUnauthorized";
 const ERROR_NAME_WALLET_ADDRESS_ZERO = "SharedWalletController_WalletAddressZero";
 const ERROR_NAME_WALLET_ALREADY_EXISTS = "SharedWalletController_WalletAlreadyExists";
-const ERROR_NAME_WALLET_BALANCE_NOT_ZERO = "SharedWalletController_WalletBalanceNotZero";
+const ERROR_NAME_WALLET_BALANCE_NONZERO = "SharedWalletController_WalletBalanceNonzero";
 const ERROR_NAME_WALLET_BALANCE_INSUFFICIENT = "SharedWalletController_WalletBalanceInsufficient";
 const ERROR_NAME_WALLET_NONEXISTENT = "SharedWalletController_WalletNonexistent";
 const ERROR_NAME_WALLET_STATUS_INCOMPATIBLE = "SharedWalletController_WalletStatusIncompatible";
@@ -70,7 +70,7 @@ const ERROR_NAME_PARTICIPANT_COUNT_EXCESS = "SharedWalletController_ParticipantC
 const ERROR_NAME_PARTICIPANT_NOT_REGISTERED = "SharedWalletController_ParticipantNotRegistered";
 const ERROR_NAME_PARTICIPANT_REGISTERED_ALREADY = "SharedWalletController_ParticipantAlreadyRegistered";
 const ERROR_NAME_PARTICIPANT_IS_SHARED_WALLET = "SharedWalletController_ParticipantIsSharedWallet";
-const ERROR_NAME_PARTICIPANT_BALANCE_NOT_ZERO = "SharedWalletController_ParticipantBalanceNotZero";
+const ERROR_NAME_PARTICIPANT_BALANCE_NONZERO = "SharedWalletController_ParticipantBalanceNonzero";
 const ERROR_NAME_PARTICIPANT_BALANCE_INSUFFICIENT = "SharedWalletController_ParticipantBalanceInsufficient";
 const ERROR_NAME_TRANSFER_AMOUNT_NOT_ROUNDED = "SharedWalletController_TransferAmountNotRounded";
 const ERROR_NAME_WALLET_ADDRESS_IS_CONTRACT = "SharedWalletController_WalletAddressIsContract";
@@ -901,7 +901,7 @@ describe("Contract 'SharedWalletController'", () => {
         // Try to suspend wallet with non-zero balance
         await expect(connect(sharedWalletController, admin).suspendWallet(walletAddress)).to.be.revertedWithCustomError(
           sharedWalletController,
-          ERROR_NAME_WALLET_BALANCE_NOT_ZERO,
+          ERROR_NAME_WALLET_BALANCE_NONZERO,
         );
       });
     });
@@ -1012,7 +1012,7 @@ describe("Contract 'SharedWalletController'", () => {
         // Try to delete wallet with balance
         await expect(
           sharedWalletController.connect(deployer).deleteWallet(walletAddress),
-        ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_WALLET_BALANCE_NOT_ZERO);
+        ).to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_WALLET_BALANCE_NONZERO);
       });
     });
   });
@@ -1542,7 +1542,7 @@ describe("Contract 'SharedWalletController'", () => {
 
         // Try to remove participant with non-zero balance
         await expect(connect(sharedWalletController, admin).removeParticipants(walletAddress, [participant1.address]))
-          .to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_PARTICIPANT_BALANCE_NOT_ZERO)
+          .to.be.revertedWithCustomError(sharedWalletController, ERROR_NAME_PARTICIPANT_BALANCE_NONZERO)
           .withArgs(participant1.address);
       });
 

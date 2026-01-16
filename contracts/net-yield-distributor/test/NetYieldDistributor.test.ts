@@ -34,7 +34,7 @@ const ERROR_NAME_INVALID_INITIALIZATION = "InvalidInitialization";
 const ERROR_NAME_ACCOUNT_ADDRESS_ZERO = "NetYieldDistributor_AccountAddressZero";
 const ERROR_NAME_ACCOUNTS_AND_AMOUNTS_LENGTH_MISMATCH = "NetYieldDistributor_AccountsAndAmountsLengthMismatch";
 const ERROR_NAME_ACCOUNTS_ARRAY_EMPTY = "NetYieldDistributor_AccountsArrayEmpty";
-const ERROR_NAME_ADVANCED_NET_YIELD_INSUFFICIENT_BALANCE = "NetYieldDistributor_AdvancedNetYieldInsufficientBalance";
+const ERROR_NAME_ADVANCED_NET_YIELD_BALANCE_INSUFFICIENT = "NetYieldDistributor_AdvancedNetYieldBalanceInsufficient";
 const ERROR_NAME_AMOUNT_ZERO = "NetYieldDistributor_AmountZero";
 const ERROR_NAME_IMPLEMENTATION_ADDRESS_INVALID = "NetYieldDistributor_ImplementationAddressInvalid";
 const ERROR_NAME_TOTAL_ADVANCED_NET_YIELD_EXCESS = "NetYieldDistributor_TotalAdvancedNetYieldExcess";
@@ -916,7 +916,7 @@ describe("Contract 'NetYieldDistributor'", async () => {
         await proveTx(connect(netYieldDistributor, manager).advanceNetYield([account], [initialAmount]));
 
         await expect(connect(netYieldDistributor, manager).reduceAdvancedNetYield([account], [excessAmount]))
-          .to.be.revertedWithCustomError(netYieldDistributor, ERROR_NAME_ADVANCED_NET_YIELD_INSUFFICIENT_BALANCE);
+          .to.be.revertedWithCustomError(netYieldDistributor, ERROR_NAME_ADVANCED_NET_YIELD_BALANCE_INSUFFICIENT);
       });
 
       it("Treasury has insufficient balance to cover the reduction", async () => {

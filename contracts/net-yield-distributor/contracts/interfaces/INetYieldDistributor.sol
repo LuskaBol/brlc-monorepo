@@ -199,7 +199,7 @@ interface INetYieldDistributorErrors {
     error NetYieldDistributor_AccountsArrayEmpty();
 
     /// @dev Thrown if the amount to reduce exceeds the account's current advanced net yield balance.
-    error NetYieldDistributor_AdvancedNetYieldInsufficientBalance();
+    error NetYieldDistributor_AdvancedNetYieldBalanceInsufficient();
 
     /// @dev Thrown if a zero amount is provided for an operation that requires a positive amount.
     error NetYieldDistributor_AmountZero();

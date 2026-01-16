@@ -24,7 +24,7 @@ interface ILendingEngineV2 is ILendingMarketV2Types {
      *
      * E.g., not through a delegate call from the lending market contract.
      */
-    error LendingEngineV2_UnauthorizedCallContext();
+    error LendingEngineV2_CallContextUnauthorized();
 
     // ------------------ Transactional functions ----------------- //
 

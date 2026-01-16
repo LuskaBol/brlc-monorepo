@@ -1,3 +1,17 @@
+# Unreleased
+
+## Main Changes
+
+- Applied custom error naming convention. Errors now follow the `ContractName_SubjectState` pattern.
+
+### Error Renames
+
+- `Treasury_InsufficientRecipientLimit` → `Treasury_RecipientLimitInsufficient`
+
+## Migration
+
+No special actions required. Update any off-chain code that catches this error.
+
 # 1.1.0
 
 ## Main Changes

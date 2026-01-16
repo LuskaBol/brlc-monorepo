@@ -3,6 +3,55 @@
 pragma solidity ^0.8.0;
 
 /**
+ * @title IMultiSigWalletErrors interface
+ * @author CloudWalk Inc. (See https://www.cloudwalk.io)
+ * @dev Defines the custom errors used in the MultiSigWallet contract.
+ */
+interface IMultiSigWalletErrors {
+    /// @dev An unauthorized account called a function.
+    error MultiSigWallet_CallerUnauthorized();
+
+    /// @dev A transaction with the specified ID does not exist.
+    error MultiSigWallet_TransactionNonexistent();
+
+    /// @dev A transaction with the specified ID is already executed.
+    error MultiSigWallet_TransactionAlreadyExecuted();
+
+    /// @dev A transaction with the specified ID must be approved by the caller.
+    error MultiSigWallet_TransactionUnapproved();
+
+    /// @dev A transaction with the specified ID is already approved by the caller.
+    error MultiSigWallet_TransactionAlreadyApproved();
+
+    /// @dev An empty array of addresses was passed when configuring the wallet owners.
+    error MultiSigWallet_OwnersArrayEmpty();
+
+    /// @dev The zero address was passed within the owners array when configuring the wallet owners.
+    error MultiSigWallet_OwnerAddressZero();
+
+    /// @dev A duplicate address was passed within the owners array when configuring the wallet owners.
+    error MultiSigWallet_OwnerAddressDuplicate();
+
+    /// @dev An invalid number of required approvals was passed when configuring the wallet owners.
+    error MultiSigWallet_RequiredApprovalsInvalid();
+
+    /// @dev The number of approvals for a given transaction is less than the required minimum.
+    error MultiSigWallet_ApprovalsInsufficient();
+
+    /// @dev A low-level call/transaction to the transaction receiver failed.
+    error MultiSigWallet_InternalTransactionFailed(bytes data);
+
+    /// @dev A transaction with the specified ID has already expired.
+    error MultiSigWallet_TransactionExpired();
+
+    /// @dev A transaction with the specified ID is on cooldown.
+    error MultiSigWallet_CooldownActive();
+
+    /// @dev An invalid amount of time was passed when configuring the expiration time.
+    error MultiSigWallet_ExpirationTimeInvalid();
+}
+
+/**
  * @title MultiSigWallet types interface
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  */
@@ -34,7 +83,7 @@ interface IMultiSigWalletTypes {
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev The interface of the multi-signature wallet contract.
  */
-interface IMultiSigWallet is IMultiSigWalletTypes {
+interface IMultiSigWallet is IMultiSigWalletTypes, IMultiSigWalletErrors {
     // ------------------ Events ---------------------------------- //
 
     /**

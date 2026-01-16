@@ -804,61 +804,61 @@ interface ICardPaymentProcessorConfiguration {
  */
 interface ICardPaymentProcessorErrors is ICardPaymentProcessorTypes {
     /// @dev The zero token address has been passed as a function argument.
-    error ZeroTokenAddress();
+    error CardPaymentProcessor_TokenAddressZero();
 
     /// @dev The zero account address has been passed as a function argument.
-    error ZeroAccount();
+    error CardPaymentProcessor_AccountAddressZero();
 
     /// @dev Zero authorization ID has been passed as a function argument.
-    error ZeroAuthorizationId();
+    error CardPaymentProcessor_AuthorizationIdZero();
 
     /// @dev The payment with the provided authorization ID already exists and is not revoked.
-    error PaymentAlreadyExists();
+    error CardPaymentProcessor_PaymentAlreadyExistent();
 
     /// @dev Payment with the provided authorization ID is uncleared, but it must be cleared.
-    error PaymentAlreadyUncleared();
+    error CardPaymentProcessor_PaymentAlreadyUncleared();
 
     /// @dev Payment with the provided authorization ID is cleared, but it must be uncleared.
-    error PaymentAlreadyCleared();
+    error CardPaymentProcessor_PaymentAlreadyCleared();
 
     /// @dev The payment with the provided authorization ID does not exist.
-    error PaymentNotExist();
+    error CardPaymentProcessor_PaymentNonexistent();
 
     /// @dev Empty array of authorization IDs has been passed as a function argument.
-    error EmptyAuthorizationIdsArray();
+    error CardPaymentProcessor_AuthorizationIdsArrayEmpty();
 
     /// @dev Zero parent transaction hash has been passed as a function argument.
-    error ZeroParentTransactionHash();
+    error CardPaymentProcessor_ParentTransactionHashZero();
 
     /// @dev The cash-out account is not configured.
-    error ZeroCashOutAccount();
+    error CardPaymentProcessor_CashOutAccountZero();
 
     /**
      * @dev The payment with the provided authorization ID has an inappropriate status.
      * @param currentStatus The current status of payment with the provided authorization ID.
      */
-    error InappropriatePaymentStatus(PaymentStatus currentStatus);
+    error CardPaymentProcessor_PaymentStatusInappropriate(PaymentStatus currentStatus);
 
     /**
      * @dev Revocation counter of the payment reached the configured limit.
      * @param configuredRevocationLimit The configured revocation limit.
      */
-    error RevocationLimitReached(uint8 configuredRevocationLimit);
+    error CardPaymentProcessor_RevocationLimitReached(uint8 configuredRevocationLimit);
 
     /// @dev A new cash-out account is the same as the previously set one.
-    error CashOutAccountUnchanged();
+    error CardPaymentProcessor_CashOutAccountUnchanged();
 
     /// @dev The requested refund amount does not meet the requirements.
-    error InappropriateRefundAmount();
+    error CardPaymentProcessor_RefundAmountInappropriate();
 
     /// @dev The new amount of the payment does not meet the requirements.
-    error InappropriateNewBasePaymentAmount();
+    error CardPaymentProcessor_NewBasePaymentAmountInappropriate();
 
     /// @dev The new extra amount of the payment does not meet the requirements.
-    error InappropriateNewExtraPaymentAmount();
+    error CardPaymentProcessor_NewExtraPaymentAmountInappropriate();
 
     /// @dev The function cannot be executed for a subsidized payment with the non-zero refund amount.
-    error SubsidizedPaymentWithNonZeroRefundAmount();
+    error CardPaymentProcessor_SubsidizedPaymentWithNonZeroRefundAmount();
 }
 
 /**

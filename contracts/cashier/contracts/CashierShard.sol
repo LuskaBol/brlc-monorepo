@@ -50,7 +50,7 @@ contract CashierShard is CashierShardStorage, OwnableUpgradeable, UUPSExtUpgrade
 
     modifier onlyOwnerOrAdmin() {
         if (msg.sender != owner() && !_admins[msg.sender]) {
-            revert CashierShard_Unauthorized();
+            revert CashierShard_CallerUnauthorized();
         }
         _;
     }

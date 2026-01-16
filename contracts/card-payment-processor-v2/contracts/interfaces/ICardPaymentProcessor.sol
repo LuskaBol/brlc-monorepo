@@ -512,68 +512,68 @@ interface ICardPaymentProcessorConfiguration {
  */
 interface ICardPaymentProcessorErrors is ICardPaymentProcessorTypes {
     /// @dev The zero payer address has been passed as a function argument.
-    error AccountZeroAddress();
+    error CardPaymentProcessor_AccountAddressZero();
 
     /// @dev A new cash-out account is the same as the previously set one.
-    error CashOutAccountUnchanged();
+    error CardPaymentProcessor_CashOutAccountUnchanged();
 
     /// @dev The zero cash-out account address has been passed as a function argument.
-    error CashOutAccountZeroAddress();
+    error CardPaymentProcessor_CashOutAccountAddressZero();
 
     /// @dev The provided cashback rate exceeds the allowed maximum.
-    error CashbackRateExcess();
+    error CardPaymentProcessor_CashbackRateExcess();
 
     /// @dev A new default cashback rate is the same as previously set one.
-    error DefaultCashbackRateUnchanged();
+    error CardPaymentProcessor_DefaultCashbackRateUnchanged();
 
     /// @dev Thrown if the provided new implementation address is not of a card payment processor contract.
-    error ImplementationAddressInvalid();
+    error CardPaymentProcessor_ImplementationAddressInvalid();
 
     /// @dev The requested confirmation amount does not meet the requirements.
-    error InappropriateConfirmationAmount();
+    error CardPaymentProcessor_ConfirmationAmountInappropriate();
 
     /**
      * @dev The payment with the provided ID has an inappropriate status.
      * @param paymentId The ID of the payment that does not exist.
      * @param currentStatus The current status of the payment.
      */
-    error InappropriatePaymentStatus(bytes32 paymentId, PaymentStatus currentStatus);
+    error CardPaymentProcessor_PaymentStatusInappropriate(bytes32 paymentId, PaymentStatus currentStatus);
 
     /// @dev The requested refunding amount does not meet the requirements.
-    error InappropriateRefundingAmount();
+    error CardPaymentProcessor_RefundingAmountInappropriate();
 
     /// @dev The requested or result or updated sum amount (base + extra) does not meet the requirements.
-    error InappropriateSumAmount();
+    error CardPaymentProcessor_SumAmountInappropriate();
 
     /// @dev The requested subsidy limit is greater than the allowed maximum to store.
-    error OverflowOfSubsidyLimit();
+    error CardPaymentProcessor_OverflowOfSubsidyLimit();
 
     /// @dev The requested or result or updated sum amount (base + extra) is greater than the allowed maximum to store.
-    error OverflowOfSumAmount();
+    error CardPaymentProcessor_OverflowOfSumAmount();
 
     /// @dev The zero payer address has been passed as a function argument.
-    error PayerZeroAddress();
+    error CardPaymentProcessor_PayerAddressZero();
 
     /// @dev The payment with the provided ID already exists and is not revoked.
-    error PaymentAlreadyExistent();
+    error CardPaymentProcessor_PaymentAlreadyExistent();
 
     /// @dev The array of payment confirmations is empty.
-    error PaymentConfirmationArrayEmpty();
+    error CardPaymentProcessor_PaymentConfirmationArrayEmpty();
 
     /**
      * @dev The payment with the provided ID does not exist.
      * @param paymentId The ID of the payment that does not exist.
      */
-    error PaymentNonExistent(bytes32 paymentId);
+    error CardPaymentProcessor_PaymentNonexistent(bytes32 paymentId);
 
     /// @dev Zero payment ID has been passed as a function argument.
-    error PaymentZeroId();
+    error CardPaymentProcessor_PaymentZeroId();
 
     /// @dev The sponsor address is zero while the subsidy limit is non-zero.
-    error SponsorZeroAddress();
+    error CardPaymentProcessor_SponsorAddressZero();
 
     /// @dev The zero token address has been passed as a function argument.
-    error TokenZeroAddress();
+    error CardPaymentProcessor_TokenAddressZero();
 }
 
 /**

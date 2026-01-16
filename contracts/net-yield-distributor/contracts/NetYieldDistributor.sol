@@ -382,7 +382,7 @@ contract NetYieldDistributor is
         uint64 oldAdvanced = yieldBalance.advanced;
 
         if (amount > oldAdvanced) {
-            revert NetYieldDistributor_AdvancedNetYieldInsufficientBalance();
+            revert NetYieldDistributor_AdvancedNetYieldBalanceInsufficient();
         }
 
         // Safe to use unchecked here because:

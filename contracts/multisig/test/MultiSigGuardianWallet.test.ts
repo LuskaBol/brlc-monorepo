@@ -51,14 +51,14 @@ describe("MultiSigGuardianWallet contract", () => {
   const EVENT_NAME_CONFIGURE_GUARDIANS = "ConfigureGuardians";
   const EVENT_NAME_EXECUTE = "Execute";
 
-  // Base contract errors
-  const ERROR_NAME_DUPLICATE_OWNER_ADDRESS = "DuplicateOwnerAddress";
-  const ERROR_NAME_EMPTY_OWNERS_ARRAY = "EmptyOwnersArray";
-  const ERROR_NAME_INTERNAL_TRANSACTION_IS_FAILED = "InternalTransactionFailed";
-  const ERROR_NAME_INVALID_REQUIRED_APPROVALS = "InvalidRequiredApprovals";
-  const ERROR_NAME_NOT_ENOUGH_APPROVALS = "NotEnoughApprovals";
-  const ERROR_NAME_UNAUTHORIZED_CALLER = "UnauthorizedCaller";
-  const ERROR_NAME_ZERO_OWNER_ADDRESS = "ZeroOwnerAddress";
+  // Base multisig wallet errors
+  const ERROR_NAME_OWNER_ADDRESS_DUPLICATE = "MultiSigWallet_OwnerAddressDuplicate";
+  const ERROR_NAME_OWNERS_ARRAY_EMPTY = "MultiSigWallet_OwnersArrayEmpty";
+  const ERROR_NAME_INTERNAL_TRANSACTION_FAILED = "MultiSigWallet_InternalTransactionFailed";
+  const ERROR_NAME_REQUIRED_APPROVALS_INVALID = "MultiSigWallet_RequiredApprovalsInvalid";
+  const ERROR_NAME_APPROVALS_INSUFFICIENT = "MultiSigWallet_ApprovalsInsufficient";
+  const ERROR_NAME_CALLER_UNAUTHORIZED = "MultiSigWallet_CallerUnauthorized";
+  const ERROR_NAME_OWNER_ADDRESS_ZERO = "MultiSigWallet_OwnerAddressZero";
 
   // Guardian-specific errors
   const ERROR_NAME_GUARDIAN_ADDRESS_DUPLICATE = "MultiSigGuardianWallet_GuardianAddressDuplicate";
@@ -178,21 +178,21 @@ describe("MultiSigGuardianWallet contract", () => {
 
     it("Deployment is reverted if the input owner array is empty", async () => {
       await expect(walletFactory.deploy([], REQUIRED_APPROVALS, guardianAddresses, REQUIRED_GUARDIAN_APPROVALS))
-        .to.be.revertedWithCustomError(walletFactory, ERROR_NAME_EMPTY_OWNERS_ARRAY);
+        .to.be.revertedWithCustomError(walletFactory, ERROR_NAME_OWNERS_ARRAY_EMPTY);
     });
 
     it("Deployment is reverted if the input number of required approvals is zero", async () => {
       const requiredApprovals = 0;
       await expect(
         walletFactory.deploy(ownerAddresses, requiredApprovals, guardianAddresses, REQUIRED_GUARDIAN_APPROVALS),
-      ).to.be.revertedWithCustomError(walletFactory, ERROR_NAME_INVALID_REQUIRED_APPROVALS);
+      ).to.be.revertedWithCustomError(walletFactory, ERROR_NAME_REQUIRED_APPROVALS_INVALID);
     });
 
     it("Deployment is reverted if the number of required approvals exceeds the length of the owner array", async () => {
       const requiredApprovals = ownerAddresses.length + 1;
       await expect(
         walletFactory.deploy(ownerAddresses, requiredApprovals, guardianAddresses, REQUIRED_GUARDIAN_APPROVALS),
-      ).to.be.revertedWithCustomError(walletFactory, ERROR_NAME_INVALID_REQUIRED_APPROVALS);
+      ).to.be.revertedWithCustomError(walletFactory, ERROR_NAME_REQUIRED_APPROVALS_INVALID);
     });
 
     it("Deployment is reverted if one of the input owners is the zero address", async () => {
@@ -202,7 +202,7 @@ describe("MultiSigGuardianWallet contract", () => {
         walletFactory.deploy(
           invalidOwnerAddresses, requiredApprovals, [ownerAddresses[0]], REQUIRED_GUARDIAN_APPROVALS,
         ),
-      ).to.be.revertedWithCustomError(walletFactory, ERROR_NAME_ZERO_OWNER_ADDRESS);
+      ).to.be.revertedWithCustomError(walletFactory, ERROR_NAME_OWNER_ADDRESS_ZERO);
     });
 
     it("Deployment is reverted if there is a duplicate address in the input owner array", async () => {
@@ -212,7 +212,7 @@ describe("MultiSigGuardianWallet contract", () => {
         walletFactory.deploy(
           invalidOwnerAddresses, requiredApprovals, [ownerAddresses[0]], REQUIRED_GUARDIAN_APPROVALS,
         ),
-      ).to.be.revertedWithCustomError(walletFactory, ERROR_NAME_DUPLICATE_OWNER_ADDRESS);
+      ).to.be.revertedWithCustomError(walletFactory, ERROR_NAME_OWNER_ADDRESS_DUPLICATE);
     });
 
     it("Deployment is reverted if the input guardian array is empty", async () => {
@@ -280,7 +280,7 @@ describe("MultiSigGuardianWallet contract", () => {
       it("Is reverted if the caller is not the multi sig wallet itself", async () => {
         const { wallet } = await setUpFixture(deployWallet);
         await expect(wallet.configureGuardians(guardianAddresses, REQUIRED_GUARDIAN_APPROVALS))
-          .to.be.revertedWithCustomError(wallet, ERROR_NAME_UNAUTHORIZED_CALLER);
+          .to.be.revertedWithCustomError(wallet, ERROR_NAME_CALLER_UNAUTHORIZED);
       });
 
       it("Is reverted if the input guardian array is empty", async () => {
@@ -289,7 +289,7 @@ describe("MultiSigGuardianWallet contract", () => {
 
         await proveTx(connect(wallet, owner1).submitAndApprove(getAddress(wallet), 0, txData));
         await expect(connect(wallet, owner2).approveAndExecute(0))
-          .to.be.revertedWithCustomError(wallet, ERROR_NAME_INTERNAL_TRANSACTION_IS_FAILED)
+          .to.be.revertedWithCustomError(wallet, ERROR_NAME_INTERNAL_TRANSACTION_FAILED)
           .withArgs(wallet.interface.encodeErrorResult(ERROR_NAME_GUARDIANS_ARRAY_EMPTY));
       });
 
@@ -300,7 +300,7 @@ describe("MultiSigGuardianWallet contract", () => {
 
         await proveTx(connect(wallet, owner1).submitAndApprove(getAddress(wallet), 0, txData));
         await expect(connect(wallet, owner2).approveAndExecute(0))
-          .to.be.revertedWithCustomError(wallet, ERROR_NAME_INTERNAL_TRANSACTION_IS_FAILED)
+          .to.be.revertedWithCustomError(wallet, ERROR_NAME_INTERNAL_TRANSACTION_FAILED)
           .withArgs(wallet.interface.encodeErrorResult(ERROR_NAME_REQUIRED_GUARDIAN_APPROVALS_INVALID));
       });
 
@@ -311,7 +311,7 @@ describe("MultiSigGuardianWallet contract", () => {
 
         await proveTx(connect(wallet, owner1).submitAndApprove(getAddress(wallet), 0, txData));
         await expect(connect(wallet, owner2).approveAndExecute(0))
-          .to.be.revertedWithCustomError(wallet, ERROR_NAME_INTERNAL_TRANSACTION_IS_FAILED)
+          .to.be.revertedWithCustomError(wallet, ERROR_NAME_INTERNAL_TRANSACTION_FAILED)
           .withArgs(wallet.interface.encodeErrorResult(ERROR_NAME_REQUIRED_GUARDIAN_APPROVALS_INVALID));
       });
 
@@ -324,7 +324,7 @@ describe("MultiSigGuardianWallet contract", () => {
 
         await proveTx(connect(wallet, owner1).submitAndApprove(getAddress(wallet), 0, txData));
         await expect(connect(wallet, owner2).approveAndExecute(0))
-          .to.be.revertedWithCustomError(wallet, ERROR_NAME_INTERNAL_TRANSACTION_IS_FAILED)
+          .to.be.revertedWithCustomError(wallet, ERROR_NAME_INTERNAL_TRANSACTION_FAILED)
           .withArgs(wallet.interface.encodeErrorResult(ERROR_NAME_GUARDIAN_NOT_IN_OWNERS));
       });
 
@@ -337,7 +337,7 @@ describe("MultiSigGuardianWallet contract", () => {
 
         await proveTx(connect(wallet, owner1).submitAndApprove(getAddress(wallet), 0, txData));
         await expect(connect(wallet, owner2).approveAndExecute(0))
-          .to.be.revertedWithCustomError(wallet, ERROR_NAME_INTERNAL_TRANSACTION_IS_FAILED)
+          .to.be.revertedWithCustomError(wallet, ERROR_NAME_INTERNAL_TRANSACTION_FAILED)
           .withArgs(wallet.interface.encodeErrorResult(ERROR_NAME_GUARDIAN_ADDRESS_DUPLICATE));
       });
     });
@@ -599,7 +599,7 @@ describe("MultiSigGuardianWallet contract", () => {
 
         // Should fail: 1 < requiredApprovals(2), even though 1 >= requiredGuardianApprovals(1)
         await expect(connect(wallet, owner1).execute(tx.id))
-          .to.be.revertedWithCustomError(wallet, ERROR_NAME_NOT_ENOUGH_APPROVALS);
+          .to.be.revertedWithCustomError(wallet, ERROR_NAME_APPROVALS_INSUFFICIENT);
       });
 
       it("Is reverted when guardian approval from ex-guardian no longer counts", async () => {
@@ -693,7 +693,7 @@ describe("MultiSigGuardianWallet contract", () => {
 
         // Should fail: 3 approvals but need 4
         await expect(connect(unanimousWallet, owner1).execute(tx.id))
-          .to.be.revertedWithCustomError(unanimousWallet, ERROR_NAME_NOT_ENOUGH_APPROVALS);
+          .to.be.revertedWithCustomError(unanimousWallet, ERROR_NAME_APPROVALS_INSUFFICIENT);
 
         // 4th owner approves
         await proveTx(connect(unanimousWallet, owner4).approve(tx.id));
