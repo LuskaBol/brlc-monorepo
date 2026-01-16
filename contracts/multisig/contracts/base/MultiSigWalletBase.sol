@@ -390,7 +390,7 @@ abstract contract MultiSigWalletBase is MultiSigWalletStorage, IMultiSigWallet, 
 
     /// @inheritdoc IVersionable
     function $__VERSION() external pure returns (Version memory) {
-        return Version(1, 0, 0);
+        return Version(1, 1, 0);
     }
 
     // ------------------ Internal functions ---------------------- //
@@ -470,6 +470,8 @@ abstract contract MultiSigWalletBase is MultiSigWalletStorage, IMultiSigWallet, 
             revert NotEnoughApprovals();
         }
 
+        _beforeExecute(txId);
+
         transaction.executed = true;
 
         emit Execute(msg.sender, txId);
@@ -547,6 +549,8 @@ abstract contract MultiSigWalletBase is MultiSigWalletStorage, IMultiSigWallet, 
         _requiredApprovals = newRequiredApprovals;
 
         emit ConfigureOwners(newOwners, newRequiredApprovals);
+
+        _afterConfigureOwners();
     }
 
     /**
@@ -567,6 +571,16 @@ abstract contract MultiSigWalletBase is MultiSigWalletStorage, IMultiSigWallet, 
         _cooldownTime = newCooldownTime;
         emit ConfigureCooldownTime(newCooldownTime);
     }
+
+    /**
+     * @dev Hook that is called after owners are configured.
+     */
+    function _afterConfigureOwners() internal virtual {}
+
+    /**
+     * @dev Hook that is called before a transaction is executed.
+     */
+    function _beforeExecute(uint256 txId) internal virtual {}
 
     /**
      * @dev Returns the downcasted uint128 from uint256, reverting on

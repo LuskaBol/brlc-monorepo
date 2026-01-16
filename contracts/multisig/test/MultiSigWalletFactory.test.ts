@@ -88,7 +88,7 @@ describe("Contract 'MultiSigWalletFactory'", () => {
         .to.be.revertedWithCustomError(walletFactory, ERROR_NAME_ZERO_OWNER_ADDRESS);
     });
 
-    it("Deployment is reverted if there is a duplicate address in the input owner array", async () => {
+    it("Is reverted if there is a duplicate address in the input owner array", async () => {
       const { factory } = await setUpFixture(deployFactory);
       const ownerAddressArray = [ownerAddresses[0], ownerAddresses[1], ownerAddresses[0]];
       const requiredApprovals = ownerAddresses.length - 1;
