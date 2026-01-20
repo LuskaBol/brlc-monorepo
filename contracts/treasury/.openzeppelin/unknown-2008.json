@@ -5,6 +5,11 @@
       "address": "0xF8a453ECd7e3AB307585899c19e6EE76d5FDD724",
       "txHash": "0x8b966bd43c534e89f51772e9a07845c0b774b7429788192d5ba273894fd477f0",
       "kind": "beacon"
+    },
+    {
+      "address": "0x2c0BC65dA98c294461056C29b620Af6c750E6BF7",
+      "txHash": "0xe901fabe02bdc9634a2dbc58ef9ed617bf87631c936be7618ebb66207dc2784c",
+      "kind": "beacon"
     }
   ],
   "impls": {
