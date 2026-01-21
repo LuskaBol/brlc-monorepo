@@ -26,9 +26,10 @@ abstract contract MultiSigGuardianWalletBase is
      *
      * @dev Requirements:
      *
-     * - The array of guardians must not be empty.
-     * - All guardians must be in the wallet owners list.
-     * - The number of required guardian approvals must not be zero and must not exceed the guardians array length.
+     * - If the guardians array is empty, the required guardian approvals must be zero.
+     * - If the guardians array is not empty, all guardians must be in the wallet owners list.
+     * - If the guardians array is not empty, the required guardian approvals must not be
+     *   zero and must not exceed the guardians array length.
      */
     function configureGuardians(
         address[] memory newGuardians,
@@ -159,28 +160,35 @@ abstract contract MultiSigGuardianWalletBase is
         uint256 len = newGuardians.length;
 
         if (len == 0) {
-            revert MultiSigGuardianWallet_GuardiansArrayEmpty();
-        }
-        if (newRequiredGuardianApprovals == 0) {
-            revert MultiSigGuardianWallet_RequiredGuardianApprovalsInvalid();
-        }
-        if (newRequiredGuardianApprovals > len) {
-            revert MultiSigGuardianWallet_RequiredGuardianApprovalsInvalid();
-        }
-
-        // Validate new guardians
-        for (uint256 i = 0; i < len; ++i) {
-            address guardian = newGuardians[i];
-
-            // Guardian must be in the owners list
-            if (!_isOwner[guardian]) {
-                revert MultiSigGuardianWallet_GuardianNotInOwners();
+            // Disabling guardians: required must be 0
+            if (newRequiredGuardianApprovals != 0) {
+                revert MultiSigGuardianWallet_RequiredGuardianApprovalsInvalid();
+            }
+        } else {
+            // Enabling/updating guardians: required must not be zero
+            if (newRequiredGuardianApprovals == 0) {
+                revert MultiSigGuardianWallet_RequiredGuardianApprovalsInvalid();
             }
 
-            // Check for duplicates by scanning previous entries
-            for (uint256 j = 0; j < i; ++j) {
-                if (newGuardians[j] == guardian) {
-                    revert MultiSigGuardianWallet_GuardianAddressDuplicate();
+            // Enabling/updating guardians: required must not exceed the guardians length
+            if (newRequiredGuardianApprovals > len) {
+                revert MultiSigGuardianWallet_RequiredGuardianApprovalsInvalid();
+            }
+
+            // Validate new guardians
+            for (uint256 i = 0; i < len; ++i) {
+                address guardian = newGuardians[i];
+
+                // Guardian must be in the owners list
+                if (!_isOwner[guardian]) {
+                    revert MultiSigGuardianWallet_GuardianNotInOwners();
+                }
+
+                // Check for duplicates by scanning previous entries
+                for (uint256 j = 0; j < i; ++j) {
+                    if (newGuardians[j] == guardian) {
+                        revert MultiSigGuardianWallet_GuardianAddressDuplicate();
+                    }
                 }
             }
         }

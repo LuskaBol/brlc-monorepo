@@ -62,14 +62,13 @@ describe("MultiSigGuardianWallet contract", () => {
 
   // Guardian-specific errors
   const ERROR_NAME_GUARDIAN_ADDRESS_DUPLICATE = "MultiSigGuardianWallet_GuardianAddressDuplicate";
-  const ERROR_NAME_GUARDIANS_ARRAY_EMPTY = "MultiSigGuardianWallet_GuardiansArrayEmpty";
   const ERROR_NAME_REQUIRED_GUARDIAN_APPROVALS_INVALID = "MultiSigGuardianWallet_RequiredGuardianApprovalsInvalid";
   const ERROR_NAME_GUARDIAN_APPROVALS_INSUFFICIENT = "MultiSigGuardianWallet_GuardianApprovalsInsufficient";
   const ERROR_NAME_GUARDIAN_NOT_IN_OWNERS = "MultiSigGuardianWallet_GuardianNotInOwners";
 
   const EXPECTED_VERSION: Version = {
     major: 1,
-    minor: 1,
+    minor: 2,
     patch: 0,
   };
 
@@ -215,12 +214,29 @@ describe("MultiSigGuardianWallet contract", () => {
       ).to.be.revertedWithCustomError(walletFactory, ERROR_NAME_OWNER_ADDRESS_DUPLICATE);
     });
 
-    it("Deployment is reverted if the input guardian array is empty", async () => {
-      await expect(walletFactory.deploy(ownerAddresses, REQUIRED_APPROVALS, [], REQUIRED_GUARDIAN_APPROVALS))
-        .to.be.revertedWithCustomError(walletFactory, ERROR_NAME_GUARDIANS_ARRAY_EMPTY);
+    it("Deployment succeeds with empty guardian array and zero required (disabled guardians)", async () => {
+      const noGuardianWallet = await walletFactory.deploy(
+        ownerAddresses,
+        REQUIRED_APPROVALS,
+        [], // No guardians
+        0, // Zero required
+      ) as Contract;
+      await noGuardianWallet.waitForDeployment();
+
+      expect(await noGuardianWallet.guardians()).to.deep.eq([]);
+      expect(await noGuardianWallet.requiredGuardianApprovals()).to.eq(0);
+      await checkGuardianship(noGuardianWallet, {
+        guardianAddresses: ownerAddresses,
+        expectedGuardianStatus: false,
+      });
     });
 
-    it("Deployment is reverted if the input number of required guardian approvals is zero", async () => {
+    it("Deployment is reverted if the input guardian array is empty but required is non-zero", async () => {
+      await expect(walletFactory.deploy(ownerAddresses, REQUIRED_APPROVALS, [], REQUIRED_GUARDIAN_APPROVALS))
+        .to.be.revertedWithCustomError(walletFactory, ERROR_NAME_REQUIRED_GUARDIAN_APPROVALS_INVALID);
+    });
+
+    it("Deployment is reverted if required guardian approvals is zero but guardians provided", async () => {
       const requiredGuardianApprovals = 0;
       await expect(
         walletFactory.deploy(ownerAddresses, REQUIRED_APPROVALS, guardianAddresses, requiredGuardianApprovals),
@@ -283,17 +299,34 @@ describe("MultiSigGuardianWallet contract", () => {
           .to.be.revertedWithCustomError(wallet, ERROR_NAME_CALLER_UNAUTHORIZED);
       });
 
-      it("Is reverted if the input guardian array is empty", async () => {
+      it("Successfully disables guardians with empty array and zero required", async () => {
+        const { wallet } = await setUpFixture(deployWallet);
+        const txData = encodeConfigureGuardiansFunctionData([], 0);
+
+        await proveTx(connect(wallet, owner1).submitAndApprove(getAddress(wallet), 0, txData));
+        await expect(connect(wallet, owner2).approveAndExecute(0))
+          .to.emit(wallet, EVENT_NAME_CONFIGURE_GUARDIANS)
+          .withArgs([], 0);
+
+        expect(await wallet.guardians()).to.deep.eq([]);
+        expect(await wallet.requiredGuardianApprovals()).to.eq(0);
+        await checkGuardianship(wallet, {
+          guardianAddresses: guardianAddresses,
+          expectedGuardianStatus: false,
+        });
+      });
+
+      it("Is reverted if the input guardian array is empty but required is non-zero", async () => {
         const { wallet } = await setUpFixture(deployWallet);
         const txData = encodeConfigureGuardiansFunctionData([], REQUIRED_GUARDIAN_APPROVALS);
 
         await proveTx(connect(wallet, owner1).submitAndApprove(getAddress(wallet), 0, txData));
         await expect(connect(wallet, owner2).approveAndExecute(0))
           .to.be.revertedWithCustomError(wallet, ERROR_NAME_INTERNAL_TRANSACTION_FAILED)
-          .withArgs(wallet.interface.encodeErrorResult(ERROR_NAME_GUARDIANS_ARRAY_EMPTY));
+          .withArgs(wallet.interface.encodeErrorResult(ERROR_NAME_REQUIRED_GUARDIAN_APPROVALS_INVALID));
       });
 
-      it("Is reverted if the input number of required guardian approvals is zero", async () => {
+      it("Is reverted if the input number of required guardian approvals is zero but guardians provided", async () => {
         const { wallet } = await setUpFixture(deployWallet);
         const invalidGuardianApprovals = 0;
         const txData = encodeConfigureGuardiansFunctionData(guardianAddresses, invalidGuardianApprovals);
@@ -1295,6 +1328,169 @@ describe("MultiSigGuardianWallet contract", () => {
         expect(await threeGuardianWallet.isGuardian(owner1.address)).to.eq(false);
         expect(await threeGuardianWallet.isGuardian(owner2.address)).to.eq(false);
         expect(await threeGuardianWallet.isGuardian(owner3.address)).to.eq(true);
+      });
+    });
+
+    describe("Scenarios with zero guardians (disabled guardian requirement)", () => {
+      const tx: TestTx = {
+        id: 0,
+        to: ADDRESS_STUB1,
+        value: 0,
+        data: TX_DATA_STUB1,
+      };
+
+      it("Wallet deployed with zero guardians allows execution without guardian approval", async () => {
+        // Deploy wallet with no guardians
+        const noGuardianWallet = await walletFactory.deploy(
+          ownerAddresses,
+          REQUIRED_APPROVALS,
+          [], // No guardians
+          0, // Zero required
+        ) as Contract;
+        await noGuardianWallet.waitForDeployment();
+
+        // Non-guardian owners can approve and execute
+        await proveTx(connect(noGuardianWallet, owner3).submitAndApprove(tx.to, tx.value, tx.data));
+        await expect(connect(noGuardianWallet, owner4).approveAndExecute(tx.id))
+          .to.emit(noGuardianWallet, EVENT_NAME_EXECUTE)
+          .withArgs(owner4.address, tx.id);
+      });
+
+      it("Guardians can be re-enabled after being disabled", async () => {
+        const { wallet } = await setUpFixture(deployWallet);
+
+        // Step 1: Disable guardians
+        const disableTxData = encodeConfigureGuardiansFunctionData([], 0);
+        await proveTx(connect(wallet, owner1).submitAndApprove(getAddress(wallet), 0, disableTxData));
+        await proveTx(connect(wallet, owner2).approveAndExecute(0));
+
+        expect(await wallet.guardians()).to.deep.eq([]);
+        expect(await wallet.requiredGuardianApprovals()).to.eq(0);
+
+        // Step 2: Re-enable guardians
+        const newGuardians = [owner3.address, owner4.address];
+        const enableTxData = encodeConfigureGuardiansFunctionData(newGuardians, 1);
+        await proveTx(connect(wallet, owner1).submitAndApprove(getAddress(wallet), 0, enableTxData));
+        await proveTx(connect(wallet, owner2).approveAndExecute(1));
+
+        expect(await wallet.guardians()).to.deep.eq(newGuardians);
+        expect(await wallet.requiredGuardianApprovals()).to.eq(1);
+        await checkGuardianship(wallet, {
+          guardianAddresses: newGuardians,
+          expectedGuardianStatus: true,
+        });
+      });
+
+      it("After disabling guardians, execution succeeds without guardian approval", async () => {
+        const { wallet } = await setUpFixture(deployWallet);
+
+        // Submit a transaction that only non-guardians approve
+        await proveTx(connect(wallet, owner3).submitAndApprove(tx.to, tx.value, tx.data));
+        await proveTx(connect(wallet, owner4).approve(tx.id));
+
+        // Should fail initially because guardian approval is required
+        await expect(connect(wallet, owner3).execute(tx.id))
+          .to.be.revertedWithCustomError(wallet, ERROR_NAME_GUARDIAN_APPROVALS_INSUFFICIENT);
+
+        // Disable guardians via tx #1
+        const disableTxData = encodeConfigureGuardiansFunctionData([], 0);
+        await proveTx(connect(wallet, owner1).submitAndApprove(getAddress(wallet), 0, disableTxData));
+        await proveTx(connect(wallet, owner2).approveAndExecute(1));
+
+        // Now tx #0 should execute (guardian requirement disabled)
+        await expect(connect(wallet, owner3).execute(tx.id))
+          .to.emit(wallet, EVENT_NAME_EXECUTE)
+          .withArgs(owner3.address, tx.id);
+      });
+
+      it("getGuardianApprovalCount returns 0 when guardians are disabled", async () => {
+        // Deploy with no guardians
+        const noGuardianWallet = await walletFactory.deploy(
+          ownerAddresses,
+          REQUIRED_APPROVALS,
+          [],
+          0,
+        ) as Contract;
+        await noGuardianWallet.waitForDeployment();
+
+        await proveTx(connect(noGuardianWallet, owner1).submitAndApprove(tx.to, tx.value, tx.data));
+
+        // Even though owner1 approved, guardian count is 0 (no guardians configured)
+        expect(await noGuardianWallet.getGuardianApprovalCount(tx.id)).to.eq(0);
+      });
+
+      it("isGuardian returns false for all addresses when guardians are disabled", async () => {
+        const noGuardianWallet = await walletFactory.deploy(
+          ownerAddresses,
+          REQUIRED_APPROVALS,
+          [],
+          0,
+        ) as Contract;
+        await noGuardianWallet.waitForDeployment();
+
+        for (const addr of ownerAddresses) {
+          expect(await noGuardianWallet.isGuardian(addr)).to.eq(false);
+        }
+      });
+
+      it("Batch operations work correctly with zero guardians", async () => {
+        const noGuardianWallet = await walletFactory.deploy(
+          ownerAddresses,
+          REQUIRED_APPROVALS,
+          [],
+          0,
+        ) as Contract;
+        await noGuardianWallet.waitForDeployment();
+
+        const txIds = [0, 1];
+
+        // Submit multiple transactions
+        await proveTx(connect(noGuardianWallet, owner3).submit(tx.to, tx.value, tx.data));
+        await proveTx(connect(noGuardianWallet, owner3).submit(tx.to, tx.value, tx.data));
+
+        // Batch approve
+        await proveTx(connect(noGuardianWallet, owner3).approveBatch(txIds));
+        await proveTx(connect(noGuardianWallet, owner4).approveBatch(txIds));
+
+        // Batch execute should succeed without guardian approval
+        const txResponse = connect(noGuardianWallet, owner3).executeBatch(txIds);
+        await expect(txResponse)
+          .to.emit(noGuardianWallet, EVENT_NAME_EXECUTE)
+          .withArgs(owner3.address, 0);
+        await expect(txResponse)
+          .to.emit(noGuardianWallet, EVENT_NAME_EXECUTE)
+          .withArgs(owner3.address, 1);
+      });
+
+      it("Transition from guardians -> no guardians -> different guardians works correctly", async () => {
+        const { wallet } = await setUpFixture(deployWallet);
+
+        // Initial state: owner1, owner2 are guardians
+        expect(await wallet.guardians()).to.deep.eq(guardianAddresses);
+
+        // Disable guardians
+        const disableTxData = encodeConfigureGuardiansFunctionData([], 0);
+        await proveTx(connect(wallet, owner1).submitAndApprove(getAddress(wallet), 0, disableTxData));
+        await proveTx(connect(wallet, owner2).approveAndExecute(0));
+
+        expect(await wallet.guardians()).to.deep.eq([]);
+
+        // Enable different guardians (owner3, owner4)
+        const newGuardians = [owner3.address, owner4.address];
+        const enableTxData = encodeConfigureGuardiansFunctionData(newGuardians, 2);
+        await proveTx(connect(wallet, owner1).submitAndApprove(getAddress(wallet), 0, enableTxData));
+        await proveTx(connect(wallet, owner2).approveAndExecute(1));
+
+        expect(await wallet.guardians()).to.deep.eq(newGuardians);
+        expect(await wallet.requiredGuardianApprovals()).to.eq(2);
+
+        // Old guardians should not be guardians anymore
+        expect(await wallet.isGuardian(owner1.address)).to.eq(false);
+        expect(await wallet.isGuardian(owner2.address)).to.eq(false);
+
+        // New guardians should be active
+        expect(await wallet.isGuardian(owner3.address)).to.eq(true);
+        expect(await wallet.isGuardian(owner4.address)).to.eq(true);
       });
     });
   });

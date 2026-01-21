@@ -60,9 +60,6 @@ interface IMultiSigGuardianWallet is IMultiSigWallet {
 
     // ------------------ Errors ---------------------------------- //
 
-    /// @dev An empty array of addresses was passed when configuring the guardians.
-    error MultiSigGuardianWallet_GuardiansArrayEmpty();
-
     /// @dev A non-owner address was passed within the guardians array.
     error MultiSigGuardianWallet_GuardianNotInOwners();
 
@@ -78,12 +75,15 @@ interface IMultiSigGuardianWallet is IMultiSigWallet {
     // ------------------ Transactional functions ----------------- //
 
     /**
-     * @dev Configures guardians.
+     * @dev Configures guardians or disables the guardian requirement.
+     *
+     * To disable guardians, pass an empty array with zero required approvals.
+     * To enable/update guardians, pass a non-empty array of owner addresses with a non-zero required count.
      *
      * Emits a {ConfigureGuardians} event.
      *
-     * @param newGuardians The array of addresses to become the guardians.
-     * @param newRequiredGuardianApprovals The new number of guardian approvals required to execute a transaction.
+     * @param newGuardians The array of addresses to become the guardians (empty array to disable).
+     * @param newRequiredGuardianApprovals The new number of guardian approvals required (zero to disable).
      */
     function configureGuardians(address[] memory newGuardians, uint16 newRequiredGuardianApprovals) external;
 

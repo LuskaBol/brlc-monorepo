@@ -20,7 +20,6 @@ describe("Contract 'MultiSigGuardianWalletFactory'", () => {
 
   // Guardian-specific errors
   const ERROR_NAME_GUARDIAN_ADDRESS_DUPLICATE = "MultiSigGuardianWallet_GuardianAddressDuplicate";
-  const ERROR_NAME_GUARDIANS_ARRAY_EMPTY = "MultiSigGuardianWallet_GuardiansArrayEmpty";
   const ERROR_NAME_REQUIRED_GUARDIAN_APPROVALS_INVALID = "MultiSigGuardianWallet_RequiredGuardianApprovalsInvalid";
   const ERROR_NAME_GUARDIAN_NOT_IN_OWNERS = "MultiSigGuardianWallet_GuardianNotInOwners";
 
@@ -139,15 +138,28 @@ describe("Contract 'MultiSigGuardianWalletFactory'", () => {
       ).to.be.revertedWithCustomError(walletFactory, ERROR_NAME_OWNER_ADDRESS_DUPLICATE);
     });
 
-    it("Is reverted if the input guardian array is empty", async () => {
+    it("Creates wallet with empty guardian array and zero required (disabled guardians)", async () => {
+      const { factory } = await setUpFixture(deployFactory);
+
+      const tx = factory.deployNewWallet(ownerAddresses, REQUIRED_APPROVALS, [], 0);
+      await expect(await tx).to.emit(factory, EVENT_NAME_NEW_WALLET_DEPLOYED_BY_FACTORY);
+
+      const walletAddress = await factory.wallets(0);
+      const wallet = await ethers.getContractAt("MultiSigGuardianWallet", walletAddress);
+
+      expect(await wallet.guardians()).to.deep.eq([]);
+      expect(await wallet.requiredGuardianApprovals()).to.eq(0);
+    });
+
+    it("Is reverted if the input guardian array is empty but required is non-zero", async () => {
       const { factory } = await setUpFixture(deployFactory);
 
       await expect(
         factory.deployNewWallet(ownerAddresses, REQUIRED_APPROVALS, [], REQUIRED_GUARDIAN_APPROVALS),
-      ).to.be.revertedWithCustomError(walletFactory, ERROR_NAME_GUARDIANS_ARRAY_EMPTY);
+      ).to.be.revertedWithCustomError(walletFactory, ERROR_NAME_REQUIRED_GUARDIAN_APPROVALS_INVALID);
     });
 
-    it("Is reverted if the input number of required guardian approvals is zero", async () => {
+    it("Is reverted if the input number of required guardian approvals is zero but guardians provided", async () => {
       const { factory } = await setUpFixture(deployFactory);
 
       const requiredGuardianApprovals = 0;

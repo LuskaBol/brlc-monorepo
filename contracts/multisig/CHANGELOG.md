@@ -1,3 +1,17 @@
+# 1.2.0
+
+## Main Changes
+
+### MultiSigGuardianWallet
+- Allow configuring zero guardians to disable the guardian requirement.
+- Calling `configureGuardians([], 0)` now disables guardian checks instead of reverting.
+- Wallets can be deployed/initialized with no guardians by passing empty array and zero required approvals.
+- Removed `MultiSigGuardianWallet_GuardiansArrayEmpty` error (no longer needed).
+
+## Migration
+
+No special actions required. Existing wallets with guardians are unaffected. To disable guardians on an existing wallet, execute `configureGuardians([], 0)` through the multisig.
+
 # 1.1.1
 
 ## Main Changes

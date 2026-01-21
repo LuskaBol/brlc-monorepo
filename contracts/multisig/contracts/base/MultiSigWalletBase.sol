@@ -346,7 +346,7 @@ abstract contract MultiSigWalletBase is MultiSigWalletStorage, IMultiSigWallet, 
 
     /// @inheritdoc IVersionable
     function $__VERSION() external pure returns (Version memory) {
-        return Version(1, 1, 0);
+        return Version(1, 2, 0);
     }
 
     // ------------------ Internal functions ---------------------- //

@@ -29,13 +29,12 @@ describe("Contract 'MultiSigGuardianWalletUpgradeable'", () => {
 
   // Guardian-specific errors
   const ERROR_NAME_GUARDIAN_ADDRESS_DUPLICATE = "MultiSigGuardianWallet_GuardianAddressDuplicate";
-  const ERROR_NAME_GUARDIANS_ARRAY_EMPTY = "MultiSigGuardianWallet_GuardiansArrayEmpty";
   const ERROR_NAME_REQUIRED_GUARDIAN_APPROVALS_INVALID = "MultiSigGuardianWallet_RequiredGuardianApprovalsInvalid";
   const ERROR_NAME_GUARDIAN_NOT_IN_OWNERS = "MultiSigGuardianWallet_GuardianNotInOwners";
 
   const EXPECTED_VERSION: Version = {
     major: 1,
-    minor: 1,
+    minor: 2,
     patch: 0,
   };
 
@@ -234,15 +233,28 @@ describe("Contract 'MultiSigGuardianWalletUpgradeable'", () => {
       ).to.be.revertedWithCustomError(uninitializedWallet, ERROR_NAME_OWNER_ADDRESS_DUPLICATE);
     });
 
-    it("Is reverted if the input guardian array is empty", async () => {
+    it("Succeeds with empty guardian array and zero required guardian approvals (disabled guardians)", async () => {
+      const uninitializedWallet =
+        await upgrades.deployProxy(walletUpgradeableFactory, [], { initializer: false }) as Contract;
+      await uninitializedWallet.initialize(ownerAddresses, REQUIRED_APPROVALS, [], 0);
+
+      expect(await uninitializedWallet.guardians()).to.deep.eq([]);
+      expect(await uninitializedWallet.requiredGuardianApprovals()).to.eq(0);
+      await checkGuardianship(uninitializedWallet, {
+        guardianAddresses: ownerAddresses,
+        expectedGuardianStatus: false,
+      });
+    });
+
+    it("Is reverted if the input guardian array is empty but required guardian approvals is non-zero", async () => {
       const uninitializedWallet =
         await upgrades.deployProxy(walletUpgradeableFactory, [], { initializer: false }) as Contract;
       await expect(
         uninitializedWallet.initialize(ownerAddresses, REQUIRED_APPROVALS, [], REQUIRED_GUARDIAN_APPROVALS),
-      ).to.be.revertedWithCustomError(uninitializedWallet, ERROR_NAME_GUARDIANS_ARRAY_EMPTY);
+      ).to.be.revertedWithCustomError(uninitializedWallet, ERROR_NAME_REQUIRED_GUARDIAN_APPROVALS_INVALID);
     });
 
-    it("Is reverted if the input number of required guardian approvals is zero", async () => {
+    it("Is reverted if required guardian approvals is zero but guardians array is not empty", async () => {
       const uninitializedWallet =
         await upgrades.deployProxy(walletUpgradeableFactory, [], { initializer: false }) as Contract;
       const requiredGuardianApprovals = 0;
