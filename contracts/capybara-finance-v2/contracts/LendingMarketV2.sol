@@ -564,6 +564,7 @@ contract LendingMarketV2 is
         preview.moratoryRate = subLoan.moratoryRate;
         preview.lateFeeRate = subLoan.lateFeeRate;
         preview.clawbackFeeRate = subLoan.clawbackFeeRate;
+        preview.chargeExpensesRate = subLoan.chargeExpensesRate;
 
         preview.trackedPrincipal = subLoan.trackedPrincipal;
         preview.repaidPrincipal = subLoan.repaidPrincipal;
@@ -588,6 +589,10 @@ contract LendingMarketV2 is
         preview.trackedClawbackFee = subLoan.trackedClawbackFee;
         preview.repaidClawbackFee = subLoan.repaidClawbackFee;
         preview.discountClawbackFee = subLoan.discountClawbackFee;
+
+        preview.trackedChargeExpenses = subLoan.trackedChargeExpenses;
+        preview.repaidChargeExpenses = subLoan.repaidChargeExpenses;
+        preview.discountChargeExpenses = subLoan.discountChargeExpenses;
 
         preview.outstandingBalance = _calculateOutstandingBalance(subLoan);
 
@@ -669,6 +674,10 @@ contract LendingMarketV2 is
             preview.totalTrackedClawbackFee += singleLoanPreview.trackedClawbackFee;
             preview.totalRepaidClawbackFee += singleLoanPreview.repaidClawbackFee;
             preview.totalDiscountClawbackFee += singleLoanPreview.discountClawbackFee;
+
+            preview.totalTrackedChargeExpenses += singleLoanPreview.trackedChargeExpenses;
+            preview.totalRepaidChargeExpenses += singleLoanPreview.repaidChargeExpenses;
+            preview.totalDiscountChargeExpenses += singleLoanPreview.discountChargeExpenses;
 
             preview.totalOutstandingBalance += singleLoanPreview.outstandingBalance;
 

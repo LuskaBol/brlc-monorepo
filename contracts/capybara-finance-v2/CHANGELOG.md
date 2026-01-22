@@ -1,6 +1,44 @@
-# Unreleased
+# 2.2.0
 
 ## Main Changes
+
+1. Added charge expenses (Brazil `despesas de cobrança`) as a new tracked financial component for sub-loans.
+2. Charge expenses is a one-time fee imposed when a sub-loan becomes overdue, calculated as: `chargeExpenses = legalPrincipal × chargeExpensesRate`, where `legalPrincipal = trackedPrincipal + trackedPrimaryInterest`.
+3. New fields added to structures:
+   - `SubLoanTakingRequest`: `chargeExpensesRate`
+   - `SubLoanInception`: `initialChargeExpensesRate`
+   - `SubLoanState`: `chargeExpensesRate`, `trackedChargeExpenses`, `repaidChargeExpenses`, `discountChargeExpenses`
+   - `SubLoanPreview`: same as `SubLoanState`
+   - `LoanPreview`: `totalTrackedChargeExpenses`, `totalRepaidChargeExpenses`, `totalDiscountChargeExpenses`
+   - `ProcessingSubLoan`: `chargeExpensesRate`, `trackedChargeExpenses`
+4. New operation kinds: `ChargeExpensesRateSetting` (value 12), `ChargeExpensesDiscount` (value 19).
+5. The value of the following operation kinds have been incremented by 1:
+    - `DurationSetting` (value 11) -> `DurationSetting` (value 12);
+    - `PrincipalDiscount` (value 12) -> `PrincipalDiscount` (value 13);
+    - `PrimaryInterestDiscount` (value 13) -> `PrimaryInterestDiscount` (value 14);
+    - `SecondaryInterestDiscount` (value 14) -> `SecondaryInterestDiscount` (value 15);
+    - `MoratoryInterestDiscount` (value 15) -> `MoratoryInterestDiscount` (value 16);
+    - `LateFeeDiscount` (value 16) -> `LateFeeDiscount` (value 17);
+    - `ClawbackFeeDiscount` (value 17) -> `ClawbackFeeDiscount` (value 18).
+6. Updated `packedRates` in events to include `chargeExpensesRate` at bits 160-191.
+7. Added `packedChargeExpensesParts` parameter to `SubLoanUpdated` event.
+8. Repayment/discount sequence updated: charge expenses is repaid after late fee and before clawback fee. The full new sequence is (from the first to the last):
+    - Secondary interest;
+    - Moratory interest;
+    - Late fee;
+    - Charge expenses;
+    - Clawback fee;
+    - Primary interest;
+    - Principal.
+
+## Migration
+
+1. Upgrade the already deployed smart contracts to the new version.
+2. Update any off-chain code to handle the new fields, event parameters and operation kinds.
+
+# 2.1.1
+
+## Main Change
 
 - Applied custom error naming convention. Errors now follow the `ContractName_SubjectState` pattern.
 

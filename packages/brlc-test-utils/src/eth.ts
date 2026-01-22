@@ -27,7 +27,7 @@ export async function proveTx(
   if (!txReceipt) {
     throw new Error("The transaction receipt is empty");
   }
-  return txReceipt as TransactionReceipt;
+  return txReceipt;
 }
 
 /**
@@ -42,7 +42,7 @@ export function connect(contract: BaseContract, signer: HardhatEthersSigner): Co
 /**
  * Gets the address from a contract instance in synchronous manner.
  */
-export function getAddress(contract: Contract): string {
+export function getAddress(contract: Contract | BaseContract): string {
   const address = contract.target;
   if (typeof address !== "string" || address.length != 42 || !address.startsWith("0x")) {
     throw new Error("The '.target' field of the contract is not an address string");
@@ -111,7 +111,7 @@ export async function increaseBlockTimestamp(seconds: number) {
  */
 export async function getNumberOfEvents(
   tx: Promise<TransactionResponse>,
-  contract: Contract,
+  contract: Contract | BaseContract,
   eventName: string,
 ): Promise<number> {
   const topic = contract.filters[eventName].fragment.topicHash;
@@ -122,7 +122,7 @@ export async function getNumberOfEvents(
  * Checks that a UUPS upgradeable contract can be upgraded properly.
  */
 export async function checkContractUupsUpgrading(
-  contract: Contract,
+  contract: Contract | BaseContract,
   contractFactory: ContractFactory,
   upgradeFunctionSignature = "upgradeToAndCall(address,bytes)",
 ) {
@@ -133,9 +133,9 @@ export async function checkContractUupsUpgrading(
   const expectedNewImplementationAddress = await newImplementation.getAddress();
 
   if (upgradeFunctionSignature === "upgradeToAndCall(address,bytes)") {
-    await proveTx(contract[upgradeFunctionSignature](expectedNewImplementationAddress, "0x"));
+    await proveTx(((contract as Contract)[upgradeFunctionSignature])(expectedNewImplementationAddress, "0x"));
   } else {
-    await proveTx(contract[upgradeFunctionSignature](expectedNewImplementationAddress));
+    await proveTx((contract as Contract)[upgradeFunctionSignature](expectedNewImplementationAddress));
   }
 
   const actualNewImplementationAddress = await upgrades.erc1967.getImplementationAddress(contractAddress);

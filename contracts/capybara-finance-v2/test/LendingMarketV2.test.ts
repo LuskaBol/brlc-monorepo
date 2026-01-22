@@ -18,6 +18,7 @@ import {
 import * as Contracts from "../typechain-types";
 import { DeployProxyOptions } from "@openzeppelin/hardhat-upgrades/dist/utils";
 import { ContractTransactionResponse } from "ethers";
+import { EXPECTED_VERSION } from "../test-utils/specific";
 
 enum LendingProgramStatus {
   Nonexistent = 0,
@@ -53,13 +54,15 @@ enum OperationKind {
   MoratoryRateSetting = 8,
   LateFeeRateSetting = 9,
   ClawbackFeeRateSetting = 10,
-  DurationSetting = 11,
-  PrincipalDiscount = 12,
-  PrimaryInterestDiscount = 13,
-  SecondaryInterestDiscount = 14,
-  MoratoryInterestDiscount = 15,
-  LateFeeDiscount = 16,
-  ClawbackFeeDiscount = 17,
+  ChargeExpensesRateSetting = 11,
+  DurationSetting = 12,
+  PrincipalDiscount = 13,
+  PrimaryInterestDiscount = 14,
+  SecondaryInterestDiscount = 15,
+  MoratoryInterestDiscount = 16,
+  LateFeeDiscount = 17,
+  ClawbackFeeDiscount = 18,
+  ChargeExpensesDiscount = 19,
 }
 
 interface Fixture {
@@ -86,6 +89,7 @@ interface SubLoanTakingRequest {
   moratoryRate: number;
   lateFeeRate: number;
   clawbackFeeRate: number;
+  chargeExpensesRate: number;
 }
 
 interface SubLoanInception {
@@ -100,8 +104,8 @@ interface SubLoanInception {
   initialSecondaryRate: number;
   initialMoratoryRate: number;
   initialLateFeeRate: number;
-
   initialClawbackFeeRate: number;
+  initialChargeExpensesRate: number;
 
   [key: string]: bigint | number | string; // Index signature
 }
@@ -130,6 +134,7 @@ interface SubLoanState {
   moratoryRate: number;
   lateFeeRate: number;
   clawbackFeeRate: number;
+  chargeExpensesRate: number;
 
   trackedPrincipal: bigint;
   repaidPrincipal: bigint;
@@ -154,6 +159,10 @@ interface SubLoanState {
   trackedClawbackFee: bigint;
   repaidClawbackFee: bigint;
   discountClawbackFee: bigint;
+
+  trackedChargeExpenses: bigint;
+  repaidChargeExpenses: bigint;
+  discountChargeExpenses: bigint;
 
   [key: string]: bigint | number; // Index signature
 }
@@ -200,6 +209,7 @@ interface SubLoanPreview {
   moratoryRate: number;
   lateFeeRate: number;
   clawbackFeeRate: number;
+  chargeExpensesRate: number;
 
   trackedPrincipal: bigint;
   repaidPrincipal: bigint;
@@ -224,6 +234,10 @@ interface SubLoanPreview {
   trackedClawbackFee: bigint;
   repaidClawbackFee: bigint;
   discountClawbackFee: bigint;
+
+  trackedChargeExpenses: bigint;
+  repaidChargeExpenses: bigint;
+  discountChargeExpenses: bigint;
 
   outstandingBalance: bigint;
 
@@ -262,6 +276,10 @@ interface LoanPreview {
   totalTrackedLateFee: bigint;
   totalRepaidLateFee: bigint;
   totalDiscountLateFee: bigint;
+
+  totalTrackedChargeExpenses: bigint;
+  totalRepaidChargeExpenses: bigint;
+  totalDiscountChargeExpenses: bigint;
 
   totalOutstandingBalance: bigint;
 
@@ -327,6 +345,7 @@ const POST_DUE_REMUNERATORY_RATE = (INTEREST_RATE_FACTOR / 1000) * 2; // 0.2%
 const MORATORY_RATE = (INTEREST_RATE_FACTOR / 1000) * 3; // 0.3%
 const LATE_FEE_RATE = (INTEREST_RATE_FACTOR / 1000) * 4; // 0.4%
 const CLAWBACK_FEE_RATE = (INTEREST_RATE_FACTOR / 1000) * 5; // 0.5%
+const CHARGE_EXPENSES_RATE = (INTEREST_RATE_FACTOR / 1000) * 6; // 0.6%
 const MAX_UINT8 = maxUintForBits(8);
 const MAX_UINT16 = maxUintForBits(16);
 const MAX_UINT16_NUMBER = Number(MAX_UINT16);
@@ -402,12 +421,6 @@ const ERROR_NAME_CREDIT_LINE_ON_AFTER_LOAN_CLOSED_REVERTED = "CreditLineV2Mock_O
 const ERROR_NAME_CREDIT_LINE_ON_BEFORE_LOAN_OPENED_REVERTED = "CreditLineV2Mock_OnBeforeLoanOpenedReverted";
 const ERROR_NAME_LIQUIDITY_POOL_ON_BEFORE_LIQUIDITY_IN_REVERTED = "LiquidityPoolMock_OnBeforeLiquidityInReverted";
 const ERROR_NAME_LIQUIDITY_POOL_ON_BEFORE_LIQUIDITY_OUT_REVERTED = "LiquidityPoolMock_OnBeforeLiquidityOutReverted";
-
-const EXPECTED_VERSION = {
-  major: 2,
-  minor: 0,
-  patch: 0,
-};
 
 const defaultOperationRequest: OperationRequest = {
   subLoanId: 0n,
@@ -519,6 +532,7 @@ function packRates(subLoan: SubLoan): bigint {
     BigInt(subLoan.state.moratoryRate),
     BigInt(subLoan.state.lateFeeRate),
     BigInt(subLoan.state.clawbackFeeRate),
+    BigInt(subLoan.state.chargeExpensesRate),
   );
 }
 
@@ -597,6 +611,15 @@ function packSubLoanClawbackFeeParts(subLoan: SubLoan): bigint {
   );
 }
 
+function packSubLoanChargeExpensesParts(subLoan: SubLoan): bigint {
+  return packAmountParts(
+    64n,
+    subLoan.state.trackedChargeExpenses,
+    subLoan.state.repaidChargeExpenses,
+    subLoan.state.discountChargeExpenses,
+  );
+}
+
 function toBytes32(value: bigint): string {
   return ethers.toBeHex(value, 32);
 }
@@ -618,6 +641,7 @@ function defineInitialSubLoan(
     initialMoratoryRate: subLoanTakingRequest.moratoryRate,
     initialLateFeeRate: subLoanTakingRequest.lateFeeRate,
     initialClawbackFeeRate: subLoanTakingRequest.clawbackFeeRate,
+    initialChargeExpensesRate: subLoanTakingRequest.chargeExpensesRate,
 
     initialDuration: subLoanTakingRequest.duration,
     startTimestamp: startTimestamp,
@@ -644,6 +668,7 @@ function defineInitialSubLoan(
     moratoryRate: inception.initialMoratoryRate,
     lateFeeRate: inception.initialLateFeeRate,
     clawbackFeeRate: inception.initialClawbackFeeRate,
+    chargeExpensesRate: inception.initialChargeExpensesRate,
 
     trackedPrincipal: inception.borrowedAmount + inception.addonAmount,
     repaidPrincipal: 0n,
@@ -668,6 +693,10 @@ function defineInitialSubLoan(
     trackedClawbackFee: 0n,
     repaidClawbackFee: 0n,
     discountClawbackFee: 0n,
+
+    trackedChargeExpenses: 0n,
+    repaidChargeExpenses: 0n,
+    discountChargeExpenses: 0n,
   };
 
   return { id, indexInLoan: subLoanIndex, inception, metadata, state };
@@ -705,7 +734,9 @@ function calculateOutstandingBalance(subLoan: SubLoan): bigint {
     subLoan.state.trackedPrimaryInterest +
     subLoan.state.trackedSecondaryInterest +
     subLoan.state.trackedMoratoryInterest +
-    subLoan.state.trackedLateFee,
+    subLoan.state.trackedLateFee +
+    subLoan.state.trackedClawbackFee +
+    subLoan.state.trackedChargeExpenses,
   );
 }
 
@@ -742,6 +773,7 @@ function defineExpectedSubLoanPreview(subLoan: SubLoan): SubLoanPreview {
     moratoryRate: subLoan.state.moratoryRate,
     lateFeeRate: subLoan.state.lateFeeRate,
     clawbackFeeRate: subLoan.state.clawbackFeeRate,
+    chargeExpensesRate: subLoan.state.chargeExpensesRate,
 
     trackedPrincipal: subLoan.state.trackedPrincipal,
     repaidPrincipal: subLoan.state.repaidPrincipal,
@@ -766,6 +798,10 @@ function defineExpectedSubLoanPreview(subLoan: SubLoan): SubLoanPreview {
     trackedClawbackFee: subLoan.state.trackedClawbackFee,
     repaidClawbackFee: subLoan.state.repaidClawbackFee,
     discountClawbackFee: subLoan.state.discountClawbackFee,
+
+    trackedChargeExpenses: subLoan.state.trackedChargeExpenses,
+    repaidChargeExpenses: subLoan.state.repaidChargeExpenses,
+    discountChargeExpenses: subLoan.state.discountChargeExpenses,
 
     outstandingBalance: calculateOutstandingBalance(subLoan),
   };
@@ -803,6 +839,10 @@ function defineExpectedLoanPreview(loan: Loan): LoanPreview {
   let totalTrackedLateFee = 0n;
   let totalRepaidLateFee = 0n;
   let totalDiscountLateFee = 0n;
+
+  let totalTrackedChargeExpenses = 0n;
+  let totalRepaidChargeExpenses = 0n;
+  let totalDiscountChargeExpenses = 0n;
 
   let totalOutstandingBalance = 0n;
 
@@ -842,6 +882,10 @@ function defineExpectedLoanPreview(loan: Loan): LoanPreview {
     totalRepaidLateFee += preview.repaidLateFee;
     totalDiscountLateFee += preview.discountLateFee;
 
+    totalTrackedChargeExpenses += preview.trackedChargeExpenses;
+    totalRepaidChargeExpenses += preview.repaidChargeExpenses;
+    totalDiscountChargeExpenses += preview.discountChargeExpenses;
+
     totalOutstandingBalance += preview.outstandingBalance;
   }
 
@@ -879,6 +923,10 @@ function defineExpectedLoanPreview(loan: Loan): LoanPreview {
     totalTrackedLateFee,
     totalRepaidLateFee,
     totalDiscountLateFee,
+
+    totalTrackedChargeExpenses,
+    totalRepaidChargeExpenses,
+    totalDiscountChargeExpenses,
 
     totalOutstandingBalance,
   };
@@ -982,6 +1030,7 @@ function createTypicalSubLoanTakingRequests(
     moratoryRate: MORATORY_RATE + oneTenthPercentRate * (i + 1),
     lateFeeRate: LATE_FEE_RATE + oneTenthPercentRate * (i + 1),
     clawbackFeeRate: CLAWBACK_FEE_RATE + oneTenthPercentRate * (i + 1),
+    chargeExpensesRate: CHARGE_EXPENSES_RATE + oneTenthPercentRate * (i + 1),
   }));
 }
 
@@ -2079,6 +2128,7 @@ describe("Contract 'LendingMarket'", () => {
               toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
               toBytes32(packSubLoanLateFeeParts(subLoan)),
               toBytes32(packSubLoanClawbackFeeParts(subLoan)),
+              toBytes32(packSubLoanChargeExpensesParts(subLoan)),
             );
         }
 
@@ -2338,6 +2388,7 @@ describe("Contract 'LendingMarket'", () => {
               toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
               toBytes32(packSubLoanLateFeeParts(subLoan)),
               toBytes32(packSubLoanClawbackFeeParts(subLoan)),
+              toBytes32(packSubLoanChargeExpensesParts(subLoan)),
             );
         });
 
@@ -2436,6 +2487,7 @@ describe("Contract 'LendingMarket'", () => {
               toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
               toBytes32(packSubLoanLateFeeParts(subLoan)),
               toBytes32(packSubLoanClawbackFeeParts(subLoan)),
+              toBytes32(packSubLoanChargeExpensesParts(subLoan)),
             );
         });
 
@@ -2521,6 +2573,7 @@ describe("Contract 'LendingMarket'", () => {
               toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
               toBytes32(packSubLoanLateFeeParts(subLoan)),
               toBytes32(packSubLoanClawbackFeeParts(subLoan)),
+              toBytes32(packSubLoanChargeExpensesParts(subLoan)),
             );
         });
 
@@ -2597,6 +2650,7 @@ describe("Contract 'LendingMarket'", () => {
               toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
               toBytes32(packSubLoanLateFeeParts(subLoan)),
               toBytes32(packSubLoanClawbackFeeParts(subLoan)),
+              toBytes32(packSubLoanChargeExpensesParts(subLoan)),
             );
         });
 
@@ -2738,6 +2792,7 @@ describe("Contract 'LendingMarket'", () => {
               toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
               toBytes32(packSubLoanLateFeeParts(subLoan)),
               toBytes32(packSubLoanClawbackFeeParts(subLoan)),
+              toBytes32(packSubLoanChargeExpensesParts(subLoan)),
             );
         });
 
@@ -2879,6 +2934,7 @@ describe("Contract 'LendingMarket'", () => {
               toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
               toBytes32(packSubLoanLateFeeParts(subLoan)),
               toBytes32(packSubLoanClawbackFeeParts(subLoan)),
+              toBytes32(packSubLoanChargeExpensesParts(subLoan)),
             );
         });
 
@@ -3020,6 +3076,7 @@ describe("Contract 'LendingMarket'", () => {
               toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
               toBytes32(packSubLoanLateFeeParts(subLoan)),
               toBytes32(packSubLoanClawbackFeeParts(subLoan)),
+              toBytes32(packSubLoanChargeExpensesParts(subLoan)),
             );
         });
 
@@ -3161,6 +3218,7 @@ describe("Contract 'LendingMarket'", () => {
               toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
               toBytes32(packSubLoanLateFeeParts(subLoan)),
               toBytes32(packSubLoanClawbackFeeParts(subLoan)),
+              toBytes32(packSubLoanChargeExpensesParts(subLoan)),
             );
         });
 
@@ -3302,6 +3360,7 @@ describe("Contract 'LendingMarket'", () => {
               toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
               toBytes32(packSubLoanLateFeeParts(subLoan)),
               toBytes32(packSubLoanClawbackFeeParts(subLoan)),
+              toBytes32(packSubLoanChargeExpensesParts(subLoan)),
             );
         });
 
@@ -3443,6 +3502,7 @@ describe("Contract 'LendingMarket'", () => {
               toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
               toBytes32(packSubLoanLateFeeParts(subLoan)),
               toBytes32(packSubLoanClawbackFeeParts(subLoan)),
+              toBytes32(packSubLoanChargeExpensesParts(subLoan)),
             );
 
           await expect(tx).not.to.emit(market, EVENT_NAME_OPERATION_PENDED);
@@ -3645,6 +3705,7 @@ describe("Contract 'LendingMarket'", () => {
               toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
               toBytes32(packSubLoanLateFeeParts(subLoan)),
               toBytes32(packSubLoanClawbackFeeParts(subLoan)),
+              toBytes32(packSubLoanChargeExpensesParts(subLoan)),
             );
         });
 
@@ -3729,7 +3790,7 @@ describe("Contract 'LendingMarket'", () => {
 
       it("one of the operation kinds is greater than allowed", async () => {
         const operationRequest = operationRequests[operationRequests.length - 1];
-        operationRequest.kind = OperationKind.ClawbackFeeDiscount + 1;
+        operationRequest.kind = OperationKind.ChargeExpensesDiscount + 1;
         operationRequest.value = 0n;
         operationRequest.account = ADDRESS_ZERO;
 
@@ -3872,6 +3933,7 @@ describe("Contract 'LendingMarket'", () => {
               toBytes32(packSubLoanMoratoryInterestParts(subLoan)),
               toBytes32(packSubLoanLateFeeParts(subLoan)),
               toBytes32(packSubLoanClawbackFeeParts(subLoan)),
+              toBytes32(packSubLoanChargeExpensesParts(subLoan)),
             );
         });
 
@@ -4136,6 +4198,7 @@ describe("Contract 'LendingMarket'", () => {
           preview.trackedMoratoryInterest = calculateSimpleInterest(legalPrincipal, preview.moratoryRate, daysPostDue);
           preview.trackedLateFee = calculateSimpleInterest(legalPrincipal, preview.lateFeeRate, 1);
           preview.trackedClawbackFee = calculateCompoundInterest(legalPrincipal, preview.clawbackFeeRate, daysUpToDue);
+          preview.trackedChargeExpenses = calculateSimpleInterest(legalPrincipal, preview.chargeExpensesRate, 1);
         }
 
         preview.outstandingBalance = roundFinancially(
@@ -4144,7 +4207,8 @@ describe("Contract 'LendingMarket'", () => {
           preview.trackedSecondaryInterest +
           preview.trackedMoratoryInterest +
           preview.trackedLateFee +
-          preview.trackedClawbackFee,
+          preview.trackedClawbackFee +
+          preview.trackedChargeExpenses,
         );
 
         return preview;

@@ -3,6 +3,7 @@ import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import { checkContractUupsUpgrading, proveTx, setUpFixture } from "@cloudwalk/brlc-test-utils";
 import * as Contracts from "../typechain-types";
+import { EXPECTED_VERSION } from "../test-utils/specific";
 
 const OWNER_ROLE = ethers.id("OWNER_ROLE");
 
@@ -13,12 +14,6 @@ const ERROR_NAME_INVALID_INITIALIZATION = "InvalidInitialization";
 // Errors of the contracts under test
 const ERROR_NAME_IMPLEMENTATION_ADDRESS_INVALID = "LendingEngineV2_ImplementationAddressInvalid";
 const ERROR_NAME_CALL_CONTEXT_UNAUTHORIZED = "LendingEngineV2_CallContextUnauthorized";
-
-const EXPECTED_VERSION = {
-  major: 2,
-  minor: 0,
-  patch: 0,
-};
 
 const STORAGE_KIND_MARKET = 0xA5;
 

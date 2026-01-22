@@ -313,7 +313,8 @@ contract LendingEngineV2 is
             subLoanTakingRequest.secondaryRate > INTEREST_RATE_FACTOR ||
             subLoanTakingRequest.moratoryRate > INTEREST_RATE_FACTOR ||
             subLoanTakingRequest.lateFeeRate > INTEREST_RATE_FACTOR ||
-            subLoanTakingRequest.clawbackFeeRate > INTEREST_RATE_FACTOR
+            subLoanTakingRequest.clawbackFeeRate > INTEREST_RATE_FACTOR ||
+            subLoanTakingRequest.chargeExpensesRate > INTEREST_RATE_FACTOR
         ) {
             revert LendingMarketV2_SubLoanRateValueExcess();
         }
@@ -339,6 +340,7 @@ contract LendingEngineV2 is
             subLoan.inception.initialMoratoryRate = uint32(subLoanTakingRequest.moratoryRate);
             subLoan.inception.initialLateFeeRate = uint32(subLoanTakingRequest.lateFeeRate);
             subLoan.inception.initialClawbackFeeRate = uint32(subLoanTakingRequest.clawbackFeeRate);
+            subLoan.inception.initialChargeExpensesRate = uint32(subLoanTakingRequest.chargeExpensesRate);
 
             // State fields, slot 1, 2
             subLoan.state.status = SubLoanStatus.Ongoing;
@@ -351,6 +353,7 @@ contract LendingEngineV2 is
             subLoan.state.moratoryRate = uint32(subLoanTakingRequest.moratoryRate);
             subLoan.state.lateFeeRate = uint32(subLoanTakingRequest.lateFeeRate);
             subLoan.state.clawbackFeeRate = uint32(subLoanTakingRequest.clawbackFeeRate);
+            subLoan.state.chargeExpensesRate = uint32(subLoanTakingRequest.chargeExpensesRate);
 
             // State fields, slot 3, 4
             subLoan.state.trackedPrincipal = uint64(principal);
@@ -388,6 +391,12 @@ contract LendingEngineV2 is
             // subLoan.state.discountClawbackFee = 0;
             // subLoan.state._reserved6 = 0;
 
+            // State fields, slot 15, 16
+            // subLoan.state.trackedChargeExpenses = 0;
+            // subLoan.state.repaidChargeExpenses = 0;
+            // subLoan.state.discountChargeExpenses = 0;
+            // subLoan.state._reserved7 = 0;
+
             // Metadata fields
             // subLoan.metadata.subLoanIndex = 0;
             // subLoan.metadata.subLoanCount = 0;
@@ -404,7 +413,8 @@ contract LendingEngineV2 is
                 subLoanTakingRequest.secondaryRate,
                 subLoanTakingRequest.moratoryRate,
                 subLoanTakingRequest.lateFeeRate,
-                subLoanTakingRequest.clawbackFeeRate
+                subLoanTakingRequest.clawbackFeeRate,
+                subLoanTakingRequest.chargeExpensesRate
             );
             emit SubLoanTaken(
                 subLoanId,
@@ -806,6 +816,8 @@ contract LendingEngineV2 is
             _applyLateFeeDiscount(subLoan, operation);
         } else if (operationKind == uint256(OperationKind.ClawbackFeeDiscount)) {
             _applyClawbackFeeDiscount(subLoan, operation);
+        } else if (operationKind == uint256(OperationKind.ChargeExpensesDiscount)) {
+            _applyChargeExpensesDiscount(subLoan, operation);
         } else if (operationKind == uint256(OperationKind.Revocation)) {
             _applyRevocation(subLoan);
         } else if (operationKind == uint256(OperationKind.Freezing)) {
@@ -822,6 +834,8 @@ contract LendingEngineV2 is
             subLoan.lateFeeRate = operation.value;
         } else if (operationKind == uint256(OperationKind.ClawbackFeeRateSetting)) {
             subLoan.clawbackFeeRate = operation.value;
+        } else if (operationKind == uint256(OperationKind.ChargeExpensesRateSetting)) {
+            subLoan.chargeExpensesRate = operation.value;
         } else if (operationKind == uint256(OperationKind.DurationSetting)) {
             subLoan.duration = operation.value;
         }
@@ -875,6 +889,7 @@ contract LendingEngineV2 is
         subLoan.moratoryRate = storedSubLoan.inception.initialMoratoryRate;
         subLoan.lateFeeRate = storedSubLoan.inception.initialLateFeeRate;
         subLoan.clawbackFeeRate = storedSubLoan.inception.initialClawbackFeeRate;
+        subLoan.chargeExpensesRate = storedSubLoan.inception.initialChargeExpensesRate;
 
         subLoan.trackedPrincipal = storedSubLoan.inception.borrowedAmount + storedSubLoan.inception.addonAmount;
         subLoan.repaidPrincipal = 0;
@@ -899,6 +914,10 @@ contract LendingEngineV2 is
         subLoan.trackedClawbackFee = 0;
         subLoan.repaidClawbackFee = 0;
         subLoan.discountClawbackFee = 0;
+
+        subLoan.trackedChargeExpenses = 0;
+        subLoan.repaidChargeExpenses = 0;
+        subLoan.discountChargeExpenses = 0;
 
         subLoan.trackedTimestamp = subLoan.startTimestamp;
         subLoan.freezeTimestamp = 0;
@@ -933,6 +952,7 @@ contract LendingEngineV2 is
                     _accruePrimaryInterest(subLoan, dueDay - begDay);
                     _imposeClawbackFee(subLoan, dueDay - startDay);
                     _imposeLateFee(subLoan);
+                    _imposeChargeExpenses(subLoan);
                     _accrueSecondaryInterest(subLoan, finishDay - dueDay);
                     _accrueMoratoryInterest(subLoan, finishDay - dueDay);
                 }
@@ -993,6 +1013,14 @@ contract LendingEngineV2 is
     }
 
     /**
+     * @dev Imposes a one-time charge expenses fee calculated as a percentage of the tracked legal principal.
+     */
+    function _imposeChargeExpenses(ProcessingSubLoan memory subLoan) internal pure {
+        uint256 trackedLegalPrincipal = subLoan.trackedPrincipal + subLoan.trackedPrimaryInterest;
+        subLoan.trackedChargeExpenses = _calculateSimpleInterest(trackedLegalPrincipal, subLoan.chargeExpensesRate);
+    }
+
+    /**
      * @dev Updates the pending timestamp to the earliest unprocessed operation timestamp.
      */
     function _updatePendingTimestamp(SubLoan storage subLoan, uint256 timestamp) internal {
@@ -1024,6 +1052,7 @@ contract LendingEngineV2 is
         storedSubLoan.state.moratoryRate = uint32(subLoan.moratoryRate);
         storedSubLoan.state.lateFeeRate = uint32(subLoan.lateFeeRate);
         storedSubLoan.state.clawbackFeeRate = uint32(subLoan.clawbackFeeRate);
+        storedSubLoan.state.chargeExpensesRate = uint32(subLoan.chargeExpensesRate);
 
         // State fields, slot 3, 4
         storedSubLoan.state.trackedPrincipal = uint64(subLoan.trackedPrincipal);
@@ -1054,6 +1083,11 @@ contract LendingEngineV2 is
         storedSubLoan.state.trackedClawbackFee = subLoan.trackedClawbackFee.toUint64();
         storedSubLoan.state.repaidClawbackFee = subLoan.repaidClawbackFee.toUint64();
         storedSubLoan.state.discountClawbackFee = subLoan.discountClawbackFee.toUint64();
+
+        // State fields, slot 15, 16
+        storedSubLoan.state.trackedChargeExpenses = subLoan.trackedChargeExpenses.toUint64();
+        storedSubLoan.state.repaidChargeExpenses = subLoan.repaidChargeExpenses.toUint64();
+        storedSubLoan.state.discountChargeExpenses = subLoan.discountChargeExpenses.toUint64();
 
         // Metadata fields
         storedSubLoan.metadata.recentOperationId = uint16(subLoan.recentOperationId);
@@ -1088,7 +1122,8 @@ contract LendingEngineV2 is
             subLoan.secondaryRate,
             subLoan.moratoryRate,
             subLoan.lateFeeRate,
-            subLoan.clawbackFeeRate
+            subLoan.clawbackFeeRate,
+            subLoan.chargeExpensesRate
         );
 
         emit SubLoanUpdated(
@@ -1101,7 +1136,8 @@ contract LendingEngineV2 is
             bytes32(_packSecondaryInterestParts(subLoan)),
             bytes32(_packMoratoryInterestParts(subLoan)),
             bytes32(_packLateFeeParts(subLoan)),
-            bytes32(_packClawbackParts(subLoan))
+            bytes32(_packClawbackParts(subLoan)),
+            bytes32(_packChargeExpensesParts(subLoan))
         );
 
         // No custom error is introduced because index overflow is not possible due to the overall contract logic
@@ -1126,6 +1162,7 @@ contract LendingEngineV2 is
         amount = _repaySecondaryInterest(subLoan, amount);
         amount = _repayMoratoryInterest(subLoan, amount);
         amount = _repayLateFee(subLoan, amount);
+        amount = _repayChargeExpenses(subLoan, amount);
         amount = _repayClawbackFee(subLoan, amount);
         amount = _repayPrimaryInterest(subLoan, amount);
         amount = _repayPrincipal(subLoan, amount);
@@ -1149,6 +1186,7 @@ contract LendingEngineV2 is
         amount = _discountSecondaryInterest(subLoan, amount);
         amount = _discountMoratoryInterest(subLoan, amount);
         amount = _discountLateFee(subLoan, amount);
+        amount = _discountChargeExpenses(subLoan, amount);
         amount = _discountClawbackFee(subLoan, amount);
         amount = _discountPrimaryInterest(subLoan, amount);
         amount = _discountPrincipal(subLoan, amount);
@@ -1224,6 +1262,16 @@ contract LendingEngineV2 is
     }
 
     /**
+     * @dev Applies a charge expenses discount operation, reducing the tracked charge expenses amount.
+     */
+    function _applyChargeExpensesDiscount(ProcessingSubLoan memory subLoan, Operation storage operation) internal view {
+        uint256 remainingAmount = _discountChargeExpenses(subLoan, operation.value);
+        if (remainingAmount > 0) {
+            revert LendingMarketV2_SubLoanDiscountPartExcess();
+        }
+    }
+
+    /**
      * @dev Applies a revocation operation, setting status to revoked and clearing all tracked amounts.
      */
     function _applyRevocation(ProcessingSubLoan memory subLoan) internal pure {
@@ -1234,6 +1282,7 @@ contract LendingEngineV2 is
         subLoan.trackedMoratoryInterest = 0;
         subLoan.trackedLateFee = 0;
         subLoan.trackedClawbackFee = 0;
+        subLoan.trackedChargeExpenses = 0;
     }
 
     /**
@@ -1383,6 +1432,25 @@ contract LendingEngineV2 is
     }
 
     /**
+     * @dev Repays charge expenses, returning the remaining amount.
+     */
+    function _repayChargeExpenses(ProcessingSubLoan memory subLoan, uint256 amount) internal pure returns (uint256) {
+        uint256 changeAmount = subLoan.trackedChargeExpenses;
+        if (changeAmount > amount) {
+            changeAmount = amount;
+        }
+        if (changeAmount == 0) {
+            return amount;
+        }
+        unchecked {
+            amount -= changeAmount;
+            subLoan.trackedChargeExpenses -= changeAmount;
+        }
+        subLoan.repaidChargeExpenses += changeAmount;
+        return amount;
+    }
+
+    /**
      * @dev Discounts principal, returning the remaining amount.
      */
     function _discountPrincipal(ProcessingSubLoan memory subLoan, uint256 amount) internal pure returns (uint256) {
@@ -1502,6 +1570,25 @@ contract LendingEngineV2 is
             subLoan.trackedClawbackFee -= changeAmount;
         }
         subLoan.discountClawbackFee += changeAmount;
+        return amount;
+    }
+
+    /**
+     * @dev Discounts charge expenses, returning the remaining amount.
+     */
+    function _discountChargeExpenses(ProcessingSubLoan memory subLoan, uint256 amount) internal pure returns (uint256) {
+        uint256 changeAmount = subLoan.trackedChargeExpenses;
+        if (changeAmount > amount) {
+            changeAmount = amount;
+        }
+        if (changeAmount == 0) {
+            return amount;
+        }
+        unchecked {
+            amount -= changeAmount;
+            subLoan.trackedChargeExpenses -= changeAmount;
+        }
+        subLoan.discountChargeExpenses += changeAmount;
         return amount;
     }
 
@@ -1682,7 +1769,8 @@ contract LendingEngineV2 is
             kind == uint256(OperationKind.SecondaryRateSetting) ||
             kind == uint256(OperationKind.MoratoryRateSetting) ||
             kind == uint256(OperationKind.LateFeeRateSetting) ||
-            kind == uint256(OperationKind.ClawbackFeeRateSetting)
+            kind == uint256(OperationKind.ClawbackFeeRateSetting) ||
+            kind == uint256(OperationKind.ChargeExpensesRateSetting)
         ) {
             if (value > INTEREST_RATE_FACTOR) {
                 revert LendingMarketV2_SubLoanRateValueExcess();
@@ -1711,7 +1799,8 @@ contract LendingEngineV2 is
             kind == uint256(OperationKind.SecondaryInterestDiscount) ||
             kind == uint256(OperationKind.MoratoryInterestDiscount) ||
             kind == uint256(OperationKind.LateFeeDiscount) ||
-            kind == uint256(OperationKind.ClawbackFeeDiscount)
+            kind == uint256(OperationKind.ClawbackFeeDiscount) ||
+            kind == uint256(OperationKind.ChargeExpensesDiscount)
         ) {
             if (value == 0) {
                 revert LendingMarketV2_SubLoanRepaymentOrDiscountAmountZero();
@@ -1777,6 +1866,7 @@ contract LendingEngineV2 is
         subLoan.moratoryRate = storedSubLoan.state.moratoryRate;
         subLoan.lateFeeRate = storedSubLoan.state.lateFeeRate;
         subLoan.clawbackFeeRate = storedSubLoan.state.clawbackFeeRate;
+        subLoan.chargeExpensesRate = storedSubLoan.state.chargeExpensesRate;
 
         subLoan.trackedPrincipal = storedSubLoan.state.trackedPrincipal;
         subLoan.repaidPrincipal = storedSubLoan.state.repaidPrincipal;
@@ -1801,6 +1891,10 @@ contract LendingEngineV2 is
         subLoan.trackedClawbackFee = storedSubLoan.state.trackedClawbackFee;
         subLoan.repaidClawbackFee = storedSubLoan.state.repaidClawbackFee;
         subLoan.discountClawbackFee = storedSubLoan.state.discountClawbackFee;
+
+        subLoan.trackedChargeExpenses = storedSubLoan.state.trackedChargeExpenses;
+        subLoan.repaidChargeExpenses = storedSubLoan.state.repaidChargeExpenses;
+        subLoan.discountChargeExpenses = storedSubLoan.state.discountChargeExpenses;
 
         return subLoan;
     }
@@ -1916,7 +2010,8 @@ contract LendingEngineV2 is
             subLoan.state.repaidSecondaryInterest +
             subLoan.state.repaidMoratoryInterest +
             subLoan.state.repaidLateFee +
-            subLoan.state.repaidClawbackFee;
+            subLoan.state.repaidClawbackFee +
+            subLoan.state.repaidChargeExpenses;
         if (subLoan.state.status == SubLoanStatus.Ongoing) {
             summary.ongoingSubLoanCount += 1;
         }
@@ -2016,6 +2111,18 @@ contract LendingEngineV2 is
     }
 
     /**
+     * @dev Packs the charge expenses parts (tracked, repaid, discount) into a single value.
+     */
+    function _packChargeExpensesParts(ProcessingSubLoan memory subLoan) internal pure returns (uint256) {
+        return
+            _packAmountParts(
+                subLoan.trackedChargeExpenses, // Tools: prevent Prettier one-liner
+                subLoan.repaidChargeExpenses,
+                subLoan.discountChargeExpenses
+            );
+    }
+
+    /**
      * @dev Packs rate values into a single 256-bit value.
      *
      * The packed rates is a bitfield with the following bits:
@@ -2025,21 +2132,24 @@ contract LendingEngineV2 is
      * - 32 bits from  64 to  95: the moratory interest rate.
      * - 32 bits from  96 to 127: the late fee rate.
      * - 32 bits from 128 to 159: the clawback fee rate.
-     * - 96 bits from 160 to 255: reserved for future usage.
+     * - 32 bits from 160 to 191: the charge expenses rate.
+     * - 64 bits from 192 to 255: reserved for future usage.
      */
     function _packRates(
         uint256 primaryRate,
         uint256 secondaryRate,
         uint256 moratoryRate,
         uint256 lateFeeRate,
-        uint256 clawbackFeeRate
+        uint256 clawbackFeeRate,
+        uint256 chargeExpensesRate
     ) internal pure returns (uint256) {
         return
             ((primaryRate & type(uint32).max) << 0) |
             ((secondaryRate & type(uint32).max) << 32) |
             ((moratoryRate & type(uint32).max) << 64) |
             ((lateFeeRate & type(uint32).max) << 96) |
-            ((clawbackFeeRate & type(uint32).max) << 128);
+            ((clawbackFeeRate & type(uint32).max) << 128) |
+            ((chargeExpensesRate & type(uint32).max) << 160);
     }
 
     /**

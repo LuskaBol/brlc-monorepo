@@ -89,13 +89,15 @@ interface ILendingMarketV2Types {
      * - MoratoryRateSetting = 8 --------- The setting of the moratory rate of the sub-loan.
      * - LateFeeRateSetting = 9 ---------- The setting of the late fee rate of the sub-loan.
      * - ClawbackFeeRateSetting = 10 ----- The setting of the clawback fee rateSetting of the sub-loan.
-     * - DurationSetting = 11 ------------ The setting of the duration of the sub-loan.
-     * - PrincipalDiscount = 12 ---------- The discount for the principal part of the sub-loan.
-     * - PrimaryInterestDiscount = 13 ---- The discount for the primary interest part of the sub-loan.
-     * - SecondaryInterestDiscount = 14 -- The discount for the secondary interest part of the sub-loan.
-     * - MoratoryInterestDiscount = 15 --- The discount for the moratory interest part of the sub-loan.
-     * - LateFeeDiscount = 16 ------------ The discount for the late fee part of the sub-loan.
-     * - ClawbackFeeDiscount = 17 -------- The discount for the clawback fee part of the sub-loan.
+     * - ChargeExpensesRateSetting = 11 -- The setting of the charge expenses rate of the sub-loan.
+     * - DurationSetting = 12 ------------ The setting of the duration of the sub-loan.
+     * - PrincipalDiscount = 13 ---------- The discount for the principal part of the sub-loan.
+     * - PrimaryInterestDiscount = 14 ---- The discount for the primary interest part of the sub-loan.
+     * - SecondaryInterestDiscount = 15 -- The discount for the secondary interest part of the sub-loan.
+     * - MoratoryInterestDiscount = 16 --- The discount for the moratory interest part of the sub-loan.
+     * - LateFeeDiscount = 17 ------------ The discount for the late fee part of the sub-loan.
+     * - ClawbackFeeDiscount = 18 -------- The discount for the clawback fee part of the sub-loan.
+     * - ChargeExpensesDiscount = 19 ----- The discount for the charge expenses part of the sub-loan.
      *
      * Notes:
      *
@@ -113,6 +115,7 @@ interface ILendingMarketV2Types {
      *    - MoratoryInterestDiscount: The amount of the moratory interest discount.
      *    - LateFeeDiscount: The amount of the late fee discount.
      *    - ClawbackFeeDiscount: The amount of the clawback fee discount.
+     *    - ChargeExpensesDiscount: The amount of the charge expenses discount.
      *    - Unfreezing: The flag indicating whether the sub-loan duration extension should be skipped during unfreezing:
      *      - 0: The sub-loan duration is extended by the number of days since the freezing timestamp.
      *      - 1: The sub-loan duration is kept without changes.
@@ -121,11 +124,12 @@ interface ILendingMarketV2Types {
      *    - MoratoryRateSetting: The moratory rate of the sub-loan to set.
      *    - LateFeeRateSetting: The late fee rate of the sub-loan to set.
      *    - ClawbackFeeRateSetting: The clawback fee rate of the sub-loan to set.
+     *    - ChargeExpensesRateSetting: The charge expenses rate of the sub-loan to set.
      *    - DurationSetting: The duration of the sub-loan to set.
      * 4. The repayment and general discount amounts of an operation must be rounded financially according to
      *    the ACCURACY_FACTOR, see the `Constants` contract. The special discount amounts may not be rounded.
      * 5. All rates are expressed as multiplied by the `INTEREST_RATE_FACTOR` constant in the `Constants` contract.
-     * 6. About the primary/secondary rates, clawback fee rate see notes in the `docs/description.md` file.
+     * 6. About the primary/secondary rates, clawback fee rate, charge expenses rate the `docs/description.md` file.
      */
     enum OperationKind {
         Nonexistent,
@@ -139,13 +143,15 @@ interface ILendingMarketV2Types {
         MoratoryRateSetting,
         LateFeeRateSetting,
         ClawbackFeeRateSetting,
+        ChargeExpensesRateSetting,
         DurationSetting,
         PrincipalDiscount,
         PrimaryInterestDiscount,
         SecondaryInterestDiscount,
         MoratoryInterestDiscount,
         LateFeeDiscount,
-        ClawbackFeeDiscount
+        ClawbackFeeDiscount,
+        ChargeExpensesDiscount
     }
 
     /**
@@ -205,13 +211,14 @@ interface ILendingMarketV2Types {
      * - initialMoratoryRate -------------- The initial moratory rate of the sub-loan.
      * - initialLateFeeRate --------------- The initial late fee rate of the sub-loan.
      * - initialClawbackFeeRate ----------- The initial clawback fee rate of the sub-loan.
+     * - initialChargeExpensesRate -------- The initial charge expenses rate of the sub-loan.
      *
      * Notes:
      *
      * 1. The borrowed amount and the addon amount together form the principal of the sub-loan.
      * 2. All rates are expressed as multiplied by the `INTEREST_RATE_FACTOR` constant in the `Constants` contract.
-     * 3. About the primary/secondary interest, related rates, and clawback fee rate see notes in the
-     *    `docs/description.md` file.
+     * 3. About the primary/secondary interest, related rates, clawback fee rate, charge expenses rate
+     *    see the `docs/description.md` file.
      */
     struct SubLoanInception {
         // Slot 1 -- This data will never change
@@ -232,6 +239,10 @@ interface ILendingMarketV2Types {
 
         // Slot 3 -- This data will never change and is rarely read
         uint32 initialClawbackFeeRate;
+        uint32 initialChargeExpensesRate;
+        // uint192 __reserved; // Reserved until the end of the storage slot
+
+        // If new slots have been added, do not forget to update gaps in the `SubLoan` structure below.
     }
 
     /**
@@ -267,6 +278,8 @@ interface ILendingMarketV2Types {
         uint16 recentOperationId;
         uint16 latestOperationId;
         // uint88 __reserved; // Reserved until the end of the storage slot
+
+        // If new slots have been added, do not forget to update gaps in the `SubLoan` structure below.
     }
 
     /**
@@ -286,6 +299,7 @@ interface ILendingMarketV2Types {
      * - moratoryRate --------------- The moratory rate of the sub-loan.
      * - lateFeeRate ---------------- The late fee rate of the sub-loan.
      * - clawbackFeeRate ------------ The clawback fee rate of the sub-loan.
+     * - chargeExpensesRate --------- The charge expenses rate of the sub-loan.
      * - _reserved0 ----------------- Reserved for future use.
      * - trackedPrincipal ----------- The tracked principal of the sub-loan, remaining to be repaid.
      * - repaidPrincipal ------------ The repaid principal of the sub-loan.
@@ -311,6 +325,10 @@ interface ILendingMarketV2Types {
      * - repaidClawbackFee ---------- The repaid clawback fee.
      * - discountClawbackFee -------- The discount clawback fee.
      * - _reserved6 ----------------- Reserved for future use.
+     * - trackedChargeExpenses ------ The tracked charge expenses.
+     * - repaidChargeExpenses ------- The repaid charge expenses.
+     * - discountChargeExpenses ----- The discount charge expenses.
+     * - _reserved7 ----------------- Reserved for future use.
      *
      * Notes:
      *
@@ -329,8 +347,8 @@ interface ILendingMarketV2Types {
      * 6.  All rates are expressed as multiplied by the `INTEREST_RATE_FACTOR` constant in the `Constants` contract.
      * 7.  All fields related to tracked, repaid, and discount amounts are not financially rounded
      *     according to the ACCURACY_FACTOR, see the `Constants` contract.
-     * 8.  About the primary/secondary interest, related rates, and clawback fee (and its rate) see notes in the
-     *     `docs/description.md` file.
+     * 8.  About the primary/secondary interest, related rates, clawback fee (and its rate), and charge expenses
+     *     (and its rate) see notes in the `docs/description.md` file.
      */
     struct SubLoanState {
         // Slot 1, 2 -- Frequently used data for reading and writing
@@ -344,7 +362,8 @@ interface ILendingMarketV2Types {
         uint32 moratoryRate;
         uint32 lateFeeRate;
         uint32 clawbackFeeRate;
-        uint256 _reserved0;
+        uint32 chargeExpensesRate;
+        uint224 _reserved0;
         // No reserve until the end of the storage slot
 
         // Slots 3, 4 -- The principal related parts
@@ -388,6 +407,15 @@ interface ILendingMarketV2Types {
         uint64 discountClawbackFee;
         uint256 _reserved6;
         // No reserve until the end of the storage slot
+
+        // Slots 15, 16 -- The charge expenses related parts
+        uint64 trackedChargeExpenses;
+        uint64 repaidChargeExpenses;
+        uint64 discountChargeExpenses;
+        uint256 _reserved7;
+        // No reserve until the end of the storage slot
+
+        // If new slots have been added, do not forget to update gaps in the `SubLoan` structure below.
     }
 
     /**
@@ -405,19 +433,19 @@ interface ILendingMarketV2Types {
      */
     struct SubLoan {
         // Slots 1 ... 3
-        SubLoanInception inception;
+        SubLoanInception inception; // 2 slots
         // Slots 3 ... 50
         uint256[47] __gap0;
         // No reserve until the end of the storage slot
 
-        // Slot 51 ... 64
-        SubLoanState state;
-        // Slots 65 ... 100
-        uint256[36] __gap1;
+        // Slot 51 ... 66
+        SubLoanState state; // 16 slots
+        // Slots 67 ... 100
+        uint256[34] __gap1;
         // No reserve until the end of the storage slot
 
         // Slot 101
-        SubLoanMetadata metadata;
+        SubLoanMetadata metadata; // 1 slot
         // Slots 102 ... 150
         uint256[49] __gap2;
         // No reserve until the end of the storage slot
@@ -447,6 +475,7 @@ interface ILendingMarketV2Types {
      * - moratoryRate --------------- The moratory rate of the sub-loan.
      * - lateFeeRate ---------------- The late fee rate of the sub-loan.
      * - clawbackFeeRate ------------ The clawback fee rate of the sub-loan.
+     * - chargeExpensesRate --------- The charge expenses rate of the sub-loan.
      * - trackedPrincipal ----------- The tracked principal of the sub-loan, remaining to be repaid.
      * - repaidPrincipal ------------ The repaid principal of the sub-loan.
      * - discountPrincipal ---------- The discount principal of the sub-loan.
@@ -465,6 +494,9 @@ interface ILendingMarketV2Types {
      * - trackedClawbackFee --------- The tracked clawback fee.
      * - repaidClawbackFee ---------- The repaid clawback fee.
      * - discountClawbackFee -------- The discount clawback fee.
+     * - trackedChargeExpenses ------ The tracked charge expenses.
+     * - repaidChargeExpenses ------- The repaid charge expenses.
+     * - discountChargeExpenses ----- The discount charge expenses.
      *
      * See notes for the appropriate fields in comments for the storage sub-loan structures above:
      * `SubLoanInception`, `SubLoanState`, `SubLoanMetadata`.
@@ -488,6 +520,7 @@ interface ILendingMarketV2Types {
         uint256 moratoryRate;
         uint256 lateFeeRate;
         uint256 clawbackFeeRate;
+        uint256 chargeExpensesRate;
 
         uint256 trackedPrincipal;
         uint256 repaidPrincipal;
@@ -512,6 +545,10 @@ interface ILendingMarketV2Types {
         uint256 trackedClawbackFee;
         uint256 repaidClawbackFee;
         uint256 discountClawbackFee;
+
+        uint256 trackedChargeExpenses;
+        uint256 repaidChargeExpenses;
+        uint256 discountChargeExpenses;
     }
 
     /**
@@ -545,6 +582,7 @@ interface ILendingMarketV2Types {
      * - moratoryRate --------------- The moratory rate of the sub-loan.
      * - lateFeeRate ---------------- The late fee rate of the sub-loan.
      * - clawbackFeeRate ------------ The clawback fee rate of the sub-loan.
+     * - chargeExpensesRate --------- The charge expenses rate of the sub-loan.
      * - trackedPrincipal ----------- The tracked principal of the sub-loan, remaining to be repaid.
      * - repaidPrincipal ------------ The repaid principal of the sub-loan.
      * - discountPrincipal ---------- The discount principal of the sub-loan.
@@ -563,6 +601,9 @@ interface ILendingMarketV2Types {
      * - trackedClawbackFee --------- The tracked clawback fee.
      * - repaidClawbackFee ---------- The repaid clawback fee.
      * - discountClawbackFee -------- The discount clawback fee.
+     * - trackedChargeExpenses ------ The tracked charge expenses.
+     * - repaidChargeExpenses ------- The repaid charge expenses.
+     * - discountChargeExpenses ----- The discount charge expenses.
      * - outstandingBalance --------- The outstanding balance of the sub-loan, see notes below.
      *
      * Notes:
@@ -611,6 +652,7 @@ interface ILendingMarketV2Types {
         uint256 moratoryRate;
         uint256 lateFeeRate;
         uint256 clawbackFeeRate;
+        uint256 chargeExpensesRate;
 
         uint256 trackedPrincipal;
         uint256 repaidPrincipal;
@@ -635,6 +677,10 @@ interface ILendingMarketV2Types {
         uint256 trackedClawbackFee;
         uint256 repaidClawbackFee;
         uint256 discountClawbackFee;
+
+        uint256 trackedChargeExpenses;
+        uint256 repaidChargeExpenses;
+        uint256 discountChargeExpenses;
 
         uint256 outstandingBalance;
     }
@@ -678,6 +724,9 @@ interface ILendingMarketV2Types {
      * - totalTrackedClawbackFee --------- The total tracked clawback fee.
      * - totalRepaidClawbackFee ---------- The total repaid clawback fee.
      * - totalDiscountClawbackFee -------- The total discount clawback fee.
+     * - totalTrackedChargeExpenses ------ The total tracked charge expenses.
+     * - totalRepaidChargeExpenses ------- The total repaid charge expenses.
+     * - totalDiscountChargeExpenses ----- The total discount charge expenses.
      * - totalOutstandingBalance --------- The total outstanding balance.
      *
      * Notes:
@@ -731,6 +780,10 @@ interface ILendingMarketV2Types {
         uint256 totalRepaidClawbackFee;
         uint256 totalDiscountClawbackFee;
 
+        uint256 totalTrackedChargeExpenses;
+        uint256 totalRepaidChargeExpenses;
+        uint256 totalDiscountChargeExpenses;
+
         uint256 totalOutstandingBalance;
     }
 
@@ -745,7 +798,7 @@ interface ILendingMarketV2Types {
      * - kind ------------- The kind of the operation.
      * - nextOperationId -- The ID of the next operation in the operation linked list.
      * - prevOperationId -- The ID of the previous operation in the operation linked list.
-     * - timestamp -------- The timestamp (at UTC timezone) of the operation.
+     * - timestamp -------- The application timestamp (at UTC timezone) of the operation.
      * - value ------------ The value of the operation.
      * - accountId -------- The ID of the account related to the operation. See notes below.
      *
@@ -788,7 +841,7 @@ interface ILendingMarketV2Types {
      * - kind ------------- The kind of the operation.
      * - nextOperationId -- The ID of the next operation in the operation linked list.
      * - prevOperationId -- The ID of the previous operation in the operation linked list.
-     * - timestamp -------- The timestamp (at UTC timezone) of the operation.
+     * - timestamp -------- The application timestamp (at UTC timezone) of the operation.
      * - value ------------ The value of the operation.
      * - account ---------- The address of the account related to the operation (e.g. the repayer).
      */
@@ -832,28 +885,29 @@ interface ILendingMarketV2Types {
     }
 
     /**
-    /**
      * @dev Defines the request with the parameters of a sub-loan to take within a loan.
      *
      * This structure is intended for in-memory use only.
      *
      * Fields:
      *
-     * - borrowedAmount --- The borrowed amount of the sub-loan.
-     * - addonAmount ------ The addon amount of the sub-loan.
-     * - duration --------- The duration of the sub-loan in days.
-     * - primaryRate ------ The primary rate of the sub-loan.
-     * - secondaryRate ---- The secondary rate of the sub-loan.
-     * - moratoryRate ----- The moratory rate of the sub-loan.
-     * - lateFeeRate ------ The late fee rate of the sub-loan.
-     * - clawbackFeeRate -- The clawback fee rate of the sub-loan.
+     * - borrowedAmount ------ The borrowed amount of the sub-loan.
+     * - addonAmount --------- The addon amount of the sub-loan.
+     * - duration ------------ The duration of the sub-loan in days.
+     * - primaryRate --------- The primary rate of the sub-loan.
+     * - secondaryRate ------- The secondary rate of the sub-loan.
+     * - moratoryRate -------- The moratory rate of the sub-loan.
+     * - lateFeeRate --------- The late fee rate of the sub-loan.
+     * - clawbackFeeRate ----- The clawback fee rate of the sub-loan.
+     * - chargeExpensesRate -- The charge expenses rate of the sub-loan.
      *
      * Notes:
      *
      * 1. All fields must be provided for each sub-loan request.
      * 2. The number of requests defines the number of sub-loans to take within the loan.
      * 3. The rates are expressed as multiplied by the `INTEREST_RATE_FACTOR` constant in the `Constants` contract.
-     * 4. About the primary rate, secondary rate, clawback fee rate see notes in the the `docs/description.md` file.
+     * 4. About the primary rate, secondary rate, clawback fee rate, charge expenses rate see notes in the
+     *    `docs/description.md` file.
      */
     struct SubLoanTakingRequest {
         uint256 borrowedAmount;
@@ -864,6 +918,7 @@ interface ILendingMarketV2Types {
         uint256 moratoryRate;
         uint256 lateFeeRate;
         uint256 clawbackFeeRate;
+        uint256 chargeExpensesRate;
     }
 
     /**
@@ -875,7 +930,7 @@ interface ILendingMarketV2Types {
      *
      * - subLoanId ---- The ID of the sub-loan to submit the operation for.
      * - kind --------- The kind of the operation to submit, see {OperationKind}.
-     * - timestamp ---- The timestamp (at UTC timezone) of the operation to submit.
+     * - timestamp ---- The application timestamp (at UTC timezone) of the operation to submit.
      * - value -------- The value of the operation to submit or zero if the operation does not have a value.
      * - account ------ The address of the account related to the operation to submit or the zero address if the operation does not have an account.
      *
@@ -975,7 +1030,8 @@ interface ILendingMarketV2PrimaryEvents is ILendingMarketV2Types {
      * - 32  bits from  64 to  95: the moratory interest rate.
      * - 32  bits from  96 to 127: the late fee rate.
      * - 32  bits from 128 to 159: the clawback fee rate.
-     * - 96 bits from 160 to 255: reserved for future usage.
+     * - 32  bits from 160 to 191: the charge expenses rate.
+     * - 64  bits from 192 to 255: reserved for future usage.
      *
      */
     event SubLoanTaken(
@@ -1034,6 +1090,7 @@ interface ILendingMarketV2PrimaryEvents is ILendingMarketV2Types {
      * @param packedMoratoryInterestParts The packed moratory interest parts.
      * @param packedLateFeeParts The packed late fee parts.
      * @param packedClawbackFeeParts The packed clawback fee parts.
+     * @param packedChargeExpensesParts The packed charge expenses parts.
      */
     event SubLoanUpdated(
         uint256 indexed subLoanId, // Tools: prevent Prettier one-liner
@@ -1045,7 +1102,8 @@ interface ILendingMarketV2PrimaryEvents is ILendingMarketV2Types {
         bytes32 packedSecondaryInterestParts,
         bytes32 packedMoratoryInterestParts,
         bytes32 packedLateFeeParts,
-        bytes32 packedClawbackFeeParts
+        bytes32 packedClawbackFeeParts,
+        bytes32 packedChargeExpensesParts
     );
 
     /**

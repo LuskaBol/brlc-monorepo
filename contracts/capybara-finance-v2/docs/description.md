@@ -12,8 +12,9 @@
     - The secondary interest. It is the remuneratory interest post the due date, accrued compoundly on (principal + primary interest + secondary interest) using the secondary rate (the remuneratory rate post the due date).
     - The moratory interest. It is the penalty interest, accrued as simple interest on (principal + primary interest) after the due date using the moratory rate.
     - The late fee. It is the fee applied when the sub-loan becomes overdue. It is calculated as a simple interest on the (principal + primary interest) at the due date using the late fee rate.
-    - The clawback fee. It is the fee applied when a borrower fails to meet the conditions required to retain a discounted primary rate, in particular when a sub-loan (installment) becomes overdue. The fee is equivalent to the interest retroactively recalculated as if the base (non-discounted) primary rate had applied for the entire accrual period and there were no repayments or discounts. The fee is calculated as a compound interest on (principal + primary interest as of the due date) for the number of days since between the sub-loan start date and the due date using the clawback fee rate. 
-   
+    - The clawback fee. It is the fee applied when a borrower fails to meet the conditions required to retain a discounted primary rate, in particular when a sub-loan (installment) becomes overdue. The fee is equivalent to the interest retroactively recalculated as if the base (non-discounted) primary rate had applied for the entire accrual period and there were no repayments or discounts. The fee is calculated as a compound interest on (principal + primary interest as of the due date) for the number of days since between the sub-loan start date and the due date using the clawback fee rate.
+    - The charge expenses. It is the fee applied when the sub-loan becomes overdue to cover collection costs (Brazil `Despesas de Cobrança`). It is calculated as a simple interest on the (principal + primary interest) at the due date using the charge expenses rate.
+
    For each financial part, the contract maintains the tracked the following sub-parts:
    - tracked: the amount remaining to be repaid.
    - repaid: the amount that has been repaid.
@@ -26,6 +27,7 @@
     - The tracked secondary interest.
     - The tracked moratory interest.
     - The tracked late fee.
+    - The tracked charge expenses.
     - The tracked clawback fee.
     - The tracked primary interest.
     - The tracked principal.
@@ -57,6 +59,8 @@
       * `lateFeeRate` -- the late fee rate provided as the parameter of the sub-loan;
       * `clawbackFee` -- the tracked clawback fee;
       * `clawbackFeeRate` -- the clawback fee rate provided as the parameter of the sub-loan;
+      * `chargeExpenses` -- the tracked charge expenses;
+      * `chargeExpensesRate` -- the charge expenses rate provided as the parameter of the sub-loan;
       * `[x]` -- means "at day x";
       * `d1`, `d2`, ... `di` -- some concrete dates without repayments or discounts between them;
       * `dx - dy` -- the integer number of days between dx and dy;
@@ -75,19 +79,22 @@
         (5) moratoryInterest[d2] = 0;
         (6) lateFee[d2] = 0;
         (7) clawbackFee[d2] = 0;
+        (8) chargeExpenses[d2] = 0;
         ```
       * Post the due date:
         ```
-        (8) legalPrincipal[dueDate] = principal[dueDate] + primaryInterest[dueDate];
-        (9) lateFee[dueDate] = legalPrincipal[dueDate] * lateFeeRate;
-        (10) clawbackFee[dueDate] = legalPrincipal[dueDate] * (1 + clawbackFeeRate)^(dueDate - startDate) - legalPrincipal[dueDate];
+        (9) legalPrincipal[dueDate] = principal[dueDate] + primaryInterest[dueDate];
+        (10) lateFee[dueDate] = legalPrincipal[dueDate] * lateFeeRate;
+        (11) clawbackFee[dueDate] = legalPrincipal[dueDate] * (1 + clawbackFeeRate)^(dueDate - startDate) - legalPrincipal[dueDate];
+        (12) chargeExpenses[dueDate] = legalPrincipal[dueDate] * chargeExpensesRate;
 
-        (11) principal[d4] = principal[d3];
-        (12) primaryInterest[d4] = primaryInterest[d3];
-        (13) secondaryInterest[d4] = (legalPrincipal[d3] + secondaryInterest[d3]) * (1 + secondaryRate)^(d4 - d3) - legalPrincipal[d3];
-        (14) moratoryInterest[d4] = moratoryInterest[d3] + legalPrincipal[d3] * moratoryRate * (d4 - d3);
-        (15) lateFee[d4] = lateFee[d3];
-        (16) clawbackFee[d4] = clawbackFee[d3];
+        (13) principal[d4] = principal[d3];
+        (14) primaryInterest[d4] = primaryInterest[d3];
+        (15) secondaryInterest[d4] = (legalPrincipal[d3] + secondaryInterest[d3]) * (1 + secondaryRate)^(d4 - d3) - legalPrincipal[d3];
+        (16) moratoryInterest[d4] = moratoryInterest[d3] + legalPrincipal[d3] * moratoryRate * (d4 - d3);
+        (17) lateFee[d4] = lateFee[d3];
+        (18) clawbackFee[d4] = clawbackFee[d3];
+        (19) chargeExpenses[d4] = chargeExpenses[d3];
         ```
     - Example without any repayments or discounts:
       * Dates (in days):
@@ -97,36 +104,39 @@
       * Rates (assume all rates below are **per day** to match the `^(days)` formulas):
         * `primaryRate = 1% = 0.01`
         * `secondaryRate = 2% = 0.02`
-        * `moratoryRate = 3% = 0.03` (linear, see formula (14))
-        * `lateFeeRate = 4% = 0.04` (one-time at `dueDate`, see formula (9))
+        * `moratoryRate = 3% = 0.03` (linear, see formula (16))
+        * `lateFeeRate = 4% = 0.04` (one-time at `dueDate`, see formula (10))
         * `clawbackFeeRate = 5% = 0.05`
+        * `chargeExpensesRate = 6% = 0.06` (one-time at `dueDate`, see formula (12))
       * Initial state at `d1 = startDate = 0`:
         * `principal[0] = 1000`
         * `primaryInterest[0] = 0`
-        * `secondaryInterest[0] = 0`, `moratoryInterest[0] = 0`, `lateFee[0] = 0`, `clawbackFee[0] = 0`
+        * `secondaryInterest[0] = 0`, `moratoryInterest[0] = 0`, `lateFee[0] = 0`, `clawbackFee[0] = 0`, `chargeExpenses[0] = 0`
       * Up to the due date (`d1 = 0` → `d2 = 2`):
         * (1) `principal[2] = principal[0] = 1000`
         * (2) `primaryInterest[2] = (1000 + 0) * (1 + 0.01)^(2) - 1000`
           * `(1 + 0.01)^2 = 1.01^2 = 1.0201`
           * `primaryInterest[2] = 1000 * 1.0201 - 1000 = 20.1`
         * (3) `legalPrincipal[2] = principal[2] + primaryInterest[2] = 1000 + 20.1 = 1020.1`
-        * (4)-(7) `secondaryInterest[2] = 0`, `moratoryInterest[2] = 0`, `lateFee[2] = 0`, `clawbackFee[2] = 0`
+        * (4)-(8) `secondaryInterest[2] = 0`, `moratoryInterest[2] = 0`, `lateFee[2] = 0`, `clawbackFee[2] = 0`, `chargeExpenses[2] = 0`
       * Exactly after the due date — applying fees:
-        * (8) `legalPrincipal[dueDate] = legalPrincipal[2] = 1020.1`
-        * (9) `lateFee[dueDate] = legalPrincipal[dueDate] * lateFeeRate = 1020.1 * 0.04 = 40.804 ≈ 40.80`
-        * (10) `clawbackFee[dueDate] = legalPrincipal[dueDate] * (1 + clawbackFeeRate)^(dueDate - startDate) - legalPrincipal[dueDate]`
+        * (9) `legalPrincipal[dueDate] = legalPrincipal[2] = 1020.1`
+        * (10) `lateFee[dueDate] = legalPrincipal[dueDate] * lateFeeRate = 1020.1 * 0.04 = 40.804 ≈ 40.80`
+        * (11) `clawbackFee[dueDate] = legalPrincipal[dueDate] * (1 + clawbackFeeRate)^(dueDate - startDate) - legalPrincipal[dueDate]`
           * `dueDate - startDate = 2 - 0 = 2`
           * `(1 + clawbackFeeRate)^2 = (1.05)^2 = 1.1025`
           * `clawbackFee[dueDate] = 1020.1 * 1.1025 - 1020.1 = 104.56025 ≈ 104.56`
+        * (12) `chargeExpenses[dueDate] = legalPrincipal[dueDate] * chargeExpensesRate = 1020.1 * 0.06 = 61.206 ≈ 61.21`
       * Post the due date at `d3 = 3`:
-        * (11) `principal[3] = principal[dueDate] = 1000`
-        * (12) `primaryInterest[3] = primaryInterest[dueDate] = 20.1`
-        * (13) `secondaryInterest[3] = (legalPrincipal[dueDate] + secondaryInterest[dueDate]) * (1 + secondaryRate)^(3 - dueDate) - legalPrincipal[dueDate]`
+        * (13) `principal[3] = principal[dueDate] = 1000`
+        * (14) `primaryInterest[3] = primaryInterest[dueDate] = 20.1`
+        * (15) `secondaryInterest[3] = (legalPrincipal[dueDate] + secondaryInterest[dueDate]) * (1 + secondaryRate)^(3 - dueDate) - legalPrincipal[dueDate]`
           * `secondaryInterest[3] = (1020.1 + 0) * 1.02^(3 - 2) - 1020.1 = 1020.1 * 1.02 - 1020.1 = 20.402 ≈ 20.40`
-        * (14) `moratoryInterest[3] = moratoryInterest[dueDate] + legalPrincipal[dueDate] * moratoryRate * (3 - dueDate)`
+        * (16) `moratoryInterest[3] = moratoryInterest[dueDate] + legalPrincipal[dueDate] * moratoryRate * (3 - dueDate)`
           * `moratoryInterest[3] = 0 + 1020.1 * 0.03 * (3 - 2) = 30.603 ≈ 30.60`
-        * (15) `lateFee[3] = lateFee[dueDate] = 40.80`
-        * (16) `clawbackFee[3] = clawbackFee[dueDate] = 104.56`
+        * (17) `lateFee[3] = lateFee[dueDate] = 40.80`
+        * (18) `clawbackFee[3] = clawbackFee[dueDate] = 104.56`
+        * (19) `chargeExpenses[3] = chargeExpenses[dueDate] = 61.21`
       * Full sub-loan parts at `d3 = 3`:
         * `principal = 1000`
         * `primaryInterest = 20.1`
@@ -134,8 +144,9 @@
         * `moratoryInterest = 30.60`
         * `lateFee = 40.80`
         * `clawbackFee = 104.56`
+        * `chargeExpenses = 61.21`
         * `legalPrincipal = principal + primaryInterest = 1020.1`
-        * Total due at day 3 (sum of all parts) = `1000 + 20.1 + 20.40 + 30.60 + 40.80 + 104.56 = 1216.46`
+        * Total due at day 3 (sum of all parts) = `1000 + 20.1 + 20.40 + 30.60 + 40.80 + 104.56 + 61.21` = `1277.67`
 
 5. **Sub-Loan IDs**: Each sub-loan has a unique ID assigned when the sub-loan is taken. Sub-loan IDs are always sequential within a loan. Each sub-loan stores its index within the loan and the total number of sub-loans for that loan.
 
@@ -165,6 +176,7 @@
     - `MoratoryRateSetting`: sets the moratory rate of the sub-loan.
     - `LateFeeRateSetting`: sets the late fee rate of the sub-loan.
     - `ClawbackFeeRateSetting`: sets the clawback fee rate of the sub-loan.
+    - `ChargeExpensesRateSetting`: sets the charge expenses rate of the sub-loan.
     - `DurationSetting`: sets the duration of the sub-loan.
     - `PrincipalDiscount`: discounts the principal part of the sub-loan.
     - `PrimaryInterestDiscount`: discounts the primary interest part of the sub-loan.
@@ -172,6 +184,7 @@
     - `MoratoryInterestDiscount`: discounts the moratory interest part of the sub-loan.
     - `LateFeeDiscount`: discounts the late fee part of the sub-loan.
     - `ClawbackFeeDiscount`: discounts the clawback fee part of the sub-loan.
+    - `ChargeExpensesDiscount`: discounts the charge expenses part of the sub-loan.
 
 8. **Operation IDs**: Each operation has an ID within a sub-loan. Operation IDs are `uint16` values from 1 to 65535. The zero ID (`0`) means `no operation`.
 
@@ -373,24 +386,37 @@
 ### 5. Notes
 
 1. Lending programs cannot be updated once opened because we preserve history. To reconfigure a program, open another one and switch to it. The old program can be closed to prevent new loans.
+
 2. Operations are applied only while processing a sub-loan, which happens in the transaction where operations are added or voided, or in a later transaction when previously pending operations are processed.
+
 3. The operation account is stored in the `Operation` structure as the account ID in the global smart-contract address book with the following special values:
     * `0` — the address is not provided or zero.
     * `type(uint64).max` — the address is the borrower of the sub-loan.
+
 4. Operations are ordered in the sub-loan linked list by timestamp and then by ID: earlier timestamps come first, and matching timestamps are ordered by lower IDs before higher ones.
+
 5. Loans (a group of sub-loans) can be taken starting with a timestamp in the past. If zero is provided, the current block timestamp is used. Loans cannot be taken in the future. Additionally, `startTimestamp == 1` is rejected as a special reserved value.
+
 6. No direct token transfers to or from a pool. Tokens always move through the lending market contract. Examples:
     * Taking a loan:
       * `borrowedAmount`: LP => LM => borrower
       * `addonAmount`: LP => LM => addonTreasury
     * Repaying a loan:
       * `repaymentAmount`: borrower => LM => LP
+
 7. Late fee rate change operations can have any timestamp, but the new rate is applied only if the operation timestamp is not later than the sub-loan due date. Similarly for clawback fee rate change operations.
-8. There is currently no special amount for full sub-loan repayment. In V1 you could pass `type(uint256).max`; in V2 only explicit repayment and discount amounts are supported. If a special amount is added in the future, it must be converted to the outstanding balance when the operation is added, not when it is processed.
-9. Batch view functions that return arrays of structs are no longer exposed. This keeps the ABI forward-compatible when structs gain new fields: returning a single struct remains backward compatible, whereas returning an array forces an ABI update and couples smart contracts to backend updates. To keep backend reads consistent, call the individual view functions against the same block number (not `latest`) and aggregate the results. Most blockchain libraries also let you batch JSON-RPC calls; for example, see https://docs.ethers.org/v6/api/providers/jsonrpc/#JsonRpcApiProviderOptions.
-10. All rates are expressed as multiplied by `INTEREST_RATE_FACTOR = 10^9` (see the `Constants` contract).
-11. The tracked, repaid and discount parts of sub-loans are not rounded financially (according to the accuracy factor) as well as fees, they are stored in the contract in the raw form. Only the sum of tracked parts are rounded when calculating the outstanding balance of a sub-loan. That rounded value is exposed by the separate field of the preview structures returned by the view functions.
-12. The financially rounded values are calculated using the standard mathematical rules and the following rule: if the initial value for rounding is not zero and the rounded value is zero, then the rounded value is set to the accuracy factor. Examples of rounding for BRLC (6 decimals, accuracy factor = 10_000):
+
+8. Charge expenses rate change operations can have any timestamp, but the new rate is applied only if the operation timestamp is not later than the sub-loan due date.
+
+9. There is currently no special amount for full sub-loan repayment. In V1 you could pass `type(uint256).max`; in V2 only explicit repayment and discount amounts are supported. If a special amount is added in the future, it must be converted to the outstanding balance when the operation is added, not when it is processed.
+
+10. Batch view functions that return arrays of structs are no longer exposed. This keeps the ABI forward-compatible when structs gain new fields: returning a single struct remains backward compatible, whereas returning an array forces an ABI update and couples smart contracts to backend updates. To keep backend reads consistent, call the individual view functions against the same block number (not `latest`) and aggregate the results. Most blockchain libraries also let you batch JSON-RPC calls; for example, see https://docs.ethers.org/v6/api/providers/jsonrpc/#JsonRpcApiProviderOptions.
+
+11. All rates are expressed as multiplied by `INTEREST_RATE_FACTOR = 10^9` (see the `Constants` contract).
+
+12. The tracked, repaid and discount parts of sub-loans are not rounded financially (according to the accuracy factor) as well as fees, they are stored in the contract in the raw form. Only the sum of tracked parts are rounded when calculating the outstanding balance of a sub-loan. That rounded value is exposed by the separate field of the preview structures returned by the view functions.
+
+13. The financially rounded values are calculated using the standard mathematical rules and the following rule: if the initial value for rounding is not zero and the rounded value is zero, then the rounded value is set to the accuracy factor. Examples of rounding for BRLC (6 decimals, accuracy factor = 10_000):
     * 1.009999 => 1.01,
     * 1.005000 => 1.01,
     * 1.004999 => 1.00,
@@ -401,9 +427,11 @@
     * 0.004999 => 0.01,
     * 0.000001 => 0.01,
     * 0.000000 => 0.00.
-13. The general discount operation works similarly to the repayment operation, but without the token transfers.
+
+14. The general discount operation works similarly to the repayment operation, but without the token transfers.
     The special discount operations are used to discount specific parts of the sub-loan.
-14. The value of the repayment and general discount operations must be rounded financially, the value of the special discount operations may not be rounded.
+
+15. The value of the repayment and general discount operations must be rounded financially, the value of the special discount operations may not be rounded.
 
 
 ## Credit Line V2
@@ -470,4 +498,5 @@ To be defined.
 ### 5. Notes
 
 1. Changes in the borrowing policy of credit lines between CFv1 and CFv2 follow these mappings (CFv1 => CFv2): 0 => 1, 2 => 2, 2 => 3.
+
 2. The credit line now emits the `LoanOpened` and `LoanClosed` events, which can be used to trace the appropriate hook function calls.
