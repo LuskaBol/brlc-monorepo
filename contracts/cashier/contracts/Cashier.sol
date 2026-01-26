@@ -12,6 +12,8 @@ import { PausableExtUpgradeable } from "@cloudwalk/brlc-base/contracts/PausableE
 import { RescuableUpgradeable } from "@cloudwalk/brlc-base/contracts/RescuableUpgradeable.sol";
 import { UUPSExtUpgradeable } from "@cloudwalk/brlc-base/contracts/UUPSExtUpgradeable.sol";
 
+import { IERC20Mintable } from "@cloudwalk/brlc-token/contracts/base/interfaces/IERC20Mintable.sol";
+
 import { ICashier } from "./interfaces/ICashier.sol";
 import { ICashierPrimary } from "./interfaces/ICashier.sol";
 import { ICashierConfiguration } from "./interfaces/ICashier.sol";
@@ -19,7 +21,6 @@ import { ICashierShard } from "./interfaces/ICashierShard.sol";
 import { ICashierShardPrimary } from "./interfaces/ICashierShard.sol";
 import { ICashierHook } from "./interfaces/ICashierHook.sol";
 import { ICashierHookable } from "./interfaces/ICashierHookable.sol";
-import { IERC20Mintable } from "./interfaces/IERC20Mintable.sol";
 
 import { CashierStorage } from "./CashierStorage.sol";
 import { Versionable } from "./Versionable.sol";

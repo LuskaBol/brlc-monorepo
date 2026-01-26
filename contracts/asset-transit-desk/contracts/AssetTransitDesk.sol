@@ -8,13 +8,14 @@ import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.s
 import { AccessControlExtUpgradeable } from "@cloudwalk/brlc-base/contracts/AccessControlExtUpgradeable.sol";
 import { PausableExtUpgradeable } from "@cloudwalk/brlc-base/contracts/PausableExtUpgradeable.sol";
 import { RescuableUpgradeable } from "@cloudwalk/brlc-base/contracts/RescuableUpgradeable.sol";
-import { Versionable } from "./Versionable.sol";
 import { UUPSExtUpgradeable } from "@cloudwalk/brlc-base/contracts/UUPSExtUpgradeable.sol";
+import { ITreasury } from "@cloudwalk/brlc-treasury/contracts/interfaces/ITreasury.sol";
+
+import { Versionable } from "./Versionable.sol";
 
 import { IAssetTransitDesk } from "./interfaces/IAssetTransitDesk.sol";
 import { IAssetTransitDeskPrimary } from "./interfaces/IAssetTransitDesk.sol";
 import { IAssetTransitDeskConfiguration } from "./interfaces/IAssetTransitDesk.sol";
-import { ITreasury } from "./interfaces/ITreasury.sol";
 
 import { AssetTransitDeskStorageLayout } from "./AssetTransitDeskStorageLayout.sol";
 

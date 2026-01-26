@@ -5,9 +5,10 @@ pragma solidity 0.8.30;
 import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
+import { IERC20Hook } from "@cloudwalk/brlc-token/contracts/base/interfaces/IERC20Hook.sol";
+
 import { IBalanceTrackerPrimary, IBalanceTrackerErrors } from "./interfaces/IBalanceTracker.sol";
 import { IBalanceTracker } from "./interfaces/IBalanceTracker.sol";
-import { IERC20Hook } from "./interfaces/IERC20Hook.sol";
 import { Versionable } from "./base/Versionable.sol";
 
 /**

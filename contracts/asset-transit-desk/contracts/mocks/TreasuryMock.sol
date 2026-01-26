@@ -5,14 +5,12 @@ pragma solidity 0.8.30;
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import { ITreasury } from "../interfaces/ITreasury.sol";
-
 /**
  * @title TreasuryMock contract
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev Mock implementation of the Treasury contract for testing purposes.
  */
-contract TreasuryMock is ITreasury {
+contract TreasuryMock {
     using SafeERC20 for IERC20;
 
     // ------------------ Storage --------------------------------- //
@@ -33,21 +31,18 @@ contract TreasuryMock is ITreasury {
 
     // ------------------ Transactional functions ----------------- //
 
-    /// @inheritdoc ITreasury
     function withdraw(uint256 amount) external {
         IERC20(_token).safeTransfer(msg.sender, amount);
     }
 
     // ------------------ View functions -------------------------- //
 
-    /// @inheritdoc ITreasury
     function underlyingToken() external view returns (address) {
         return _token;
     }
 
     // ------------------ Pure functions -------------------------- //
 
-    /// @inheritdoc ITreasury
     function proveTreasury() external pure {}
 
     // ------------------ Test helper functions ------------------- //

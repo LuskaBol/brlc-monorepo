@@ -7,18 +7,20 @@ import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import { PausableEnumerableExtUpgradeable } from "@cloudwalk/brlc-base/contracts/enumerable/PausableEnumerableExtUpgradeable.sol";
 import { RescuableEnumerableUpgradeable } from "@cloudwalk/brlc-base/contracts/enumerable/RescuableEnumerableUpgradeable.sol";
 import { AccessControlEnumerableExtUpgradeable } from "@cloudwalk/brlc-base/contracts/enumerable/AccessControlEnumerableExtUpgradeable.sol";
+
 import { UUPSExtUpgradeable } from "@cloudwalk/brlc-base/contracts/UUPSExtUpgradeable.sol";
+import { ICashierHook } from "@cloudwalk/brlc-cashier/contracts/interfaces/ICashierHook.sol";
+import { ICashier } from "@cloudwalk/brlc-cashier/contracts/interfaces/ICashier.sol";
+import { ICashierHookable } from "@cloudwalk/brlc-cashier/contracts/interfaces/ICashierHookable.sol";
+import { ICashierHookableTypes } from "@cloudwalk/brlc-cashier/contracts/interfaces/ICashierHookable.sol";
+
 import { Versionable } from "./Versionable.sol";
 
 import { CreditAgentStorageLayout } from "./CreditAgentStorageLayout.sol";
 
-import { ICashier } from "./interfaces/ICashier.sol";
 import { ICreditAgent } from "./interfaces/ICreditAgent.sol";
 import { ICreditAgentConfiguration } from "./interfaces/ICreditAgent.sol";
 import { ICreditAgentPrimary } from "./interfaces/ICreditAgent.sol";
-import { ICashierHook } from "./interfaces/ICashierHook.sol";
-import { ICashierHookable } from "./interfaces/ICashierHookable.sol";
-import { ICashierHookableTypes } from "./interfaces/ICashierHookable.sol";
 
 /**
  * @title CreditAgent contract

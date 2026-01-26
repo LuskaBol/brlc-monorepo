@@ -1,19 +1,21 @@
 {
   "name": "@cloudwalk/brlc-periphery",
+  "version": "0.0.0",
   "dependencies": {
+    "@cloudwalk/brlc-base": "workspace:",
+    "@cloudwalk/brlc-capybara-finance": "workspace:",
     "@openzeppelin/contracts": "catalog:",
-    "@openzeppelin/contracts-upgradeable": "catalog:",
-    "@cloudwalk/brlc-base": "workspace:"
+    "@openzeppelin/contracts-upgradeable": "catalog:"
   },
   "type": "commonjs",
   "devDependencies": {
     "@cloudwalk/brlc-test-utils": "workspace:",
-    "@nomicfoundation/hardhat-ethers": "catalog:hardhat2",
-    "hardhat": "catalog:hardhat2",
-    "chai": "catalog:hardhat2",
-    "typescript": "catalog:",
     "@cloudwalk/hardhat2-config": "workspace:",
-    "ethers": "catalog:"
+    "@nomicfoundation/hardhat-ethers": "catalog:hardhat2",
+    "chai": "catalog:hardhat2",
+    "ethers": "catalog:",
+    "hardhat": "catalog:hardhat2",
+    "typescript": "catalog:"
   },
   "devEngines": {
     "runtime": {

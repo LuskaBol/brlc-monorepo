@@ -4,7 +4,6 @@ pragma solidity ^0.8.20;
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import { ITreasury } from "../interfaces/ITreasury.sol";
 
 /**
  * @title TreasuryMock contract
@@ -14,7 +13,7 @@ import { ITreasury } from "../interfaces/ITreasury.sol";
  * This mock allows for configurable behavior to test various scenarios including
  * successful withdrawals and failure cases.
  */
-contract TreasuryMock is ITreasury {
+contract TreasuryMock {
     // ------------------ Types ----------------------------------- //
 
     using SafeERC20 for IERC20;
@@ -44,7 +43,6 @@ contract TreasuryMock is ITreasury {
     // ------------------ External functions ---------------------- //
 
     /**
-     * @inheritdoc ITreasury
      *
      * @dev Withdraws tokens from the treasury to the caller's address.
      *
@@ -58,11 +56,9 @@ contract TreasuryMock is ITreasury {
         IERC20(_underlyingToken).safeTransfer(msg.sender, amount);
     }
 
-    /// @inheritdoc ITreasury
     function underlyingToken() external view returns (address) {
         return _underlyingToken;
     }
 
-    /// @inheritdoc ITreasury
     function proveTreasury() external pure {}
 }

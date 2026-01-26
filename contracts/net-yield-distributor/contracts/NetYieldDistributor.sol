@@ -9,6 +9,10 @@ import { AccessControlExtUpgradeable } from "@cloudwalk/brlc-base/contracts/Acce
 import { PausableExtUpgradeable } from "@cloudwalk/brlc-base/contracts/PausableExtUpgradeable.sol";
 import { RescuableUpgradeable } from "@cloudwalk/brlc-base/contracts/RescuableUpgradeable.sol";
 import { UUPSExtUpgradeable } from "@cloudwalk/brlc-base/contracts/UUPSExtUpgradeable.sol";
+
+import { IERC20Mintable } from "@cloudwalk/brlc-token/contracts/base/interfaces/IERC20Mintable.sol";
+import { ITreasury } from "@cloudwalk/brlc-treasury/contracts/interfaces/ITreasury.sol";
+
 import { Versionable } from "./Versionable.sol";
 
 import { NetYieldDistributorStorageLayout } from "./NetYieldDistributorStorageLayout.sol";
@@ -16,8 +20,6 @@ import { NetYieldDistributorStorageLayout } from "./NetYieldDistributorStorageLa
 import { INetYieldDistributor } from "./interfaces/INetYieldDistributor.sol";
 import { INetYieldDistributorPrimary } from "./interfaces/INetYieldDistributor.sol";
 import { INetYieldDistributorConfiguration } from "./interfaces/INetYieldDistributor.sol";
-import { ITreasury } from "./interfaces/ITreasury.sol";
-import { IERC20Mintable } from "./interfaces/IERC20Mintable.sol";
 
 /**
  * @title NetYieldDistributor contract

@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-import { IERC20Freezable } from "../../interfaces/IERC20Freezable.sol";
+import { IERC20Freezable } from "@cloudwalk/brlc-token/contracts/base/interfaces/IERC20Freezable.sol";
 
 /**
  * @title ERC20TokenMock contract

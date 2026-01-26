@@ -1,9 +1,11 @@
 {
   "name": "@cloudwalk/brlc-asset-transit-desk",
+  "version": "0.0.0",
   "dependencies": {
     "@openzeppelin/contracts": "catalog:",
     "@openzeppelin/contracts-upgradeable": "catalog:",
-    "@cloudwalk/brlc-base": "workspace:"
+    "@cloudwalk/brlc-base": "workspace:",
+    "@cloudwalk/brlc-treasury": "workspace:"
   },
   "type": "commonjs",
   "devDependencies": {

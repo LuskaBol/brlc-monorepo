@@ -5,6 +5,7 @@ pragma solidity 0.8.30;
 import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import { EnumerableSetUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeable.sol";
 import { SafeERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import { ICashbackVault } from "@cloudwalk/brlc-card-payment-processor-v2/contracts/interfaces/ICashbackVault.sol";
 
 import { BlocklistableUpgradeable } from "./base/BlocklistableUpgradeable.sol";
 import { PausableExtUpgradeable } from "./base/PausableExtUpgradeable.sol";
@@ -16,7 +17,6 @@ import { Versionable } from "./base/Versionable.sol";
 import { CashbackDistributorStorage } from "./CashbackDistributorStorage.sol";
 import { ICashbackDistributor, ICashbackDistributorPrimary } from "./interfaces/ICashbackDistributor.sol";
 import { ICashbackDistributorConfiguration } from "./interfaces/ICashbackDistributor.sol";
-import { ICashbackVault } from "./interfaces/ICashbackVault.sol";
 
 /**
  * @title CashbackDistributor contract

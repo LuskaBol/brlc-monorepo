@@ -5,6 +5,8 @@ pragma solidity 0.8.30;
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { Initializable } from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
+import { ILiquidityPool } from "@cloudwalk/brlc-capybara-finance/contracts/interfaces/ILiquidityPool.sol";
+
 import { AccessControlExtUpgradeable } from "./base/AccessControlExtUpgradeable.sol";
 import { PausableExtUpgradeable } from "./base/PausableExtUpgradeable.sol";
 import { UUPSExtUpgradeable } from "./base/UUPSExtUpgradeable.sol";
@@ -15,7 +17,6 @@ import { ILendingMarketV2 } from "./interfaces/ILendingMarketV2.sol";
 import { ILendingEngineV2 } from "./interfaces/ILendingEngineV2.sol";
 import { ILendingMarketV2Configuration } from "./interfaces/ILendingMarketV2.sol";
 import { ILendingMarketV2Primary } from "./interfaces/ILendingMarketV2.sol";
-import { ILiquidityPool } from "./interfaces/ILiquidityPool.sol";
 
 import { AddressBook } from "./libraries/AddressBook.sol";
 import { LendingMarketV2Core } from "./core/LendingMarketV2Core.sol";

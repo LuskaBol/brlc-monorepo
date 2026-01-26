@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.0;
 
-import "../interfaces/IVersionable.sol";
+import { IVersionable } from "@cloudwalk/brlc-base/interfaces/IVersionable.sol";
 
 /**
  * @title Versionable base contract

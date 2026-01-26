@@ -25,18 +25,18 @@
   "type": "module",
   "devDependencies": {
     "@eslint/js": "^9.39.2",
-    "@stylistic/eslint-plugin": "^5.2.3",
-    "@types/node": "^22.19.3",
+    "@stylistic/eslint-plugin": "^5.7.1",
+    "@types/node": "^25.0.10",
     "eslint": "^9.39.2",
     "eslint-plugin-promise": "^7.2.1",
-    "globals": "^17.0.0",
+    "globals": "^17.1.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
-    "prettier": "^3.7.4",
+    "prettier": "^3.8.1",
     "prettier-plugin-solidity": "^2.2.1",
     "ts-node": "^10.9.2",
     "typescript": "catalog:",
-    "typescript-eslint": "^8.38.0"
+    "typescript-eslint": "^8.53.1"
   },
   "devEngines": {
     "runtime": {
@@ -48,5 +48,5 @@
       "onFail": "error"
     }
   },
-  "packageManager": "pnpm@10.28.0+sha512.05df71d1421f21399e053fde567cea34d446fa02c76571441bfc1c7956e98e363088982d940465fd34480d4d90a0668bc12362f8aa88000a64e83d0b0e47be48"
+  "packageManager": "pnpm@10.28.1+sha512.7d7dbbca9e99447b7c3bf7a73286afaaf6be99251eb9498baefa7d406892f67b879adb3a1d7e687fc4ccc1a388c7175fbaae567a26ab44d1067b54fcb0d6a316"
 }

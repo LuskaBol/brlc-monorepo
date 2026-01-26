@@ -3,12 +3,14 @@
 pragma solidity 0.8.30;
 
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import {
+    ILendingMarket as ILendingMarketCapybaraV1,
+    ILendingMarketPrimary as ILendingMarketPrimaryCapybaraV1
+} from "@cloudwalk/brlc-capybara-finance/contracts/interfaces/ILendingMarket.sol";
 
 import { CreditAgent } from "./CreditAgent.sol";
 
 import { ICreditAgentCapybaraV1, ICreditAgentCapybaraV1Primary } from "./interfaces/ICreditAgentCapybaraV1.sol";
-
-import { ILendingMarketCapybaraV1 } from "./interfaces/ILendingMarketCapybaraV1.sol";
 
 /**
  * @title CreditAgentCapybaraV1 contract
@@ -54,8 +56,8 @@ contract CreditAgentCapybaraV1 is CreditAgent, ICreditAgentCapybaraV1 {
             txId,
             borrower,
             loanAmount,
-            ILendingMarketCapybaraV1.takeLoanFor.selector,
-            ILendingMarketCapybaraV1.revokeLoan.selector,
+            ILendingMarketPrimaryCapybaraV1.takeLoanFor.selector,
+            ILendingMarketPrimaryCapybaraV1.revokeLoan.selector,
             abi.encode(borrower, programId.toUint32(), loanAmount, loanAddon, durationInPeriods)
         );
     }
@@ -103,8 +105,8 @@ contract CreditAgentCapybaraV1 is CreditAgent, ICreditAgentCapybaraV1 {
             txId,
             borrower,
             _sumArray(borrowAmounts),
-            ILendingMarketCapybaraV1.takeInstallmentLoan.selector,
-            ILendingMarketCapybaraV1.revokeInstallmentLoan.selector,
+            ILendingMarketPrimaryCapybaraV1.takeInstallmentLoan.selector,
+            ILendingMarketPrimaryCapybaraV1.revokeInstallmentLoan.selector,
             abi.encode(
                 borrower,
                 programId.toUint32(),

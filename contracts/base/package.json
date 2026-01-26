@@ -1,6 +1,6 @@
 {
   "name": "@cloudwalk/brlc-base",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "dependencies": {
     "@openzeppelin/contracts": "catalog:",
     "@openzeppelin/contracts-upgradeable": "catalog:"

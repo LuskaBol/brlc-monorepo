@@ -3,7 +3,7 @@
 pragma solidity ^0.8.20;
 
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import { IERC20Hook } from "../../interfaces/IERC20Hook.sol";
+import { IERC20Hook } from "@cloudwalk/brlc-token/contracts/base/interfaces/IERC20Hook.sol";
 
 /**
  * @title ERC20TokenMockWithHooks contract

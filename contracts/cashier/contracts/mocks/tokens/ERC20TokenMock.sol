@@ -4,14 +4,12 @@ pragma solidity ^0.8.20;
 
 import { ERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-import { IERC20Mintable } from "../../interfaces/IERC20Mintable.sol";
-
 /**
  * @title ERC20TokenMock contract
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev An implementation of the {ERC20Upgradeable} contract for testing purposes.
  */
-contract ERC20TokenMock is ERC20, IERC20Mintable {
+contract ERC20TokenMock is ERC20 {
     /// @dev The result of minting function.
     bool public mintResult;
 

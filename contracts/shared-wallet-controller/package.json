@@ -1,9 +1,11 @@
 {
   "name": "@cloudwalk/brlc-shared-wallet-controller",
+  "version": "0.0.0",
   "dependencies": {
     "@openzeppelin/contracts": "catalog:",
     "@openzeppelin/contracts-upgradeable": "catalog:",
-    "@cloudwalk/brlc-base": "workspace:"
+    "@cloudwalk/brlc-base": "workspace:",
+    "@cloudwalk/brlc-token": "workspace:"
   },
   "type": "commonjs",
   "devDependencies": {

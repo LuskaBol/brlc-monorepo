@@ -10,9 +10,10 @@ import { AccessControlExtUpgradeable } from "@cloudwalk/brlc-base/contracts/Acce
 import { PausableExtUpgradeable } from "@cloudwalk/brlc-base/contracts/PausableExtUpgradeable.sol";
 import { RescuableUpgradeable } from "@cloudwalk/brlc-base/contracts/RescuableUpgradeable.sol";
 import { UUPSExtUpgradeable } from "@cloudwalk/brlc-base/contracts/UUPSExtUpgradeable.sol";
+import { IERC20Hook } from "@cloudwalk/brlc-token/contracts/base/interfaces/IERC20Hook.sol";
+
 import { Versionable } from "./Versionable.sol";
 
-import { IERC20Hook } from "./interfaces/IERC20Hook.sol";
 import { ISharedWalletController, ISharedWalletControllerPrimary } from "./interfaces/ISharedWalletController.sol";
 
 import { SharedWalletControllerStorageLayout } from "./SharedWalletControllerStorageLayout.sol";

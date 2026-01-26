@@ -2,16 +2,15 @@
 
 pragma solidity ^0.8.0;
 
-import { ICashierHook } from "../interfaces/ICashierHook.sol";
-import { ICashierHookableTypes } from "../interfaces/ICashierHookable.sol";
-import { ICashier } from "../interfaces/ICashier.sol";
+import { ICashierHook } from "@cloudwalk/brlc-cashier/contracts/interfaces/ICashierHook.sol";
+import { ICashierTypes } from "@cloudwalk/brlc-cashier/contracts/interfaces/ICashierTypes.sol";
 
 /**
  * @title CashierMock contract
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev A simplified version of the Cashier contract to use in tests for other contracts.
  */
-contract CashierMock is ICashierHookableTypes, ICashier {
+contract CashierMock is ICashierTypes {
     // ------------------ Storage --------------------------------- //
 
     /// @dev The mapping of a cash-out operation structure for a given off-chain transaction identifier.

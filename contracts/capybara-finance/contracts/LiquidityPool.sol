@@ -9,9 +9,10 @@ import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableS
 import { AccessControlExtUpgradeable } from "@cloudwalk/brlc-base/contracts/AccessControlExtUpgradeable.sol";
 import { PausableExtUpgradeable } from "@cloudwalk/brlc-base/contracts/PausableExtUpgradeable.sol";
 import { UUPSExtUpgradeable } from "@cloudwalk/brlc-base/contracts/UUPSExtUpgradeable.sol";
+import { IERC20Mintable } from "@cloudwalk/brlc-token/contracts/base/interfaces/IERC20Mintable.sol";
+
 import { Versionable } from "./Versionable.sol";
 
-import { IERC20Mintable } from "./interfaces/IERC20Mintable.sol";
 import { ILiquidityPool } from "./interfaces/ILiquidityPool.sol";
 import { ILiquidityPoolConfiguration } from "./interfaces/ILiquidityPool.sol";
 import { ILiquidityPoolHooks } from "./interfaces/ILiquidityPool.sol";

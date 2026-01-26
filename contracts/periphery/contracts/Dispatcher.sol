@@ -10,8 +10,9 @@ import { RescuableUpgradeable } from "@cloudwalk/brlc-base/contracts/RescuableUp
 import { Versionable } from "./Versionable.sol";
 import { UUPSExtUpgradeable } from "@cloudwalk/brlc-base/contracts/UUPSExtUpgradeable.sol";
 
+import { ILiquidityPool } from "@cloudwalk/brlc-capybara-finance/contracts/interfaces/ILiquidityPool.sol";
+
 import { ICompoundAgent } from "./interfaces/ICompoundAgent.sol";
-import { ILiquidityPool } from "./interfaces/ILiquidityPool.sol";
 
 import { DispatcherStorage } from "./DispatcherStorage.sol";
 import { IDispatcher, IDispatcherConfiguration, IDispatcherPrimary } from "./interfaces/IDispatcher.sol";

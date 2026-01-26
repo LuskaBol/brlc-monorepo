@@ -8,12 +8,13 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { SafeCast } from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 
+import { ILiquidityPool } from "@cloudwalk/brlc-capybara-finance/contracts/interfaces/ILiquidityPool.sol";
+
 import { ABDKMath64x64 } from "./libraries/ABDKMath64x64.sol";
 import { AddressBook } from "./libraries/AddressBook.sol";
 
 import { ICreditLineV2 } from "./interfaces/ICreditLineV2.sol";
 import { ILendingEngineV2 } from "./interfaces/ILendingEngineV2.sol";
-import { ILiquidityPool } from "./interfaces/ILiquidityPool.sol";
 
 import { UUPSExtUpgradeable } from "./base/UUPSExtUpgradeable.sol";
 import { Versionable } from "./base/Versionable.sol";

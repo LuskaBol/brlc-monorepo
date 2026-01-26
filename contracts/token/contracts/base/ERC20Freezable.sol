@@ -82,23 +82,12 @@ abstract contract ERC20Freezable is ERC20Base, IERC20Freezable {
     function approveFreezing() external {}
 
     /**
-     * @dev [DEPRECATED] Updates the frozen balance of an account.
+     * @inheritdoc IERC20Freezable
      *
-     * Emits a {Freeze} event.
-     *
-     * IMPORTANT: This function is deprecated and will be removed in the future updates of the contract.
-     *            Use the {freezeIncrease} and {freezeDecrease} functions instead.
-     *
-     * Requirements:
-     *
-     * - The contract must not be paused
-     * - Can only be called by a freezer
-     * - The account address must not be zero
-     *
-     * @param account The account to update the frozen balance for.
-     * @param amount The amount of tokens to set as the new frozen balance.
-     * @return newBalance The frozen balance of the account after the update.
-     * @return oldBalance The frozen balance of the account before the update.
+     * @dev The contract must not be paused.
+     * @dev Can only be called by a freezer.
+     * @dev The account address must not be zero.
+     * @dev The amount must not be zero.
      */
     function freeze(
         address account,

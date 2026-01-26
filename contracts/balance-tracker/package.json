@@ -1,8 +1,11 @@
 {
   "name": "@cloudwalk/brlc-balance-tracker",
+  "version": "0.0.0",
   "dependencies": {
     "@openzeppelin/contracts": "4.9.6",
-    "@openzeppelin/contracts-upgradeable": "4.9.6"
+    "@openzeppelin/contracts-upgradeable": "4.9.6",
+    "@cloudwalk/brlc-base": "workspace:",
+    "@cloudwalk/brlc-token": "workspace:"
   },
   "type": "commonjs",
   "devDependencies": {

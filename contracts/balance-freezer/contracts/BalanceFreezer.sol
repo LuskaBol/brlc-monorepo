@@ -8,9 +8,10 @@ import { RescuableUpgradeable } from "@cloudwalk/brlc-base/contracts/RescuableUp
 import { Versionable } from "./Versionable.sol";
 import { UUPSExtUpgradeable } from "@cloudwalk/brlc-base/contracts/UUPSExtUpgradeable.sol";
 
+import { IERC20Freezable } from "@cloudwalk/brlc-token/contracts/base/interfaces/IERC20Freezable.sol";
+
 import { IBalanceFreezer } from "./interfaces/IBalanceFreezer.sol";
 import { IBalanceFreezerPrimary } from "./interfaces/IBalanceFreezer.sol";
-import { IERC20Freezable } from "./interfaces/IERC20Freezable.sol";
 
 import { BalanceFreezerStorageLayout } from "./BalanceFreezerStorageLayout.sol";
 

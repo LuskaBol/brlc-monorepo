@@ -112,6 +112,30 @@ interface IERC20Freezable is IERC20FreezableErrors {
     ) external returns (uint256 newBalance, uint256 oldBalance);
 
     /**
+     * @dev [DEPRECATED] Updates the frozen balance of an account.
+     *
+     * Emits a {Freeze} event.
+     *
+     * IMPORTANT: This function is deprecated and will be removed in the future updates of the contract.
+     *            Use the {freezeIncrease} and {freezeDecrease} functions instead.
+     *
+     * Requirements:
+     *
+     * - The contract must not be paused
+     * - Can only be called by a freezer
+     * - The account address must not be zero
+     *
+     * @param account The account to update the frozen balance for.
+     * @param amount The amount of tokens to set as the new frozen balance.
+     * @return newBalance The frozen balance of the account after the update.
+     * @return oldBalance The frozen balance of the account before the update.
+     */
+    function freeze(
+        address account, // Tools: prevent Prettier one-liner
+        uint256 amount
+    ) external returns (uint256 newBalance, uint256 oldBalance);
+
+    /**
      * @dev Increases the frozen balance of an account.
      *
      * Emits a {Freeze} event.
@@ -122,7 +146,7 @@ interface IERC20Freezable is IERC20FreezableErrors {
      * @return oldBalance The frozen balance of the account before the increase.
      */
     function freezeIncrease(
-        address account, // Tools: this comment prevents Prettier from formatting into a single line
+        address account, // Tools: prevent Prettier one-liner
         uint256 amount
     ) external returns (uint256 newBalance, uint256 oldBalance);
 
@@ -137,7 +161,7 @@ interface IERC20Freezable is IERC20FreezableErrors {
      * @return oldBalance The frozen balance of the account before the decrease.
      */
     function freezeDecrease(
-        address account, // Tools: this comment prevents Prettier from formatting into a single line
+        address account, // Tools: prevent Prettier one-liner
         uint256 amount
     ) external returns (uint256 newBalance, uint256 oldBalance);
 

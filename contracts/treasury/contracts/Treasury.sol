@@ -9,9 +9,10 @@ import { EnumerableMap } from "@openzeppelin/contracts/utils/structs/EnumerableM
 import { AccessControlEnumerableExtUpgradeable } from "@cloudwalk/brlc-base/contracts/enumerable/AccessControlEnumerableExtUpgradeable.sol";
 import { PausableEnumerableExtUpgradeable } from "@cloudwalk/brlc-base/contracts/enumerable/PausableEnumerableExtUpgradeable.sol";
 import { RescuableEnumerableUpgradeable } from "@cloudwalk/brlc-base/contracts/enumerable/RescuableEnumerableUpgradeable.sol";
+import { IERC20Mintable } from "@cloudwalk/brlc-token/contracts/base/interfaces/IERC20Mintable.sol";
+
 import { Versionable } from "./Versionable.sol";
 
-import { IERC20Mintable } from "./interfaces/IERC20Mintable.sol";
 import { ITreasury, ITreasuryPrimary } from "./interfaces/ITreasury.sol";
 import { TreasuryStorageLayout } from "./TreasuryStorageLayout.sol";
 

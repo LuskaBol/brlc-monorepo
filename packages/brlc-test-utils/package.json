@@ -12,13 +12,13 @@
     "ethers": "catalog:"
   },
   "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "catalog:hardhat2",
     "@nomicfoundation/hardhat-ethers": "catalog:hardhat2",
     "@nomicfoundation/hardhat-network-helpers": "catalog:hardhat2",
-    "@nomicfoundation/hardhat-chai-matchers": "catalog:hardhat2",
     "@openzeppelin/hardhat-upgrades": "catalog:hardhat2",
     "@types/chai": "^4.0.0",
     "@types/mocha": "^10.0.0",
-    "@types/node": "^22.0.0",
+    "@types/node": "^25.0.10",
     "hardhat": "catalog:hardhat2",
     "typescript": "catalog:"
   },

@@ -2,14 +2,14 @@
 
 pragma solidity ^0.8.30;
 
-import { ICreditLineV1 } from "../interfaces/ICreditLineV1.sol";
+import { ICreditLineTypes } from "@cloudwalk/brlc-capybara-finance/contracts/interfaces/ICreditLineTypes.sol";
 
 /**
  * @title CreditLineV1Mock contract
  * @author CloudWalk Inc.
- * @dev Mock implementation of the `ICreditLineV1` interface used for testing.
+ * @dev Mock implementation of the `ICreditLine` interface from `@cloudwalk/brlc-capybara-finance`.
  */
-contract CreditLineV1Mock is ICreditLineV1 {
+contract CreditLineV1Mock is ICreditLineTypes {
     // ------------------ Storage --------------------------------- //
 
     /// @dev Mapping of borrower address to their state.
@@ -26,17 +26,11 @@ contract CreditLineV1Mock is ICreditLineV1 {
         _borrowerStates[borrower] = state;
     }
 
-    /**
-     * @inheritdoc ICreditLineV1
-     */
     function getBorrowerState(address borrower) external view returns (BorrowerState memory) {
         return _borrowerStates[borrower];
     }
 
     // ------------------ Pure functions -------------------------- //
 
-    /**
-     * @inheritdoc ICreditLineV1
-     */
     function proveCreditLine() external pure {}
 }

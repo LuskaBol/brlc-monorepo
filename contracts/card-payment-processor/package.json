@@ -1,19 +1,22 @@
 {
   "name": "@cloudwalk/brlc-card-payment-processor",
+  "version": "0.0.0",
   "dependencies": {
+    "@cloudwalk/brlc-base": "workspace:",
+    "@cloudwalk/brlc-card-payment-processor-v2": "workspace:",
     "@openzeppelin/contracts": "4.9.6",
     "@openzeppelin/contracts-upgradeable": "4.9.6"
   },
   "type": "commonjs",
   "devDependencies": {
     "@cloudwalk/brlc-test-utils": "workspace:",
-    "@nomicfoundation/hardhat-ethers": "catalog:hardhat2",
-    "@nomicfoundation/hardhat-chai-matchers": "catalog:hardhat2",
-    "hardhat": "catalog:hardhat2",
-    "chai": "catalog:hardhat2",
-    "typescript": "catalog:",
     "@cloudwalk/hardhat2-config": "workspace:",
-    "ethers": "catalog:"
+    "@nomicfoundation/hardhat-chai-matchers": "catalog:hardhat2",
+    "@nomicfoundation/hardhat-ethers": "catalog:hardhat2",
+    "chai": "catalog:hardhat2",
+    "ethers": "catalog:",
+    "hardhat": "catalog:hardhat2",
+    "typescript": "catalog:"
   },
   "devEngines": {
     "runtime": {

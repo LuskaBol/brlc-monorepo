@@ -4,14 +4,12 @@ pragma solidity ^0.8.9;
 
 import { IERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 
-import { ICashbackVault } from "../interfaces/ICashbackVault.sol";
-
 /**
  * @title CashbackVaultMock contract
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
  * @dev An implementation of the {ICashbackVault} interface for test purposes.
  */
-contract CashbackVaultMock is ICashbackVault {
+contract CashbackVaultMock {
     address public token;
     mapping(address => uint256) public cashbackBalances;
 

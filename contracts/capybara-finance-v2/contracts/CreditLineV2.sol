@@ -7,12 +7,12 @@ import { PausableExtUpgradeable } from "./base/PausableExtUpgradeable.sol";
 import { UUPSExtUpgradeable } from "./base/UUPSExtUpgradeable.sol";
 import { Versionable } from "./base/Versionable.sol";
 
-import { ICreditLineV1 } from "./interfaces/ICreditLineV1.sol";
+import { ICreditLine as ICreditLineV1 } from "@cloudwalk/brlc-capybara-finance/contracts/interfaces/ICreditLine.sol";
+
 import { ICreditLineV2 } from "./interfaces/ICreditLineV2.sol";
 import { ICreditLineV2Configuration } from "./interfaces/ICreditLineV2.sol";
 import { ICreditLineV2Hooks } from "./interfaces/ICreditLineV2.sol";
 import { ICreditLineV2Primary } from "./interfaces/ICreditLineV2.sol";
-import { IVersionable } from "./interfaces/IVersionable.sol";
 
 import { CreditLineV2StorageLayout } from "./storage/CreditLineV2StorageLayout.sol";
 
