@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.30;
 
+import { IAddressBookEvents } from "../interfaces/IAddressBookEvents.sol";
+
 /**
  * @title AddressBook library
  * @author CloudWalk Inc. (See https://www.cloudwalk.io)
@@ -26,16 +28,6 @@ library AddressBook {
         uint256 recordCount;
     }
 
-    // ------------------ Events ---------------------------------- //
-
-    /**
-     * @dev Emitted when a new account is added to the address book.
-     *
-     * @param account The address of the account added.
-     * @param id The ID assigned to the account.
-     */
-    event AddressBookAccountAdded(address indexed account, uint256 indexed id);
-
     // ------------------ Transactional functions  ---------------- //
 
     /**
@@ -58,7 +50,7 @@ library AddressBook {
         table.idToAccount[id] = account;
         table.accountToId[account] = id;
 
-        emit AddressBookAccountAdded(account, id);
+        emit IAddressBookEvents.AddressBookAccountAdded(account, id);
     }
 
     // ------------------ View functions  ------------------------- //

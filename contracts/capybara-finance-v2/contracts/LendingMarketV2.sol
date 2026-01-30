@@ -12,6 +12,7 @@ import { PausableExtUpgradeable } from "./base/PausableExtUpgradeable.sol";
 import { UUPSExtUpgradeable } from "./base/UUPSExtUpgradeable.sol";
 import { Versionable } from "./base/Versionable.sol";
 
+import { IAddressBookEvents } from "./interfaces/IAddressBookEvents.sol";
 import { ICreditLineV2 } from "./interfaces/ICreditLineV2.sol";
 import { ILendingMarketV2 } from "./interfaces/ILendingMarketV2.sol";
 import { ILendingEngineV2 } from "./interfaces/ILendingEngineV2.sol";
@@ -34,6 +35,7 @@ contract LendingMarketV2 is
     AccessControlExtUpgradeable,
     PausableExtUpgradeable,
     ILendingMarketV2,
+    IAddressBookEvents, // Just to have the address book events in the ABI
     Versionable,
     UUPSExtUpgradeable
 {
@@ -123,17 +125,34 @@ contract LendingMarketV2 is
     }
 
     /// @inheritdoc ILendingMarketV2Primary
-    function submitOperationBatch(
-        OperationRequest[] calldata operationRequests
+    function submitOperation(
+        uint256 subLoanId,
+        uint256 kind,
+        uint256 timestamp,
+        uint256 value,
+        address account
     ) external whenNotPaused onlyRole(ADMIN_ROLE) {
-        _submitOperations(operationRequests);
+        _submitOperation(subLoanId, kind, timestamp, value, account);
     }
 
     /// @inheritdoc ILendingMarketV2Primary
-    function voidOperationBatch(
-        OperationVoidingRequest[] calldata operationVoidingRequests
+    function voidOperation(
+        uint256 subLoanId,
+        uint256 operationId,
+        address counterparty
     ) external whenNotPaused onlyRole(ADMIN_ROLE) {
-        _voidOperations(operationVoidingRequests);
+        _voidOperation(subLoanId, operationId, counterparty);
+    }
+
+    /// @inheritdoc ILendingMarketV2Primary
+    function repaySubLoan(
+        uint256 subLoanId,
+        address repayer,
+        uint256 amount
+    ) external whenNotPaused onlyRole(ADMIN_ROLE) {
+        uint256 kind = uint256(OperationKind.Repayment);
+        uint256 timestamp = 0;
+        _submitOperation(subLoanId, kind, timestamp, amount, repayer);
     }
 
     /**
@@ -444,91 +463,33 @@ contract LendingMarketV2 is
     }
 
     /**
-     * @dev Submits multiple operations to sub-loans and processes all affected sub-loans.
+     * @dev Add an operation for a sub-loan and process the affected sub-loan.
      */
-    function _submitOperations(
-        OperationRequest[] memory operationRequests
-    ) internal returns (uint256[] memory affectedSubLoanIds) {
-        uint256 count = operationRequests.length;
-        if (count == 0) {
-            revert LendingMarketV2_OperationRequestCountZero();
-        }
-        affectedSubLoanIds = new uint256[](count);
-        for (uint256 i = 0; i < count; ++i) {
-            OperationRequest memory operationRequest = operationRequests[i];
-            _delegateToEngine(
-                abi.encodeCall(
-                    ILendingEngineV2.addOperation,
-                    (
-                        operationRequest.subLoanId,
-                        uint256(operationRequest.kind),
-                        operationRequest.timestamp,
-                        operationRequest.value,
-                        operationRequest.account
-                    )
-                )
-            );
-            _includeAffectedSubLoanId(affectedSubLoanIds, operationRequest.subLoanId);
-        }
-        _processAffectedSubLoans(affectedSubLoanIds);
+    function _submitOperation(
+        uint256 subLoanId,
+        uint256 kind,
+        uint256 timestamp,
+        uint256 value,
+        address account
+    ) internal {
+        _delegateToEngine(abi.encodeCall(ILendingEngineV2.addOperation, (subLoanId, kind, timestamp, value, account)));
+        _delegateToEngine(abi.encodeCall(ILendingEngineV2.processSubLoan, (subLoanId)));
+        // to be sure pending operations will not be reverted in the future
+        _getSubLoanPreview(subLoanId, _getLatestOperationTimestamp(subLoanId));
     }
 
     /**
-     * @dev Cancels multiple operations and processes all affected sub-loans.
+     * @dev Cancels an operation for a sub-loan and processes the affected sub-loan.
      */
-    function _voidOperations(OperationVoidingRequest[] memory operationVoidingRequests) internal {
-        uint256 count = operationVoidingRequests.length;
-        if (count == 0) {
-            revert LendingMarketV2_OperationRequestCountZero();
-        }
-        uint256[] memory affectedSubLoanIds = new uint256[](count);
-        for (uint256 i = 0; i < count; ++i) {
-            OperationVoidingRequest memory voidingRequest = operationVoidingRequests[i];
-            _delegateToEngine(
-                abi.encodeCall(
-                    ILendingEngineV2.cancelOperation,
-                    (voidingRequest.subLoanId, voidingRequest.operationId, voidingRequest.counterparty)
-                )
-            );
-            _includeAffectedSubLoanId(affectedSubLoanIds, voidingRequest.subLoanId);
-        }
-        _processAffectedSubLoans(affectedSubLoanIds);
-    }
-
-    /**
-     * @dev Adds a sub-loan ID to the array of affected sub-loans if not already present.
-     */
-    function _includeAffectedSubLoanId(uint256[] memory affectedSubLoanIds, uint256 subLoanId) internal pure {
-        uint256 count = affectedSubLoanIds.length;
-        uint256 i = 0;
-        for (; i < count; ++i) {
-            uint256 affectedSubLoanId = affectedSubLoanIds[i];
-            if (affectedSubLoanId == subLoanId) {
-                return;
-            }
-            if (affectedSubLoanId == 0) {
-                break;
-            }
-        }
-
-        // No existing affected sub-loan found, add a new one
-        affectedSubLoanIds[i] = subLoanId;
-    }
-
-    /**
-     * @dev Processes all affected sub-loans and validates their state by computing previews.
-     */
-    function _processAffectedSubLoans(uint256[] memory affectedSubLoanIds) internal {
-        uint256 count = affectedSubLoanIds.length;
-        for (uint256 i = 0; i < count; ++i) {
-            uint256 subLoanId = affectedSubLoanIds[i];
-            if (subLoanId == 0) {
-                break;
-            }
-            _delegateToEngine(abi.encodeCall(ILendingEngineV2.processSubLoan, (subLoanId)));
-            // to be sure pending operations will not be reverted in the future
-            _getSubLoanPreview(subLoanId, _getLatestOperationTimestamp(subLoanId));
-        }
+    function _voidOperation(
+        uint256 subLoanId, // Tools: prevent Prettier one-liner
+        uint256 operationId,
+        address counterparty
+    ) internal {
+        _delegateToEngine(abi.encodeCall(ILendingEngineV2.cancelOperation, (subLoanId, operationId, counterparty)));
+        _delegateToEngine(abi.encodeCall(ILendingEngineV2.processSubLoan, (subLoanId)));
+        // to be sure pending operations will not be reverted in the future
+        _getSubLoanPreview(subLoanId, _getLatestOperationTimestamp(subLoanId));
     }
 
     /**

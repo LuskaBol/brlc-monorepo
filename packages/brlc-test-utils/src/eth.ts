@@ -159,6 +159,27 @@ export async function checkTokenPath(
 }
 
 /**
+ * Checks that events are emitted in the specified order within a transaction.
+ * Each event is specified as a [contract, eventName] tuple.
+ * Throws if events are not found or are emitted out of order.
+ */
+export async function checkEventSequence(
+  tx: TransactionResponse | Promise<TransactionResponse>,
+  events: [Contract | BaseContract, string][],
+) {
+  const receipt = await proveTx(tx);
+  let lastIndex = -1;
+
+  for (const [contract, eventName] of events) {
+    const topic = contract.filters[eventName].fragment.topicHash;
+    const index = receipt.logs.findIndex((log, i) => i > lastIndex && log.topics[0] === topic);
+
+    expect(index, `Event "${eventName}" not found after index ${lastIndex}`).to.be.greaterThan(lastIndex);
+    lastIndex = index;
+  }
+}
+
+/**
  * Deploys a contract and connects it to a specific signer.
  * Not typesafe, but it's a common pattern in the codebase.
  */

@@ -1210,39 +1210,67 @@ interface ILendingMarketV2Primary is ILendingMarketV2Types, ILendingMarketV2Prim
     function revokeLoan(uint256 subLoanId) external;
 
     /**
-     * @dev Submits a batch of operations for sub-loans.
+     * @dev Submits a single operation for a sub-loan.
      *
      * Can be called only by an account with a special role.
      *
      * This function performs the following steps:
-     * 1. Add all operations specified in the operation requests to the corresponding sub-loan operation lists.
-     * 2. Recalculates affected sub-loan states if needed and emits corresponding events
      *
-     * This atomic batch operation ensures data consistency when voiding multiple operations simultaneously.
+     * 1. Adds the specified operation to the corresponding sub-loan operation list with a new operation ID.
+     * 2. Recalculates the sub-loan stat if needed and emits corresponding events.
+     * 3. Transfers tokens from or to the account address if needed.
+     *    E.g., for a repayment operation, the tokens are transferred from the account address to the liquidity pool.
      *
-     * Operation IDs are generated sequentially within each sub-loan.
-     *
-     *
-     * @param operationRequests The request structures to submit.
+     * @param subLoanId The unique identifier of the sub-loan to submit the operation for.
+     * @param kind The kind of the operation to submit.
+     * @param timestamp The timestamp when the operation will be applied. Zero means the current block timestamp.
+     * @param value The value of the operation or zero if the operation does not have a value.
+     * @param account The account related to the operation (e.g., a repayer) or the zero address if it is not expected.
      */
-    function submitOperationBatch(OperationRequest[] calldata operationRequests) external;
+    function submitOperation(
+        uint256 subLoanId,
+        uint256 kind,
+        uint256 timestamp,
+        uint256 value,
+        address account
+    ) external;
 
     /**
-     * @dev Voids a batch of operations for sub-loans.
+     * @dev Voids a single operation for a sub-loan.
      *
      * The voided operations will be kept in the operation lists of the sub-loans.
      *
-     * Can be called only by an account with a special role.
-     *
      * This function performs the following steps:
-     * 1. Cancels all operations specified in the void requests
-     * 2. Recalculates affected sub-loan states if needed and emits corresponding events
      *
-     * This atomic batch operation ensures data consistency when voiding multiple operations simultaneously.
+     * 1. Cancels the specified operation for the sub-loan.
+     *    The applied operation status is changed to revoked.
+     *    The pending operation status is changed to dismissed.
+     * 2. Recalculates the sub-loan state if needed and emits corresponding events.
+     * 3. Transfers tokens from or to the counterparty address if needed.
+     *    E.g., for a repayment operation, the tokens are transferred from the liquidity pool to the counterparty.
      *
-     * @param operationVoidingRequests The requests to void the operations.
+     * @param subLoanId The unique identifier of the sub-loan to void the operation for.
+     * @param operationId The unique identifier of the operation to void.
+     * @param counterparty The counterparty for voiding (see above) or the zero address if it is not expected.
      */
-    function voidOperationBatch(OperationVoidingRequest[] calldata operationVoidingRequests) external;
+    function voidOperation(uint256 subLoanId, uint256 operationId, address counterparty) external;
+
+    /**
+     * @dev Repays a sub-loan in the current block.
+     *
+     * This function is a kind of shortcut for the `submitOperation()` function
+     * with the `Repayment` operation kind and `timestamp = 0`.
+     * It allows to reduce the number of parameters and have a separate function for the most common use case.
+     *
+     * @param subLoanId The unique identifier of the sub-loan to repay.
+     * @param repayer The address of the repayer.
+     * @param amount The amount of the repayment.
+     */
+    function repaySubLoan(
+        uint256 subLoanId, // Tools: prevent Prettier one-liner
+        address repayer,
+        uint256 amount
+    ) external;
 
     // ------------------ View functions -------------------------- //
 
@@ -1557,9 +1585,6 @@ interface ILendingMarketV2Errors {
 
     /// @dev Thrown when trying to access an operation that does not exist.
     error LendingMarketV2_OperationNonexistent(uint256 subLoanId, uint256 operationId);
-
-    /// @dev Thrown when trying to call a function with the zero count of operation requests.
-    error LendingMarketV2_OperationRequestCountZero();
 
     /// @dev Thrown when trying to void an operation that has already been revoked.
     error LendingMarketV2_OperationRevokedAlready(uint256 subLoanId, uint256 operationId);

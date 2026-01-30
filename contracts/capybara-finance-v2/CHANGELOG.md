@@ -1,3 +1,19 @@
+# 2.3.0
+
+## Main Changes
+
+1. The batch operation functions have been replaced with individual ones:
+    * `submitOperationBatch()` -> `submitOperation()`;
+    * `voidOperationBatch()` -> `voidOperation()`.
+2. The new `repaySubLoan()` function has been added to the `LendingMarketV2` contract. It is a shortcut for the `submitOperation()` function with the `Repayment` operation kind and `timestamp = 0`. The new function allows to reduce the number of parameters and have a separate function for the most common use case.
+3. The `AddressBookChanged` event has been moved to a separate `IAddressBookEvents` interface for proper ABI generation.
+4. Test coverage for operation submission and voiding scenarios has been improved.
+
+## Migration
+
+1. Upgrade the already deployed smart contracts to the new version.
+2. Update any off-chain code to handle the new functions instead of the removed batch ones.
+
 # 2.2.0
 
 ## Main Changes

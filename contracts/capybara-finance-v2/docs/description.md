@@ -210,25 +210,23 @@
     * c. **Sub-Loan Updating Event**: Emitted whenever a sub-loan changes and carries the full current state: `SubLoanUpdated`. Each event includes `updateIndex` to simplify retrieving previous sub-loan states from the database. For a given sub-loan and transaction, this event is emitted only once even if multiple operations are added or voided.
     * d. **Operation Events**: Emitted once per operation: `OperationApplied`, `OperationPended`, `OperationRevoked`, `OperationDismissed`.
 
-13. **Batch Processing**: All operations support batch processing with atomic transaction guarantees (either all succeed or all fail).
-
-14. **Operation Logic Restrictions**:
+13. **Operation Logic Restrictions**:
     * a. Repayments, discounts, duration updates, rate changes, and freeze/unfreeze operations can be applied only while the sub-loan is **not** `Revoked` (i.e., `Ongoing` or `Repaid`).
     * b. A sub-loan revocation operation cannot currently be revoked.
     * c. Future-dated repayment and discount operations are currently prohibited.
     * d. The revocation operation cannot be applied externally, only via the loan revocation function.
 
-15. **Program-Based**: Loans are created under lending programs that pair credit lines with liquidity pools, enabling flexible lending configurations inherited from Capybara Finance protocol V1.
+14. **Program-Based**: Loans are created under lending programs that pair credit lines with liquidity pools, enabling flexible lending configurations inherited from Capybara Finance protocol V1.
 
 ### 2. Main Files
 
-1. [ILendingMarketV2.sol](../contracts/interfaces/ILendingMarketV2.sol): Complete interface definition for the lending market smart contract of the CFv2 protocol. It contains core data structures and enums, events, function signatures, and error definitions, including `SubLoan` structure, the `Operation` structure, batch request structures, and view structures.
+1. [ILendingMarketV2.sol](../contracts/interfaces/ILendingMarketV2.sol): Complete interface definition for the lending market smart contract of the CFv2 protocol. It contains core data structures and enums, events, function signatures, and error definitions, including `SubLoan` structure, the `Operation` structure, request structures, and view structures.
 
 2. [LendingMarketV2StorageLayout.sol](../contracts/storage/LendingMarketV2StorageLayout.sol): Storage layout definition for the lending market smart contract of the CFv2 protocol. It follows the ERC-7201 standard and declares the storage structure containing the sub-loan counter, program counter, and mappings for sub-loans, operations, and program configurations, and exposes the storage slot accessor for upgradeable contracts.
 
-3. [LendingMarketV2.sol](../contracts/LendingMarketV2.sol): Main contract implementation for the lending market smart contract of the CFv2 protocol. It contains all business logic for the loan life cycle, operation processing, interest calculations, revision handling, and batch operations, and implements access control, pausability, upgradeability, token transfers, and integration with credit lines and liquidity pools.
+3. [LendingMarketV2.sol](../contracts/LendingMarketV2.sol): Main contract implementation for the lending market smart contract of the CFv2 protocol. It contains all business logic for the loan life cycle, operation processing, interest calculations, and revision handling, and implements access control, pausability, upgradeability, token transfers, and integration with credit lines and liquidity pools.
 
-4. [LendingEngineV2.sol](../contracts/LendingEngineV2.sol): Helper contract for the lending market smart contract of the CFv2 protocol. It contains the lending engine smart contract for standalone deployments. The engine is used only by the lending market contract through the delegatecall mechanism to perform the loan life cycle, operation processing, interest calculations, revision handling, and batch operations.
+4. [LendingEngineV2.sol](../contracts/LendingEngineV2.sol): Helper contract for the lending market smart contract of the CFv2 protocol. It contains the lending engine smart contract for standalone deployments. The engine is used only by the lending market contract through the delegatecall mechanism to perform the loan life cycle, operation processing, interest calculations, and revision handling.
 
 ### 3. Main Code Entities
 
@@ -273,8 +271,9 @@
 
 - `takeLoan()`: Takes a loan with multiple sub-loans for a provided borrower (role-restricted).
 - `revokeLoan()`: Revokes an entire loan by the ID of any of its sub-loans.
-- `submitOperationBatch()`: Submits a batch of operations for sub-loans and applies them atomically.
-- `voidOperationBatch()`: Voids a batch of operations for sub-loans and reprocesses affected states atomically.
+- `submitOperation()`: Submits a single operation for a sub-loan and processes it immediately.
+- `voidOperation()`: Voids a single operation for a sub-loan and reprocesses the affected state.
+- `repaySubLoan()`: A shortcut function to repay a sub-loan in the current block (equivalent to `submitOperation()` with `Repayment` kind and `timestamp = 0`).
 
 #### 3.4. View and pure functions:
 
