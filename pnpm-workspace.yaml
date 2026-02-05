@@ -16,10 +16,12 @@ catalogs:
     '@nomicfoundation/hardhat-network-helpers': ^1.1.2
     '@nomicfoundation/hardhat-toolbox': ^6.1.2
     '@openzeppelin/hardhat-upgrades': ^3.9.1
-    chai: ^4.2.0
-    hardhat: 2.28.3
+    '@types/chai': ^4.3.20
+    '@types/mocha': ^10.0.10
+    chai: ^4.5.0
+    hardhat: 2.28.4
     hardhat-contract-sizer: ^2.10.1
-    hardhat-gas-reporter: ^1.0.8
+    hardhat-gas-reporter: ^1.0.10
 
 linkWorkspacePackages: true
 
@@ -30,6 +32,7 @@ onlyBuiltDependencies:
 overrides:
   cookie@<0.7.0: '>=0.7.0'
   diff@>=5.0.0 <5.2.2: '>=5.2.2'
+  fast-xml-parser@>=4.3.6 <=5.3.3: '>=5.3.4'
   lodash@>=4.0.0 <=4.17.22: '>=4.17.23'
   tmp@<=0.2.3: '>=0.2.4'
 #  undici@<6.23.0: '>=6.23.0' we cant override it because hardhat 2 uses it and cant work with overrides

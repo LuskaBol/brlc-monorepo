@@ -18,9 +18,8 @@
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-ethers": "catalog:hardhat2",
-    "@types/chai": "^4.0.0",
-    "@types/mocha": "^10.0.0",
-    "@types/node": "^25.0.10",
+    "@types/chai": "catalog:hardhat2",
+    "@types/mocha": "catalog:hardhat2",
     "hardhat": "catalog:hardhat2"
   },
   "peerDependencies": {

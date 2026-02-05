@@ -19,6 +19,7 @@
     "hardhat-contract-sizer": "catalog:hardhat2"
   },
   "devDependencies": {
-    "@types/lodash": "^4.17.23"
+    "@types/lodash": "^4.17.23",
+    "@types/chai": "catalog:hardhat2"
   }
 }
