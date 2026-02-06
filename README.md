@@ -12,7 +12,7 @@ This repository all smart contracts and utilities for smart contracts developmen
 
 1. Common Development [documentation](./docs/DEVELOPMENT.md)
 1. JS packages:
-   - Package with [Prettier configuration](./packages/pretier-config)
+   - Package with [Prettier configuration](./packages/prettier-config)
    - Package with [Eslint configuration](./packages/eslint-config)
    - [@cloudwalk/chainshot](./packages/chainshot/README.md) library
 
